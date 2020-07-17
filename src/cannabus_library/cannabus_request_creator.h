@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 #include "project_config.h"
 #include "cannabus_common.h"
 #include "can/i_can.h"

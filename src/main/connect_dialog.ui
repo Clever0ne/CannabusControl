@@ -390,7 +390,7 @@
   <customwidget>
    <class>BitRateBox</class>
    <extends>QComboBox</extends>
-   <header>bitrate_box.h</header>
+   <header>src/main/bitrate_box.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "project_config.h"
-#include "umba_array/umba_array.h"
-#include "can/i_can.h"
+#include <stdint.h>
+//#include "project_config.h"
+//#include "umba_array/umba_array.h"
+//#include "can/i_can.h"
 
 namespace cannabus
 {

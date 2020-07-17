@@ -16,22 +16,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    bitrate_box.cpp \
-    cannabus_control.cpp \
-    connect_dialog.cpp \
-    main.cpp
+    src/main/bitrate_box.cpp \
+    src/main/cannabus_control.cpp \
+    src/main/connect_dialog.cpp \
+    src/main/main.cpp \
 
 HEADERS += \
-    bitrate_box.h \
-    cannabus_control.h \
-    connect_dialog.h
+    src/cannabus_library/cannabus_common.h \
+    src/main/bitrate_box.h \
+    src/main/cannabus_control.h \
+    src/main/connect_dialog.h
 
 FORMS += \
-    cannabus_control.ui \
-    connect_dialog.ui
+    src/main/cannabus_control.ui \
+    src/main/connect_dialog.ui
 
 TRANSLATIONS += \
-    CannabusControl_ru_RU.ts
+    src/main/CannabusControl_ru_RU.ts
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
