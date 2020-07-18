@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>470</width>
+    <width>500</width>
     <height>390</height>
    </rect>
   </property>
@@ -24,19 +24,13 @@
     <rect>
      <x>10</x>
      <y>350</y>
-     <width>450</width>
+     <width>480</width>
      <height>32</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
      <width>400</width>
-     <height>32</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>450</width>
      <height>32</height>
     </size>
    </property>
@@ -121,7 +115,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Description:</string>
+     <string>Interface:</string>
     </property>
    </widget>
    <widget class="QLabel" name="serialNumberLabel">
@@ -200,8 +194,8 @@
     <rect>
      <x>230</x>
      <y>10</y>
-     <width>230</width>
-     <height>301</height>
+     <width>260</width>
+     <height>300</height>
     </rect>
    </property>
    <property name="title">
@@ -220,22 +214,12 @@
      <string>RAW Filter</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="rawFilterEdit">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>30</y>
-      <width>130</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="errorFilterEdit">
     <property name="geometry">
      <rect>
       <x>90</x>
       <y>70</y>
-      <width>131</width>
+      <width>160</width>
       <height>22</height>
      </rect>
     </property>
@@ -261,7 +245,7 @@
      <rect>
       <x>90</x>
       <y>110</y>
-      <width>130</width>
+      <width>160</width>
       <height>20</height>
      </rect>
     </property>
@@ -271,17 +255,17 @@
      <rect>
       <x>90</x>
       <y>150</y>
-      <width>130</width>
+      <width>160</width>
       <height>20</height>
      </rect>
     </property>
    </widget>
-   <widget class="BitRateBox" name="bitrateListBox">
+   <widget class="BitRateBox" name="bitRateListBox">
     <property name="geometry">
      <rect>
       <x>90</x>
       <y>190</y>
-      <width>130</width>
+      <width>160</width>
       <height>20</height>
      </rect>
     </property>
@@ -291,17 +275,17 @@
      <rect>
       <x>90</x>
       <y>230</y>
-      <width>130</width>
+      <width>160</width>
       <height>20</height>
      </rect>
     </property>
    </widget>
-   <widget class="BitRateBox" name="dataBitrateListBox">
+   <widget class="BitRateBox" name="dataBitRateListBox">
     <property name="geometry">
      <rect>
       <x>90</x>
       <y>270</y>
-      <width>130</width>
+      <width>160</width>
       <height>20</height>
      </rect>
     </property>
@@ -332,7 +316,7 @@
      <string>Receive Own</string>
     </property>
    </widget>
-   <widget class="QLabel" name="bitrateLabel">
+   <widget class="QLabel" name="bitRateLabel">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -345,7 +329,7 @@
      <string>Bit Rate</string>
     </property>
    </widget>
-   <widget class="QLabel" name="dataBitrateLabel">
+   <widget class="QLabel" name="dataBitRateLabel">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -369,6 +353,16 @@
     </property>
     <property name="text">
      <string>CAN FD</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="rawFilterListBox">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>30</y>
+      <width>160</width>
+      <height>20</height>
+     </rect>
     </property>
    </widget>
   </widget>

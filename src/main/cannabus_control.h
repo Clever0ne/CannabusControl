@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QCanBusDevice>
+#include <stdint.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -21,7 +22,7 @@ class CannabusControl : public QMainWindow
     Q_OBJECT
 
 public:
-    CannabusControl(QWidget *parent = nullptr);
+    explicit CannabusControl(QWidget *parent = nullptr);
     ~CannabusControl();
 
 private slots:
@@ -29,10 +30,16 @@ private slots:
     void disconnectDevice();
     void busStatus();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     void initActionsConnections();
 
+    uint64_t numberFramesWritten = 0;
     Ui::CannabusControl *ui = nullptr;
+    QLabel *status = nullptr;
+    QLabel *written = nullptr;
     ConnectDialog *connectDialog = nullptr;
     std::unique_ptr<QCanBusDevice> canDevice;
     QTimer *busStatusTimer = nullptr;

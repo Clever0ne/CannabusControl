@@ -27,6 +27,50 @@
      <string/>
     </property>
    </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>780</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>GroupBox</string>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>760</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Courier New</family>
+      </font>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="text">
+      <string>Time       F-Code      Slave Address      Message Type      DLC      Data </string>
+     </property>
+    </widget>
+    <widget class="QTextEdit" name="textEdit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>760</width>
+       <height>420</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -44,7 +88,7 @@
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
-    <addaction name="actionClear_Log"/>
+    <addaction name="actionClearLog"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -64,12 +108,12 @@
    <addaction name="actionConnect"/>
    <addaction name="actionDisconnect"/>
    <addaction name="separator"/>
-   <addaction name="actionClear_Log"/>
+   <addaction name="actionClearLog"/>
   </widget>
   <action name="actionConnect">
    <property name="icon">
-    <iconset>
-     <normaloff>images/connect.png</normaloff>images/connect.png</iconset>
+    <iconset resource="../images/cannabus_control.qrc">
+     <normaloff>:/connect.png</normaloff>:/connect.png</iconset>
    </property>
    <property name="text">
     <string>Connect</string>
@@ -80,17 +124,20 @@
   </action>
   <action name="actionDisconnect">
    <property name="icon">
-    <iconset>
-     <normaloff>images/disconnect.png</normaloff>images/disconnect.png</iconset>
+    <iconset resource="../images/cannabus_control.qrc">
+     <normaloff>:/disconnect.png</normaloff>:/disconnect.png</iconset>
    </property>
    <property name="text">
     <string>Disconnect</string>
    </property>
+   <property name="toolTip">
+    <string>Disconnect from the CAN Device</string>
+   </property>
   </action>
-  <action name="actionClear_Log">
+  <action name="actionClearLog">
    <property name="icon">
-    <iconset>
-     <normaloff>images/clear.png</normaloff>images/clear.png</iconset>
+    <iconset resource="../images/cannabus_control.qrc">
+     <normaloff>:/clear.png</normaloff>:/clear.png</iconset>
    </property>
    <property name="text">
     <string>Clear Log</string>
@@ -98,14 +145,16 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset>
-     <normaloff>images/application-exit.png</normaloff>images/application-exit.png</iconset>
+    <iconset resource="../images/cannabus_control.qrc">
+     <normaloff>:/application-exit.png</normaloff>:/application-exit.png</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../images/cannabus_control.qrc"/>
+ </resources>
  <connections/>
 </ui>

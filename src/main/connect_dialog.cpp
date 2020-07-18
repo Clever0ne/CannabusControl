@@ -9,7 +9,12 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->errorFilterEdit->setValidator(new QIntValidator(0, 0x1FFFFFFFU, this));
+    ui->rawFilterListBox->addItem(tr("base format"), QVariant(QCanBusDevice::Filter::MatchBaseFormat));
+    ui->rawFilterListBox->addItem(tr("extended format"), QVariant(QCanBusDevice::Filter::MatchExtendedFormat));
+    ui->rawFilterListBox->addItem(tr("base and extended format"), QVariant(QCanBusDevice::Filter::MatchBaseAndExtendedFormat));
+    ui->rawFilterListBox->setCurrentIndex(ui->rawFilterListBox->findText("base format"));
+
+    ui->errorFilterEdit->setValidator(new QIntValidator(QCanBusFrame::NoError, QCanBusFrame::AnyError, this));
 
     ui->loopbackListBox->addItem(tr("true"), QVariant(true));
     ui->loopbackListBox->addItem(tr("false"), QVariant(false));
@@ -67,7 +72,7 @@ void ConnectDialog::pluginChanged(const QString &plugin)
 
 void ConnectDialog::interfaceChanged(const QString &interface)
 {
-    ui->descriptionLabel->setText(tr("Device: "));
+    ui->descriptionLabel->setText(tr("Interface: "));
     ui->serialNumberLabel->setText(tr("Serial: "));
     ui->channelLabel->setText(tr("Channel: "));
     ui->isVirtual->setChecked(false);
@@ -83,7 +88,7 @@ void ConnectDialog::interfaceChanged(const QString &interface)
                 serialNumber = tr("N/A");
             }
 
-            ui->descriptionLabel->setText(tr("Device: %1").arg(info.description()));
+            ui->descriptionLabel->setText(tr("Interface: %1").arg(info.description()));
             ui->serialNumberLabel->setText(tr("Serial: %1").arg(serialNumber));
             ui->channelLabel->setText(tr("Channel: %1").arg(info.channel()));
             ui->isVirtual->setChecked(info.isVirtual());
@@ -137,6 +142,18 @@ void ConnectDialog::updateSettings()
     {
         currentSettings.configurations.clear();
 
+        // Формат кадра данных шины CAN
+        if (ui->rawFilterListBox->currentText().isEmpty() == false)
+        {
+            ConfigurationItem item;
+
+            item.first = QCanBusDevice::RawFilterKey;
+            item.second = ui->rawFilterListBox->currentData();
+
+            currentSettings.configurations.append(item);
+        }
+
+        // Режим обратной связи
         if (ui->loopbackListBox->currentText() != "false")
         {
             ConfigurationItem item;
@@ -147,12 +164,51 @@ void ConnectDialog::updateSettings()
             currentSettings.configurations.append(item);
         }
 
+        // Режим приёма адаптером собственных сообщений
         if (ui->receiveOwnListBox->currentText() != "false")
         {
             ConfigurationItem item;
 
             item.first = QCanBusDevice::ReceiveOwnKey;
             item.second = ui->receiveOwnListBox->currentData();
+
+            currentSettings.configurations.append(item);
+        }
+
+        if (ui->errorFilterEdit->text().isEmpty() == false)
+        {
+
+        }
+
+        // Скорость передачи битов поля арбитража в кадре данных
+        if (ui->bitRateListBox->bitRate() != 0)
+        {
+            ConfigurationItem item;
+
+            item.first = QCanBusDevice::BitRateKey;
+            item.second = ui->bitRateListBox->bitRate();
+
+            currentSettings.configurations.append(item);
+        }
+
+        // Использование шины CAN FD
+        if (ui->canFdListBox->currentText() != "false")
+        {
+            ConfigurationItem item;
+
+            item.first = QCanBusDevice::CanFdKey;
+            item.second = ui->canFdListBox->currentData();
+
+            currentSettings.configurations.append(item);
+        }
+
+        // Скорость передачи битов поля данных в кадре данных
+        if (ui->dataBitRateListBox->bitRate() != 0)
+        {
+            ConfigurationItem item;
+
+            item.first = QCanBusDevice::DataBitRateKey;
+            item.second = ui->dataBitRateListBox->bitRate();
 
             currentSettings.configurations.append(item);
         }
@@ -169,7 +225,7 @@ void ConnectDialog::revertSettings()
     ui->configurationBox->setEnabled(ui->useConfigurationBox->isChecked());
 
     value = configurationValue(QCanBusDevice::RawFilterKey);
-    ui->rawFilterEdit->setText(value);
+    ui->rawFilterListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::ErrorFilterKey);
     ui->errorFilterEdit->setText(value);
@@ -181,11 +237,11 @@ void ConnectDialog::revertSettings()
     ui->receiveOwnListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::BitRateKey);
-    ui->bitrateListBox->setCurrentText(value);
+    ui->bitRateListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::CanFdKey);
     ui->canFdListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::DataBitRateKey);
-    ui->dataBitrateListBox->setCurrentText(value);
+    ui->dataBitRateListBox->setCurrentText(value);
 }

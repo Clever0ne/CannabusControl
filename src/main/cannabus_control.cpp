@@ -17,6 +17,12 @@ CannabusControl::CannabusControl(QWidget *parent) :
 
     connectDialog = new ConnectDialog;
 
+    status = new QLabel;
+    ui->statusBar->addPermanentWidget(status);
+
+    written = new QLabel;
+    ui->statusBar->addPermanentWidget(written);
+
     initActionsConnections();
 
     connect(busStatusTimer, &QTimer::timeout, this, &CannabusControl::busStatus);
@@ -24,17 +30,29 @@ CannabusControl::CannabusControl(QWidget *parent) :
 
 CannabusControl::~CannabusControl()
 {
+    delete connectDialog;
     delete ui;
 }
 
 void CannabusControl::initActionsConnections()
 {
-    connect(ui->actionConnect, &QAction::triggered, [this]() { connectDialog->show(); });
+    ui->actionDisconnect->setEnabled(false);
+
+    connect(ui->actionConnect, &QAction::triggered, [this]() {
+        canDevice.release()->deleteLater();
+        connectDialog->show();
+    });
+    connect(ui->actionDisconnect, &QAction::triggered,
+            this, &CannabusControl::disconnectDevice);
+    connect(ui->actionClearLog, &QAction::triggered, ui->receivedMassegesLogWindow, &QTextEdit::clear);
+    connect(ui->actionQuit, &QAction::triggered, this, &QWidget::close);
+
+    connect(connectDialog, &QDialog::accepted, this, &CannabusControl::connectDevice);
 }
 
 void CannabusControl::connectDevice()
 {
-    const ConnectDialog::Settings p = connectDialog->settings();
+    const ConnectDialog::Settings settings = connectDialog->settings();
 
     QString errorString;
 
@@ -44,6 +62,12 @@ void CannabusControl::connectDevice()
 void CannabusControl::disconnectDevice()
 {
 
+}
+
+void CannabusControl::closeEvent(QCloseEvent *event)
+{
+    connectDialog->close();
+    event->accept();
 }
 
 void CannabusControl::busStatus()
