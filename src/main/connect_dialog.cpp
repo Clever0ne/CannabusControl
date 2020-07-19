@@ -33,7 +33,7 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ConnectDialog::ok);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ConnectDialog::cancel);
 
-    connect(ui->useConfigurationBox, &QCheckBox::clicked,
+    connect(ui->useCustomConfigurationCheckBox, &QCheckBox::clicked,
             ui->configurationBox, &QGroupBox::setEnabled);
     connect(ui->pluginListBox, &QComboBox::currentTextChanged,
             this, &ConnectDialog::pluginChanged);
@@ -44,7 +44,7 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
 
     ui->isVirtual->setEnabled(false);
     ui->isFlexibleDataRateCapable->setEnabled(false);
-    ui->configurationBox->setEnabled(ui->useConfigurationBox->isChecked());
+    ui->configurationBox->setEnabled(ui->useCustomConfigurationCheckBox->isChecked());
 
     updateSettings();
 }
@@ -136,9 +136,9 @@ void ConnectDialog::updateSettings()
 {
     currentSettings.pluginName = ui->pluginListBox->currentText();
     currentSettings.deviceInterfaceName = ui->interfaceListBox->currentText();
-    currentSettings.useConfigurationEnabled = ui->useConfigurationBox->isChecked();
+    currentSettings.useCustomConfigurationEnabled = ui->useCustomConfigurationCheckBox->isChecked();
     // Пользовательские настройки
-    if (currentSettings.useConfigurationEnabled == true)
+    if (currentSettings.useCustomConfigurationEnabled == true)
     {
         currentSettings.configurations.clear();
 
@@ -154,7 +154,7 @@ void ConnectDialog::updateSettings()
         }
 
         // Режим обратной связи
-        if (ui->loopbackListBox->currentText() != "false")
+        if (ui->loopbackListBox->currentData() != "false")
         {
             ConfigurationItem item;
 
@@ -221,8 +221,8 @@ void ConnectDialog::revertSettings()
 
     ui->pluginListBox->setCurrentText(currentSettings.pluginName);
     ui->interfaceListBox->setCurrentText(currentSettings.deviceInterfaceName);
-    ui->useConfigurationBox->setChecked(currentSettings.useConfigurationEnabled);
-    ui->configurationBox->setEnabled(ui->useConfigurationBox->isChecked());
+    ui->useCustomConfigurationCheckBox->setChecked(currentSettings.useCustomConfigurationEnabled);
+    ui->configurationBox->setEnabled(ui->useCustomConfigurationCheckBox->isChecked());
 
     value = configurationValue(QCanBusDevice::RawFilterKey);
     ui->rawFilterListBox->setCurrentText(value);

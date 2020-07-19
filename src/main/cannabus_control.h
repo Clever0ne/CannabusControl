@@ -29,6 +29,8 @@ private slots:
     void connectDevice();
     void disconnectDevice();
     void busStatus();
+    void processError(QCanBusDevice::CanBusError error) const;
+    void processFramesReceived();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -36,7 +38,7 @@ protected:
 private:
     void initActionsConnections();
 
-    uint64_t numberFramesWritten = 0;
+    uint64_t numberFramesReceived = 0;
     Ui::CannabusControl *ui = nullptr;
     QLabel *status = nullptr;
     QLabel *written = nullptr;

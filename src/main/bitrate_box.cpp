@@ -3,24 +3,9 @@
 #include <stdint.h>
 #include <QLineEdit>
 
-enum BitRate {
-    BitRate_10000_bps = 10000,
-    BitRate_20000_bps = 20000,
-    BitRate_50000_bps = 50000,
-    BitRate_100000_bps = 100000,
-    BitRate_125000_bps = 125000,
-    BitRate_250000_bps = 250000,
-    BitRate_500000_bps = 500000,
-    BitRate_800000_bps = 800000,
-    BitRate_1000000_bps = 1000000,
-    BitRate_2000000_bps = 2000000,
-    BitRate_5000000_bps = 5000000,
-    BitRate_8000000_bps = 8000000,
-};
-
 BitRateBox::BitRateBox(QWidget *parent) :
     QComboBox(parent),
-    customSpeedValidator(new QIntValidator(0, 1000000, this))
+    customSpeedValidator(new QIntValidator(0, BitRate_1000000_bps, this))
 {
     fillBitRates();
 
@@ -39,23 +24,23 @@ uint32_t BitRateBox::bitRate() const
     {
         return currentText().toUInt();
     }
-    return itemData(currentIndex()).toUInt();
+    return itemData(currentIndex()).toInt();
 }
 
 bool BitRateBox::isFlexibleDataRateEnabled() const
 {
-    return flexibleDataRate;
+    return useFlexibleDataRate;
 }
 
 void BitRateBox::setFlexibleFataRateEnabled(bool isEnabled)
 {
-    flexibleDataRate = isEnabled;
-    customSpeedValidator->setTop(isEnabled == true ? 10000000 : 1000000);
+    useFlexibleDataRate = isEnabled;
+    customSpeedValidator->setTop(isEnabled == true ? BitRate_8000000_bps : BitRate_1000000_bps);
 
     fillBitRates();
 }
 
-void BitRateBox::checkCustomSpeedPolicy(int index)
+void BitRateBox::checkCustomSpeedPolicy(const int32_t index)
 {
     const bool isCustomSpeed = !(itemData(index).isValid());
     setEditable(isCustomSpeed);
@@ -65,7 +50,6 @@ void BitRateBox::checkCustomSpeedPolicy(int index)
         lineEdit()->setValidator(customSpeedValidator);
     }
 }
-
 
 void BitRateBox::fillBitRates()
 {

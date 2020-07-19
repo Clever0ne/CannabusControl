@@ -23,7 +23,7 @@ public:
         QString pluginName;
         QString deviceInterfaceName;
         QList<ConfigurationItem> configurations;
-        bool useConfigurationEnabled = false;
+        bool useCustomConfigurationEnabled = false;
     };
 
     explicit ConnectDialog(QWidget *parent = nullptr);
