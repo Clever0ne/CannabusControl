@@ -1,5 +1,4 @@
-#ifndef BITRATE_BOX_H
-#define BITRATE_BOX_H
+#pragma once
 
 #include <QComboBox>
 
@@ -10,18 +9,18 @@ class QIntValidator;
 QT_END_NAMESPACE
 
 enum BitRate {
-    BitRate_10000_bps = 10000,
-    BitRate_20000_bps = 20000,
-    BitRate_50000_bps = 50000,
-    BitRate_100000_bps = 100000,
-    BitRate_125000_bps = 125000,
-    BitRate_250000_bps = 250000,
-    BitRate_500000_bps = 500000,
-    BitRate_800000_bps = 800000,
-    BitRate_1000000_bps = 1000000,
-    BitRate_2000000_bps = 2000000,
-    BitRate_5000000_bps = 5000000,
-    BitRate_8000000_bps = 8000000,
+    BITRATE_10000_BPS = 10000,
+    BITRATE_20000_BPS = 20000,
+    BITRATE_50000_BPS = 50000,
+    BITRATE_100000_BPS = 100000,
+    BITRATE_125000_BPS = 125000,
+    BITRATE_250000_BPS = 250000,
+    BITRATE_500000_BPS = 500000,
+    BITRATE_800000_BPS = 800000,
+    BITRATE_1000000_BPS = 1000000,
+    BITRATE_2000000_BPS = 2000000,
+    BITRATE_5000000_BPS = 5000000,
+    BITRATE_8000000_BPS = 8000000,
 };
 
 class BitRateBox : public QComboBox
@@ -41,8 +40,6 @@ private slots:
 private:
     void fillBitRates();
 
-    bool useFlexibleDataRate = false;
-    QIntValidator *customSpeedValidator = nullptr;
+    bool m_isFlexibleDataRateEnabled = false;
+    QIntValidator *m_customSpeedValidator = nullptr;
 };
-
-#endif // BITRATE_BOX_H

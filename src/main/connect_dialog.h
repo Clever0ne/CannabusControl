@@ -1,5 +1,4 @@
-#ifndef CONNECT_DIALOG_H
-#define CONNECT_DIALOG_H
+#pragma once
 
 #include <QCanBusDevice>
 #include <QCanBusDeviceInfo>
@@ -23,7 +22,7 @@ public:
         QString pluginName;
         QString deviceInterfaceName;
         QList<ConfigurationItem> configurations;
-        bool useCustomConfigurationEnabled = false;
+        bool isCustomConfigurationEnabled = false;
     };
 
     explicit ConnectDialog(QWidget *parent = nullptr);
@@ -42,9 +41,7 @@ private:
     void updateSettings();
     void revertSettings();
 
-    Ui::ConnectDialog *ui = nullptr;
-    Settings currentSettings;
-    QList<QCanBusDeviceInfo> interfaces;
+    Ui::ConnectDialog *m_ui = nullptr;
+    Settings m_currentSettings;
+    QList<QCanBusDeviceInfo> m_interfaces;
 };
-
-#endif // CONNECT_DIALOG_H

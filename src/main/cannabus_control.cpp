@@ -12,62 +12,63 @@
 
 CannabusControl::CannabusControl(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::CannabusControl),
-    busStatusTimer(new QTimer(this))
+    m_ui(new Ui::CannabusControl),
+    m_busStatusTimer(new QTimer(this))
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
-    connectDialog = new ConnectDialog;
+    m_connectDialog = new ConnectDialog;
 
-    status = new QLabel;
-    ui->statusBar->addPermanentWidget(status);
+    m_status = new QLabel;
+    m_ui->statusBar->addPermanentWidget(m_status);
 
-    written = new QLabel;
-    ui->statusBar->addWidget(written);
+    m_written = new QLabel;
+    m_ui->statusBar->addWidget(m_written);
 
-    QStringList logWindowHeader = {"No.", "Time", "F-Code", "Slave Address", "Message Type", "DLC", "Data", "Info"};
+    QStringList logWindowHeader = {"No.", "Time", "Message Type", "Slave Address", "F-Code", "DLC", "Data", "Info"};
 
-    ui->receivedMessagesLogWindow->setColumnCount(logWindowHeader.count());
-    ui->receivedMessagesLogWindow->setHorizontalHeaderLabels(logWindowHeader);
+    m_ui->receivedMessagesLogWindow->setColumnCount(logWindowHeader.count());
+    m_ui->receivedMessagesLogWindow->setHorizontalHeaderLabels(logWindowHeader);
 
-    ui->receivedMessagesLogWindow->resizeColumnsToContents();
-    ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("No."), 60);
-    ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Time"), 90);
-    ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("F-Code"), 120);
-    ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Slave Address"), 120);
-    ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Message Type"), 120);
-    ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("DLC"), 60);
-    ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Data"), 120);
+    m_ui->receivedMessagesLogWindow->resizeColumnsToContents();
+    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("No."), 60);
+    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Time"), 90);
+    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Message Type"), 120);
+    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Slave Address"), 120);
+    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("F-Code"), 120);
+    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("DLC"), 60);
+    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Data"), 180);
 
-    ui->receivedMessagesLogWindow->horizontalHeader()->setStretchLastSection(true);
+    m_ui->receivedMessagesLogWindow->horizontalHeader()->setStretchLastSection(true);
+    m_ui->receivedMessagesLogWindow->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
     initActionsConnections();
 
-    connect(busStatusTimer, &QTimer::timeout, this, &CannabusControl::busStatus);
+    connect(m_busStatusTimer, &QTimer::timeout, this, &CannabusControl::busStatus);
 }
 
 CannabusControl::~CannabusControl()
 {
-    delete connectDialog;
-    delete ui;
+    delete m_connectDialog;
+    delete m_ui;
 }
 
 void CannabusControl::initActionsConnections()
 {
-    ui->actionDisconnect->setEnabled(false);
+    m_ui->actionDisconnect->setEnabled(false);
 
-    connect(ui->actionConnect, &QAction::triggered, [this]() {
-        canDevice.release()->deleteLater();
-        connectDialog->show();
+    connect(m_ui->actionConnect, &QAction::triggered, [this]() {
+        m_canDevice.release()->deleteLater();
+        m_connectDialog->show();
     });
-    connect(ui->actionDisconnect, &QAction::triggered,
+    connect(m_ui->actionDisconnect, &QAction::triggered,
             this, &CannabusControl::disconnectDevice);
-    connect(ui->actionClearLog, &QAction::triggered,
-            ui->receivedMessagesLogWindow, &QTableWidget::clearContents);
-    connect(ui->actionQuit, &QAction::triggered,
+    connect(m_ui->actionClearLog, &QAction::triggered,
+            m_ui->receivedMessagesLogWindow, &QTableWidget::clearContents);
+    connect(m_ui->actionQuit, &QAction::triggered,
             this, &QWidget::close);
 
-    connect(connectDialog, &QDialog::accepted,
+    connect(m_connectDialog, &QDialog::accepted,
             this, &CannabusControl::connectDevice);
 }
 
@@ -81,7 +82,7 @@ void CannabusControl::processError(QCanBusDevice::CanBusError error) const
         case QCanBusDevice::ConfigurationError:
         case QCanBusDevice::UnknownError:
         {
-            status->setText(canDevice->errorString());
+            m_status->setText(m_canDevice->errorString());
             break;
         }
         default:
@@ -93,197 +94,284 @@ void CannabusControl::processError(QCanBusDevice::CanBusError error) const
 
 void CannabusControl::connectDevice()
 {
-    const ConnectDialog::Settings settings = connectDialog->settings();
+    const ConnectDialog::Settings settings = m_connectDialog->settings();
 
     QString errorString;
-    canDevice.reset(QCanBus::instance()->createDevice(
+    m_canDevice.reset(QCanBus::instance()->createDevice(
                         settings.pluginName,
                         settings.deviceInterfaceName,
                         &errorString));
 
-    if (canDevice == nullptr)
+    if (m_canDevice == nullptr)
     {
-        status->setText(tr("Error creating device '%1': '%2'")
+        m_status->setText(tr("Error creating device '%1': '%2'")
                         .arg(settings.pluginName)
                         .arg(errorString));
         return;
     }
 
-    numberFramesReceived = 0;
+    m_numberFramesReceived = 0;
 
-    connect(canDevice.get(), &QCanBusDevice::errorOccurred,
+    connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
             this, &CannabusControl::processError);
-    connect(canDevice.get(), &QCanBusDevice::framesReceived,
+    connect(m_canDevice.get(), &QCanBusDevice::framesReceived,
             this, &CannabusControl::processFramesReceived);
 
-    if (settings.useCustomConfigurationEnabled != false)
+    if (settings.isCustomConfigurationEnabled != false)
     {
         for (const ConnectDialog::ConfigurationItem &item : qAsConst(settings.configurations))
         {
-            canDevice->setConfigurationParameter(item.first, item.second);
+            m_canDevice->setConfigurationParameter(item.first, item.second);
         }
     }
 
-    if (canDevice->connectDevice() == false)
+    if (m_canDevice->connectDevice() == false)
     {
-        status->setText(tr("Connection error: '%1'").arg(canDevice->errorString()));
+        m_status->setText(tr("Connection error: '%1'").arg(m_canDevice->errorString()));
 
-        canDevice.reset();
+        m_canDevice.reset();
     }
     else
     {
-        ui->actionConnect->setEnabled(false);
-        ui->actionDisconnect->setEnabled(false);
+        m_ui->actionConnect->setEnabled(false);
+        m_ui->actionDisconnect->setEnabled(false);
 
-        const QVariant bitRate = canDevice->configurationParameter(QCanBusDevice::BitRateKey);
+        const QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
         if (bitRate.isValid() != false)
         {
-            const bool useCanFd = canDevice->configurationParameter(QCanBusDevice::CanFdKey).toBool();
-            const QVariant dataBitRate = canDevice->configurationParameter(QCanBusDevice::DataBitRateKey);
+            const bool isCanFdEnabled = m_canDevice->configurationParameter(QCanBusDevice::CanFdKey).toBool();
+            const QVariant dataBitRate = m_canDevice->configurationParameter(QCanBusDevice::DataBitRateKey);
 
-            if (useCanFd != false && dataBitRate.isValid() != false)
+            if (isCanFdEnabled != false && dataBitRate.isValid() != false)
             {
-                status->setText(tr("Plugin '%1': connected to %2 at %3 %4 / %5 %6 with CAN FD")
+                m_status->setText(tr("Plugin '%1': connected to %2 at %3 %4 / %5 %6 with CAN FD")
                                 .arg(settings.pluginName)
                                 .arg(settings.deviceInterfaceName)
-                                .arg(bitRate.toUInt() / (bitRate.toUInt() < BitRate_1000000_bps ? 1000 : 1000000))
-                                .arg(bitRate.toUInt() < BitRate_1000000_bps ? tr("kbit/s") : tr("Mbit/s"))
-                                .arg(dataBitRate.toUInt() / (dataBitRate.toUInt() < BitRate_1000000_bps ? 1000 : 1000000))
-                                .arg(dataBitRate.toUInt() < BitRate_1000000_bps ? tr("kbit/s") : tr("Mbit/s")));
+                                .arg(bitRate.toUInt() / (bitRate.toUInt() < BITRATE_1000000_BPS ? 1000 : 1000000))
+                                .arg(bitRate.toUInt() < BITRATE_1000000_BPS ? "kbit/s" : "Mbit/s")
+                                .arg(dataBitRate.toUInt() / (dataBitRate.toUInt() < BITRATE_1000000_BPS ? 1000 : 1000000))
+                                .arg(dataBitRate.toUInt() < BITRATE_1000000_BPS ? "kbit/s" : "Mbit/s"));
             }
             else
             {
-                status->setText(tr("Plugin '%1': connected to %2 at %3 %4")
+                m_status->setText(tr("Plugin '%1': connected to %2 at %3 %4")
                                 .arg(settings.pluginName)
                                 .arg(settings.deviceInterfaceName)
-                                .arg(bitRate.toUInt() / (bitRate.toUInt() < BitRate_1000000_bps ? 1000 : 1000000))
-                                .arg(bitRate.toUInt() < BitRate_1000000_bps ? tr("kbit/s") : tr("Mbit/s")));
+                                .arg(bitRate.toUInt() / (bitRate.toUInt() < BITRATE_1000000_BPS ? 1000 : 1000000))
+                                .arg(bitRate.toUInt() < BITRATE_1000000_BPS ? "kbit/s" : "Mbit/s"));
             }
         }
         else
         {
-            status->setText(tr("Plugin '%1': connected to %2")
+            m_status->setText(tr("Plugin '%1': connected to %2")
                             .arg(settings.pluginName)
                             .arg(settings.deviceInterfaceName));
         }
 
-        if (canDevice->hasBusStatus() != false)
+        if (m_canDevice->hasBusStatus() != false)
         {
-            busStatusTimer->start(1000);
+            m_busStatusTimer->start(1000);
         }
         else
         {
-            ui->busStatus->setText(tr("No CAN bus status available"));
+            m_ui->busStatus->setText(tr("No CAN bus status available"));
         }
     }
 }
 
 void CannabusControl::disconnectDevice()
 {
-    if (canDevice == nullptr)
+    if (m_canDevice == nullptr)
     {
         return;
     }
 
-    busStatusTimer->stop();
+    m_busStatusTimer->stop();
 
-    canDevice->disconnectDevice();
+    m_canDevice->disconnectDevice();
 
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
+    m_ui->actionConnect->setEnabled(true);
+    m_ui->actionDisconnect->setEnabled(false);
 
-    status->setText("Disconnected");
+    m_status->setText("Disconnected");
 }
 
 void CannabusControl::closeEvent(QCloseEvent *event)
 {
-    connectDialog->close();
+    m_connectDialog->close();
     event->accept();
 }
 
 void CannabusControl::processFramesReceived()
 {
-    if (canDevice == nullptr)
+    if (m_canDevice == nullptr)
     {
         return;
     }
 
-    while (canDevice->framesAvailable() != false)
+    while (m_canDevice->framesAvailable() != false)
     {
-        const QCanBusFrame frame = canDevice->readFrame();
+        const QCanBusFrame frame = m_canDevice->readFrame();
 
-        numberFramesReceived++;
+        m_numberFramesReceived++;
 
         if (frame.frameType() == QCanBusFrame::ErrorFrame)
         {
             return;
-        }
+        }        
 
         const uint32_t frameId = frame.frameId();
-        const uint32_t fCode = (uint32_t)cannabus::getFCodeFromId(frameId);
-        const uint32_t slaveAddress = cannabus::getAddressFromId(frameId);
-        const uint32_t messageType = (uint32_t)cannabus::getMsgTypeFromId(frameId);
 
-        const QString time = tr("%1.%2")
+
+        uint32_t msgType = (uint32_t)cannabus::getMsgTypeFromId(frameId);
+        QString msgTypeInfo;
+
+        uint32_t fCode = (uint32_t)cannabus::getFCodeFromId(frameId);
+        QString fCodeInfo;
+
+        switch (msgType)
+        {
+            case (uint32_t)cannabus::IdMsgTypes::HIGH_PRIO_MASTER:
+            {
+                msgTypeInfo = tr("Master's high-priority");
+                break;
+            }
+            case (uint32_t)cannabus::IdMsgTypes::HIGH_PRIO_SLAVE:
+            {
+                msgTypeInfo = tr("Slave's high-priority");
+                break;
+            }
+            case (uint32_t)cannabus::IdMsgTypes::MASTER:
+            {
+                msgTypeInfo = tr("Master's request");
+                break;
+            }
+            case (uint32_t)cannabus::IdMsgTypes::SLAVE:
+            {
+                msgTypeInfo = tr("Slave's response");
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+
+        switch (msgType)
+        {
+            case (uint32_t)cannabus::IdFCode::WRITE_REGS_RANGE:
+            {
+                fCodeInfo = tr("Writing register's range");
+                break;
+            }
+            case (uint32_t)cannabus::IdFCode::WRITE_REGS_SERIES:
+            {
+                fCodeInfo = tr("Writing register's series");
+                break;
+            }
+            case (uint32_t)cannabus::IdFCode::READ_REGS_RANGE:
+            {
+                fCodeInfo = tr("Reading register's range");
+                break;
+            }
+            case (uint32_t)cannabus::IdFCode::READ_REGS_SERIES:
+            {
+                fCodeInfo = tr("Reading register's series");
+                break;
+            }
+            case (uint32_t)cannabus::IdFCode::DEVICE_SPECIFIC1:
+            {
+                fCodeInfo = tr("Device-specific function (1)");
+                break;
+            }
+            case (uint32_t)cannabus::IdFCode::DEVICE_SPECIFIC2:
+            {
+                fCodeInfo = tr("Device-specific function (2)");
+                break;
+            }
+            case (uint32_t)cannabus::IdFCode::DEVICE_SPECIFIC3:
+            {
+                fCodeInfo = tr("Device-specific function (3)");
+                break;
+            }
+            case (uint32_t)cannabus::IdFCode::DEVICE_SPECIFIC4:
+            {
+                fCodeInfo = tr("Device-specific function (4)");
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+
+        QString count = QString::number(m_numberFramesReceived);
+        QString time = tr("%1.%2")
                 .arg(frame.timeStamp().seconds())
                 .arg(frame.timeStamp().microSeconds());
-        const QString data = frame.toString();
+        QString slaveAddress = QString::number(cannabus::getAddressFromId(frameId));
+        QString dataSize = "[" + QString::number(frame.payload().size()) + "]";
+        QString data(frame.payload().toHex(' '));
+        QString info = tr("[%1] %2")
+                .arg(fCodeInfo)
+                .arg(msgTypeInfo);
 
         QStringList frameInfo = {
-            tr("%1").arg(numberFramesReceived),
-            tr("%1").arg(fCode),
-            tr("%1").arg(slaveAddress),
-            tr("%1").arg(messageType),
-            "",
+            count,
+            time,
+            QString::number(fCode, 2),
+            slaveAddress,
+            QString::number(msgType, 2),
+            dataSize,
             data,
-            ""
+            info
         };
 
-        uint32_t row = ui->receivedMessagesLogWindow->rowCount();
-        ui->receivedMessagesLogWindow->insertRow(row);
+        uint32_t row = m_ui->receivedMessagesLogWindow->rowCount();
+        m_ui->receivedMessagesLogWindow->insertRow(row);
 
-        for (uint8_t column = 0; column < ui->receivedMessagesLogWindow->columnCount(); column++)
+        for (uint8_t column = 0; column < m_ui->receivedMessagesLogWindow->columnCount(); column++)
         {
             QTableWidgetItem *item = new QTableWidgetItem(frameInfo.takeFirst());
-            ui->receivedMessagesLogWindow->setItem(row, column, item);
+            m_ui->receivedMessagesLogWindow->setItem(row, column, item);
         }
     }
 }
 
 void CannabusControl::busStatus()
 {
-    if (canDevice == nullptr || canDevice->hasBusStatus() == false)
+    if (m_canDevice == nullptr || m_canDevice->hasBusStatus() == false)
     {
-        ui->busStatus->setText(tr("No CAN bus status available."));
-        busStatusTimer->stop();
+        m_ui->busStatus->setText(tr("No CAN bus status available."));
+        m_busStatusTimer->stop();
         return;
     }
 
-    switch(canDevice->busStatus())
+    switch(m_canDevice->busStatus())
     {
         case QCanBusDevice::CanBusStatus::Good:
         {
-            ui->busStatus->setText(tr("CAN bus status: Good."));
+            m_ui->busStatus->setText(tr("CAN bus status: Good."));
             break;
         }
         case QCanBusDevice::CanBusStatus::Warning:
         {
-            ui->busStatus->setText(tr("CAN bus status: Warning."));
+            m_ui->busStatus->setText(tr("CAN bus status: Warning."));
             break;
         }
         case QCanBusDevice::CanBusStatus::Error:
         {
-            ui->busStatus->setText(tr("CAN bus status: Error."));
+            m_ui->busStatus->setText(tr("CAN bus status: Error."));
             break;
         }
         case QCanBusDevice::CanBusStatus::BusOff:
         {
-            ui->busStatus->setText(tr("CAN bus status: Bus Off."));
+            m_ui->busStatus->setText(tr("CAN bus status: Bus Off."));
             break;
         }
         default:
         {
-            ui->busStatus->setText(tr("CAN bus status: Unknown."));
+            m_ui->busStatus->setText(tr("CAN bus status: Unknown."));
             break;
         }
     }

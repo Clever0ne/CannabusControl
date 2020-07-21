@@ -1,5 +1,4 @@
-#ifndef CANNABUS_CONTROL_H
-#define CANNABUS_CONTROL_H
+#pragma once
 
 #include <QMainWindow>
 #include <QCanBusDevice>
@@ -25,6 +24,9 @@ public:
     explicit CannabusControl(QWidget *parent = nullptr);
     ~CannabusControl();
 
+protected:
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void connectDevice();
     void disconnectDevice();
@@ -32,19 +34,14 @@ private slots:
     void processError(QCanBusDevice::CanBusError error) const;
     void processFramesReceived();
 
-protected:
-    void closeEvent(QCloseEvent *event) override;
-
 private:
     void initActionsConnections();
 
-    uint64_t numberFramesReceived = 0;
-    Ui::CannabusControl *ui = nullptr;
-    QLabel *status = nullptr;
-    QLabel *written = nullptr;
-    ConnectDialog *connectDialog = nullptr;
-    std::unique_ptr<QCanBusDevice> canDevice;
-    QTimer *busStatusTimer = nullptr;
+    uint64_t m_numberFramesReceived = 0;
+    Ui::CannabusControl *m_ui = nullptr;
+    QLabel *m_status = nullptr;
+    QLabel *m_written = nullptr;
+    ConnectDialog *m_connectDialog = nullptr;
+    std::unique_ptr<QCanBusDevice> m_canDevice;
+    QTimer *m_busStatusTimer = nullptr;
 };
-
-#endif // CANNABUS_CONTROL_H

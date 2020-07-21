@@ -5,7 +5,7 @@
 
 BitRateBox::BitRateBox(QWidget *parent) :
     QComboBox(parent),
-    customSpeedValidator(new QIntValidator(0, BitRate_1000000_bps, this))
+    m_customSpeedValidator(new QIntValidator(0, BITRATE_1000000_BPS, this))
 {
     fillBitRates();
 
@@ -15,7 +15,7 @@ BitRateBox::BitRateBox(QWidget *parent) :
 
 BitRateBox::~BitRateBox()
 {
-    delete customSpeedValidator;
+    delete m_customSpeedValidator;
 }
 
 uint32_t BitRateBox::bitRate() const
@@ -29,13 +29,13 @@ uint32_t BitRateBox::bitRate() const
 
 bool BitRateBox::isFlexibleDataRateEnabled() const
 {
-    return useFlexibleDataRate;
+    return m_isFlexibleDataRateEnabled;
 }
 
 void BitRateBox::setFlexibleFataRateEnabled(bool isEnabled)
 {
-    useFlexibleDataRate = isEnabled;
-    customSpeedValidator->setTop(isEnabled == true ? BitRate_8000000_bps : BitRate_1000000_bps);
+    m_isFlexibleDataRateEnabled = isEnabled;
+    m_customSpeedValidator->setTop(isEnabled == true ? BITRATE_8000000_BPS : BITRATE_1000000_BPS);
 
     fillBitRates();
 }
@@ -47,28 +47,28 @@ void BitRateBox::checkCustomSpeedPolicy(const int32_t index)
     if (isCustomSpeed != false)
     {
         clearEditText();
-        lineEdit()->setValidator(customSpeedValidator);
+        lineEdit()->setValidator(m_customSpeedValidator);
     }
 }
 
 void BitRateBox::fillBitRates()
 {
     const QList<uint32_t> rates = {
-        BitRate_10000_bps,
-        BitRate_20000_bps,
-        BitRate_50000_bps,
-        BitRate_100000_bps,
-        BitRate_125000_bps,
-        BitRate_250000_bps,
-        BitRate_500000_bps,
-        BitRate_800000_bps,
-        BitRate_1000000_bps
+        BITRATE_10000_BPS,
+        BITRATE_20000_BPS,
+        BITRATE_50000_BPS,
+        BITRATE_100000_BPS,
+        BITRATE_125000_BPS,
+        BITRATE_250000_BPS,
+        BITRATE_500000_BPS,
+        BITRATE_800000_BPS,
+        BITRATE_1000000_BPS
     };
 
     const QList<uint32_t> dataRates = {
-        BitRate_2000000_bps,
-        BitRate_5000000_bps,
-        BitRate_8000000_bps
+        BITRATE_2000000_BPS,
+        BITRATE_5000000_BPS,
+        BITRATE_8000000_BPS
     };
 
     clear();
@@ -87,5 +87,5 @@ void BitRateBox::fillBitRates()
     }
     addItem(tr("Custom"));
     // По-умолчанию битрейт равен 500 кбит/с
-    setCurrentIndex(findData(BitRate_500000_bps));
+    setCurrentIndex(findData(BITRATE_500000_BPS));
 }

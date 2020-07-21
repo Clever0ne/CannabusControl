@@ -5,80 +5,80 @@
 
 ConnectDialog::ConnectDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ConnectDialog)
+    m_ui(new Ui::ConnectDialog)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
-    ui->rawFilterListBox->addItem(tr("base format"), QVariant(QCanBusDevice::Filter::MatchBaseFormat));
-    ui->rawFilterListBox->addItem(tr("extended format"), QVariant(QCanBusDevice::Filter::MatchExtendedFormat));
-    ui->rawFilterListBox->addItem(tr("base and extended format"), QVariant(QCanBusDevice::Filter::MatchBaseAndExtendedFormat));
-    ui->rawFilterListBox->setCurrentIndex(ui->rawFilterListBox->findText("base format"));
+    m_ui->rawFilterListBox->addItem(tr("base format"), QVariant(QCanBusDevice::Filter::MatchBaseFormat));
+    m_ui->rawFilterListBox->addItem(tr("extended format"), QVariant(QCanBusDevice::Filter::MatchExtendedFormat));
+    m_ui->rawFilterListBox->addItem(tr("base and extended format"), QVariant(QCanBusDevice::Filter::MatchBaseAndExtendedFormat));
+    m_ui->rawFilterListBox->setCurrentIndex(m_ui->rawFilterListBox->findText("base format"));
 
-    ui->errorFilterEdit->setValidator(new QIntValidator(QCanBusFrame::NoError, QCanBusFrame::AnyError, this));
+    m_ui->errorFilterEdit->setValidator(new QIntValidator(QCanBusFrame::NoError, QCanBusFrame::AnyError, this));
 
-    ui->loopbackListBox->addItem(tr("true"), QVariant(true));
-    ui->loopbackListBox->addItem(tr("false"), QVariant(false));
-    ui->loopbackListBox->addItem(tr("unspecified"), QVariant());
-    ui->loopbackListBox->setCurrentIndex(ui->loopbackListBox->findText("unspecified"));
+    m_ui->loopbackListBox->addItem(tr("true"), QVariant(true));
+    m_ui->loopbackListBox->addItem(tr("false"), QVariant(false));
+    m_ui->loopbackListBox->addItem(tr("unspecified"), QVariant());
+    m_ui->loopbackListBox->setCurrentIndex(m_ui->loopbackListBox->findText("unspecified"));
 
-    ui->receiveOwnListBox->addItem(tr("true"), QVariant(true));
-    ui->receiveOwnListBox->addItem(tr("false"), QVariant(false));
-    ui->receiveOwnListBox->addItem(tr("unspecified"), QVariant());
-    ui->receiveOwnListBox->setCurrentIndex(ui->receiveOwnListBox->findText("unspecified"));
+    m_ui->receiveOwnListBox->addItem(tr("true"), QVariant(true));
+    m_ui->receiveOwnListBox->addItem(tr("false"), QVariant(false));
+    m_ui->receiveOwnListBox->addItem(tr("unspecified"), QVariant());
+    m_ui->receiveOwnListBox->setCurrentIndex(m_ui->receiveOwnListBox->findText("unspecified"));
 
-    ui->canFdListBox->addItem(tr("true"), QVariant(true));
-    ui->canFdListBox->addItem(tr("false"), QVariant(false));
-    ui->canFdListBox->setCurrentIndex(ui->canFdListBox->findText("false"));
+    m_ui->canFdListBox->addItem(tr("true"), QVariant(true));
+    m_ui->canFdListBox->addItem(tr("false"), QVariant(false));
+    m_ui->canFdListBox->setCurrentIndex(m_ui->canFdListBox->findText("false"));
 
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ConnectDialog::ok);
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ConnectDialog::cancel);
+    connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &ConnectDialog::ok);
+    connect(m_ui->buttonBox, &QDialogButtonBox::rejected, this, &ConnectDialog::cancel);
 
-    connect(ui->useCustomConfigurationCheckBox, &QCheckBox::clicked,
-            ui->configurationBox, &QGroupBox::setEnabled);
-    connect(ui->pluginListBox, &QComboBox::currentTextChanged,
+    connect(m_ui->useCustomConfigurationCheckBox, &QCheckBox::clicked,
+            m_ui->configurationBox, &QGroupBox::setEnabled);
+    connect(m_ui->pluginListBox, &QComboBox::currentTextChanged,
             this, &ConnectDialog::pluginChanged);
-    connect(ui->interfaceListBox, &QComboBox::currentTextChanged,
+    connect(m_ui->interfaceListBox, &QComboBox::currentTextChanged,
             this, &ConnectDialog::interfaceChanged);
 
-    ui->pluginListBox->addItems(QCanBus::instance()->plugins());
+    m_ui->pluginListBox->addItems(QCanBus::instance()->plugins());
 
-    ui->isVirtual->setEnabled(false);
-    ui->isFlexibleDataRateCapable->setEnabled(false);
-    ui->configurationBox->setEnabled(ui->useCustomConfigurationCheckBox->isChecked());
+    m_ui->isVirtual->setEnabled(false);
+    m_ui->isFlexibleDataRateCapable->setEnabled(false);
+    m_ui->configurationBox->setEnabled(m_ui->useCustomConfigurationCheckBox->isChecked());
 
     updateSettings();
 }
 
 ConnectDialog::~ConnectDialog()
 {
-    delete ui;
+    delete m_ui;
 }
 
 ConnectDialog::Settings ConnectDialog::settings() const
 {
-    return currentSettings;
+    return m_currentSettings;
 }
 
 void ConnectDialog::pluginChanged(const QString &plugin)
 {
-    ui->interfaceListBox->clear();
+    m_ui->interfaceListBox->clear();
 
-    interfaces = QCanBus::instance()->availableDevices(plugin);
-    for (const QCanBusDeviceInfo &info : qAsConst(interfaces))
+    m_interfaces = QCanBus::instance()->availableDevices(plugin);
+    for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces))
     {
-        ui->interfaceListBox->addItem(info.name());
+        m_ui->interfaceListBox->addItem(info.name());
     }
 }
 
 void ConnectDialog::interfaceChanged(const QString &interface)
 {
-    ui->descriptionLabel->setText(tr("Interface: "));
-    ui->serialNumberLabel->setText(tr("Serial: "));
-    ui->channelLabel->setText(tr("Channel: "));
-    ui->isVirtual->setChecked(false);
-    ui->isFlexibleDataRateCapable->setChecked(false);
+    m_ui->descriptionLabel->setText(tr("Interface: "));
+    m_ui->serialNumberLabel->setText(tr("Serial: "));
+    m_ui->channelLabel->setText(tr("Channel: "));
+    m_ui->isVirtual->setChecked(false);
+    m_ui->isFlexibleDataRateCapable->setChecked(false);
 
-    for (const QCanBusDeviceInfo &info : qAsConst(interfaces))
+    for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces))
     {
         if (info.name() == interface)
         {
@@ -88,11 +88,11 @@ void ConnectDialog::interfaceChanged(const QString &interface)
                 serialNumber = tr("N/A");
             }
 
-            ui->descriptionLabel->setText(tr("Interface: %1").arg(info.description()));
-            ui->serialNumberLabel->setText(tr("Serial: %1").arg(serialNumber));
-            ui->channelLabel->setText(tr("Channel: %1").arg(info.channel()));
-            ui->isVirtual->setChecked(info.isVirtual());
-            ui->isFlexibleDataRateCapable->setChecked(info.hasFlexibleDataRate());
+            m_ui->descriptionLabel->setText(tr("Interface: %1").arg(info.description()));
+            m_ui->serialNumberLabel->setText(tr("Serial: %1").arg(serialNumber));
+            m_ui->channelLabel->setText(tr("Channel: %1").arg(info.channel()));
+            m_ui->isVirtual->setChecked(info.isVirtual());
+            m_ui->isFlexibleDataRateCapable->setChecked(info.hasFlexibleDataRate());
 
             break;
         }
@@ -115,7 +115,7 @@ QString ConnectDialog::configurationValue(QCanBusDevice::ConfigurationKey key)
 {
     QVariant result;
 
-    for (const ConfigurationItem &item : qAsConst(currentSettings.configurations))
+    for (const ConfigurationItem &item : qAsConst(m_currentSettings.configurations))
     {
         if (item.first == key)
         {
@@ -134,83 +134,83 @@ QString ConnectDialog::configurationValue(QCanBusDevice::ConfigurationKey key)
 
 void ConnectDialog::updateSettings()
 {
-    currentSettings.pluginName = ui->pluginListBox->currentText();
-    currentSettings.deviceInterfaceName = ui->interfaceListBox->currentText();
-    currentSettings.useCustomConfigurationEnabled = ui->useCustomConfigurationCheckBox->isChecked();
+    m_currentSettings.pluginName = m_ui->pluginListBox->currentText();
+    m_currentSettings.deviceInterfaceName = m_ui->interfaceListBox->currentText();
+    m_currentSettings.isCustomConfigurationEnabled = m_ui->useCustomConfigurationCheckBox->isChecked();
     // Пользовательские настройки
-    if (currentSettings.useCustomConfigurationEnabled == true)
+    if (m_currentSettings.isCustomConfigurationEnabled == true)
     {
-        currentSettings.configurations.clear();
+        m_currentSettings.configurations.clear();
 
         // Формат кадра данных шины CAN
-        if (ui->rawFilterListBox->currentText().isEmpty() == false)
+        if (m_ui->rawFilterListBox->currentText().isEmpty() == false)
         {
             ConfigurationItem item;
 
             item.first = QCanBusDevice::RawFilterKey;
-            item.second = ui->rawFilterListBox->currentData();
+            item.second = m_ui->rawFilterListBox->currentData();
 
-            currentSettings.configurations.append(item);
+            m_currentSettings.configurations.append(item);
         }
 
         // Режим обратной связи
-        if (ui->loopbackListBox->currentData() != "false")
+        if (m_ui->loopbackListBox->currentData() != "false")
         {
             ConfigurationItem item;
 
             item.first = QCanBusDevice::LoopbackKey;
-            item.second = ui->loopbackListBox->currentData();
+            item.second = m_ui->loopbackListBox->currentData();
 
-            currentSettings.configurations.append(item);
+            m_currentSettings.configurations.append(item);
         }
 
         // Режим приёма адаптером собственных сообщений
-        if (ui->receiveOwnListBox->currentText() != "false")
+        if (m_ui->receiveOwnListBox->currentText() != "false")
         {
             ConfigurationItem item;
 
             item.first = QCanBusDevice::ReceiveOwnKey;
-            item.second = ui->receiveOwnListBox->currentData();
+            item.second = m_ui->receiveOwnListBox->currentData();
 
-            currentSettings.configurations.append(item);
+            m_currentSettings.configurations.append(item);
         }
 
-        if (ui->errorFilterEdit->text().isEmpty() == false)
+        if (m_ui->errorFilterEdit->text().isEmpty() == false)
         {
 
         }
 
         // Скорость передачи битов поля арбитража в кадре данных
-        if (ui->bitRateListBox->bitRate() != 0)
+        if (m_ui->bitRateListBox->bitRate() != 0)
         {
             ConfigurationItem item;
 
             item.first = QCanBusDevice::BitRateKey;
-            item.second = ui->bitRateListBox->bitRate();
+            item.second = m_ui->bitRateListBox->bitRate();
 
-            currentSettings.configurations.append(item);
+            m_currentSettings.configurations.append(item);
         }
 
         // Использование шины CAN FD
-        if (ui->canFdListBox->currentText() != "false")
+        if (m_ui->canFdListBox->currentText() != "false")
         {
             ConfigurationItem item;
 
             item.first = QCanBusDevice::CanFdKey;
-            item.second = ui->canFdListBox->currentData();
+            item.second = m_ui->canFdListBox->currentData();
 
-            currentSettings.configurations.append(item);
+            m_currentSettings.configurations.append(item);
         }
 
         // Скорость передачи битов поля данных в кадре данных
-        if (ui->dataBitRateListBox->bitRate() != 0)
+        if (m_ui->dataBitRateListBox->bitRate() != 0)
         {
             ConfigurationItem item;
 
             item.first = QCanBusDevice::DataBitRateKey;
-            item.second = ui->dataBitRateListBox->bitRate();
+            item.second = m_ui->dataBitRateListBox->bitRate();
 
-            currentSettings.configurations.append(item);
+            m_currentSettings.configurations.append(item);
         }
     }
 }
@@ -219,29 +219,29 @@ void ConnectDialog::revertSettings()
 {
     QString value;
 
-    ui->pluginListBox->setCurrentText(currentSettings.pluginName);
-    ui->interfaceListBox->setCurrentText(currentSettings.deviceInterfaceName);
-    ui->useCustomConfigurationCheckBox->setChecked(currentSettings.useCustomConfigurationEnabled);
-    ui->configurationBox->setEnabled(ui->useCustomConfigurationCheckBox->isChecked());
+    m_ui->pluginListBox->setCurrentText(m_currentSettings.pluginName);
+    m_ui->interfaceListBox->setCurrentText(m_currentSettings.deviceInterfaceName);
+    m_ui->useCustomConfigurationCheckBox->setChecked(m_currentSettings.isCustomConfigurationEnabled);
+    m_ui->configurationBox->setEnabled(m_ui->useCustomConfigurationCheckBox->isChecked());
 
     value = configurationValue(QCanBusDevice::RawFilterKey);
-    ui->rawFilterListBox->setCurrentText(value);
+    m_ui->rawFilterListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::ErrorFilterKey);
-    ui->errorFilterEdit->setText(value);
+    m_ui->errorFilterEdit->setText(value);
 
     value = configurationValue(QCanBusDevice::LoopbackKey);
-    ui->loopbackListBox->setCurrentText(value);
+    m_ui->loopbackListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::ReceiveOwnKey);
-    ui->receiveOwnListBox->setCurrentText(value);
+    m_ui->receiveOwnListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::BitRateKey);
-    ui->bitRateListBox->setCurrentText(value);
+    m_ui->bitRateListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::CanFdKey);
-    ui->canFdListBox->setCurrentText(value);
+    m_ui->canFdListBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::DataBitRateKey);
-    ui->dataBitRateListBox->setCurrentText(value);
+    m_ui->dataBitRateListBox->setCurrentText(value);
 }
