@@ -1,7 +1,7 @@
 #include "cannabus_control.h"
 #include "ui_cannabus_control.h"
 #include "connect_dialog.h"
-#include "bitrate_box.h"
+#include "bitrate.h"
 #include "../cannabus_library/cannabus_common.h"
 
 #include <QCanBus>
@@ -25,23 +25,6 @@ CannabusControl::CannabusControl(QWidget *parent) :
     m_written = new QLabel;
     m_ui->statusBar->addWidget(m_written);
 
-    QStringList logWindowHeader = {"No.", "Time", "Message Type", "Slave Address", "F-Code", "DLC", "Data", "Info"};
-
-    m_ui->receivedMessagesLogWindow->setColumnCount(logWindowHeader.count());
-    m_ui->receivedMessagesLogWindow->setHorizontalHeaderLabels(logWindowHeader);
-
-    m_ui->receivedMessagesLogWindow->resizeColumnsToContents();
-    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("No."), 60);
-    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Time"), 90);
-    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Message Type"), 120);
-    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Slave Address"), 120);
-    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("F-Code"), 120);
-    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("DLC"), 60);
-    m_ui->receivedMessagesLogWindow->setColumnWidth(logWindowHeader.indexOf("Data"), 180);
-
-    m_ui->receivedMessagesLogWindow->horizontalHeader()->setStretchLastSection(true);
-    m_ui->receivedMessagesLogWindow->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
     initActionsConnections();
 
     connect(m_busStatusTimer, &QTimer::timeout, this, &CannabusControl::busStatus);
@@ -63,8 +46,10 @@ void CannabusControl::initActionsConnections()
     });
     connect(m_ui->actionDisconnect, &QAction::triggered,
             this, &CannabusControl::disconnectDevice);
-    connect(m_ui->actionClearLog, &QAction::triggered,
-            m_ui->receivedMessagesLogWindow, &QTableWidget::clearContents);
+    connect(m_ui->actionClearLog, &QAction::triggered, [this]() {
+        m_ui->receivedMessagesLogWindow->clear();
+        m_ui->receivedMessagesLogWindow->makeHeader();
+    });
     connect(m_ui->actionQuit, &QAction::triggered,
             this, &QWidget::close);
 
@@ -134,7 +119,7 @@ void CannabusControl::connectDevice()
     else
     {
         m_ui->actionConnect->setEnabled(false);
-        m_ui->actionDisconnect->setEnabled(false);
+        m_ui->actionDisconnect->setEnabled(true);
 
         const QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
         if (bitRate.isValid() != false)
@@ -144,21 +129,18 @@ void CannabusControl::connectDevice()
 
             if (isCanFdEnabled != false && dataBitRate.isValid() != false)
             {
-                m_status->setText(tr("Plugin '%1': connected to %2 at %3 %4 / %5 %6 with CAN FD")
+                m_status->setText(tr("Plugin '%1': connected to %2 at %3/ %4 with CAN FD")
                                 .arg(settings.pluginName)
                                 .arg(settings.deviceInterfaceName)
-                                .arg(bitRate.toUInt() / (bitRate.toUInt() < BITRATE_1000000_BPS ? 1000 : 1000000))
-                                .arg(bitRate.toUInt() < BITRATE_1000000_BPS ? "kbit/s" : "Mbit/s")
-                                .arg(dataBitRate.toUInt() / (dataBitRate.toUInt() < BITRATE_1000000_BPS ? 1000 : 1000000))
-                                .arg(dataBitRate.toUInt() < BITRATE_1000000_BPS ? "kbit/s" : "Mbit/s"));
+                                .arg(bitRateToString(bitRate.toUInt()))
+                                .arg(bitRateToString(dataBitRate.toUInt())));
             }
             else
             {
                 m_status->setText(tr("Plugin '%1': connected to %2 at %3 %4")
                                 .arg(settings.pluginName)
                                 .arg(settings.deviceInterfaceName)
-                                .arg(bitRate.toUInt() / (bitRate.toUInt() < BITRATE_1000000_BPS ? 1000 : 1000000))
-                                .arg(bitRate.toUInt() < BITRATE_1000000_BPS ? "kbit/s" : "Mbit/s"));
+                                .arg(bitRateToString(bitRate.toUInt())));
             }
         }
         else

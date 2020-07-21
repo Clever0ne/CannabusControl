@@ -19,13 +19,16 @@ SOURCES += \
     src/main/bitrate_box.cpp \
     src/main/cannabus_control.cpp \
     src/main/connect_dialog.cpp \
+    src/main/log_window.cpp \
     src/main/main.cpp \
 
 HEADERS += \
     src/cannabus_library/cannabus_common.h \
+    src/main/bitrate.h \
     src/main/bitrate_box.h \
     src/main/cannabus_control.h \
-    src/main/connect_dialog.h
+    src/main/connect_dialog.h \
+    src/main/log_window.h
 
 FORMS += \
     src/main/cannabus_control.ui \

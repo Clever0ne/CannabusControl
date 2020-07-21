@@ -1,4 +1,5 @@
 #include "bitrate_box.h"
+#include "bitrate.h"
 
 #include <stdint.h>
 #include <QLineEdit>
@@ -53,7 +54,7 @@ void BitRateBox::checkCustomSpeedPolicy(const int32_t index)
 
 void BitRateBox::fillBitRates()
 {
-    const QList<uint32_t> rates = {
+    static const QList<uint32_t> rates = {
         BITRATE_10000_BPS,
         BITRATE_20000_BPS,
         BITRATE_50000_BPS,
@@ -65,7 +66,7 @@ void BitRateBox::fillBitRates()
         BITRATE_1000000_BPS
     };
 
-    const QList<uint32_t> dataRates = {
+    static const QList<uint32_t> dataRates = {
         BITRATE_2000000_BPS,
         BITRATE_5000000_BPS,
         BITRATE_8000000_BPS
@@ -86,6 +87,6 @@ void BitRateBox::fillBitRates()
         }
     }
     addItem(tr("Custom"));
-    // По-умолчанию битрейт равен 500 кбит/с
-    setCurrentIndex(findData(BITRATE_500000_BPS));
+    // По-умолчанию битрейт равен 125 кбит/с
+    setCurrentIndex(findData(BITRATE_125000_BPS));
 }
