@@ -26,8 +26,6 @@ CannabusControl::CannabusControl(QWidget *parent) :
     m_ui->statusBar->addWidget(m_written);
 
     initActionsConnections();
-
-    connect(m_busStatusTimer, &QTimer::timeout, this, &CannabusControl::busStatus);
 }
 
 CannabusControl::~CannabusControl()
@@ -55,6 +53,11 @@ void CannabusControl::initActionsConnections()
 
     connect(m_connectDialog, &QDialog::accepted,
             this, &CannabusControl::connectDevice);
+
+    connect(m_busStatusTimer, &QTimer::timeout,
+            this, &CannabusControl::busStatus);
+    connect(m_logWindowUpdateTimer, &QTimer::timeout,
+            this, &CannabusControl::processFramesReceived);
 }
 
 void CannabusControl::processError(QCanBusDevice::CanBusError error) const
@@ -99,8 +102,8 @@ void CannabusControl::connectDevice()
 
     connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
             this, &CannabusControl::processError);
-    connect(m_canDevice.get(), &QCanBusDevice::framesReceived,
-            this, &CannabusControl::processFramesReceived);
+    /*connect(m_canDevice.get(), &QCanBusDevice::framesReceived,
+            this, &CannabusControl::processFramesReceived);*/
 
     if (settings.isCustomConfigurationEnabled != false)
     {
@@ -129,7 +132,7 @@ void CannabusControl::connectDevice()
 
             if (isCanFdEnabled != false && dataBitRate.isValid() != false)
             {
-                m_status->setText(tr("Plugin '%1': connected to %2 at %3/ %4 with CAN FD")
+                m_status->setText(tr("Plugin '%1': connected to %2 at %3 / %4 with CAN FD")
                                 .arg(settings.pluginName)
                                 .arg(settings.deviceInterfaceName)
                                 .arg(bitRateToString(bitRate.toUInt()))
@@ -137,7 +140,7 @@ void CannabusControl::connectDevice()
             }
             else
             {
-                m_status->setText(tr("Plugin '%1': connected to %2 at %3 %4")
+                m_status->setText(tr("Plugin '%1': connected to %2 at %3")
                                 .arg(settings.pluginName)
                                 .arg(settings.deviceInterfaceName)
                                 .arg(bitRateToString(bitRate.toUInt())));
@@ -153,6 +156,7 @@ void CannabusControl::connectDevice()
         if (m_canDevice->hasBusStatus() != false)
         {
             m_busStatusTimer->start(1000);
+            m_logWindowUpdateTimer->start(100);
         }
         else
         {
@@ -169,6 +173,7 @@ void CannabusControl::disconnectDevice()
     }
 
     m_busStatusTimer->stop();
+    m_logWindowUpdateTimer->stop();
 
     m_canDevice->disconnectDevice();
 
@@ -199,6 +204,7 @@ void CannabusControl::processFramesReceived()
 
         if (frame.frameType() == QCanBusFrame::ErrorFrame)
         {
+
             return;
         }        
 
@@ -301,9 +307,9 @@ void CannabusControl::processFramesReceived()
         QStringList frameInfo = {
             count,
             time,
-            QString::number(fCode, 2),
+            QString::number(fCode, 2).rightJustified(2, '0'),
             slaveAddress,
-            QString::number(msgType, 2),
+            QString::number(msgType, 2).rightJustified(3, '0'),
             dataSize,
             data,
             info
