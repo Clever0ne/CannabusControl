@@ -53,6 +53,7 @@ void CannabusControl::initActionsConnections()
     connect(m_settingsDialog, &QDialog::accepted, [this] {
         disconnectDevice();
         m_ui->receivedMessagesLogWindow->clearLog();
+        connectDevice();
     });
 
     connect(m_busStatusTimer, &QTimer::timeout,
@@ -111,7 +112,7 @@ void CannabusControl::connectDevice()
 
     if (m_canDevice->connectDevice() == false)
     {
-        m_status->setText(tr("Connection error: '%1'").arg(m_canDevice->errorString()));
+        m_status->setText(tr("Connection error: %1").arg(m_canDevice->errorString()));
 
         m_canDevice.reset();
     }
@@ -202,12 +203,32 @@ void CannabusControl::processFramesReceived()
 
         m_numberFramesReceived++;
 
+        // Обработка кадра ошибки
         if (frame.frameType() == QCanBusFrame::ErrorFrame)
         {
+            uint32_t row = m_ui->receivedMessagesLogWindow->rowCount();
+            m_ui->receivedMessagesLogWindow->insertRow(row);
 
-            return;
+            QString count = QString::number(m_numberFramesReceived);
+            QTableWidgetItem *countItem = new QTableWidgetItem(count);
+            m_ui->receivedMessagesLogWindow->setItem(row, 0, countItem);
+
+            QString time = tr("%1.%2")
+                    .arg(frame.timeStamp().seconds(), 4, 10, QLatin1Char(' '))
+                    .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+            QTableWidgetItem *timeItem = new QTableWidgetItem(time);
+            m_ui->receivedMessagesLogWindow->setItem(row, 1, timeItem);
+
+            QString info = m_canDevice->interpretErrorFrame(frame);
+            QTableWidgetItem *infoItem = new QTableWidgetItem(info);
+            m_ui->receivedMessagesLogWindow->setItem(row, 7, infoItem);
+
+            m_ui->receivedMessagesLogWindow->scrollToBottom();
+
+            continue;
         }        
 
+        // Обработка обычных кадров
         const uint32_t frameId = frame.frameId();
 
         uint32_t msgType = (uint32_t)cannabus::getMsgTypeFromId(frameId);
