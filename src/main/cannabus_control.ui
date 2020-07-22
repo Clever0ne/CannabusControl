@@ -20,7 +20,7 @@
       <x>10</x>
       <y>10</y>
       <width>1260</width>
-      <height>600</height>
+      <height>620</height>
      </rect>
     </property>
     <property name="title">
@@ -32,7 +32,7 @@
        <x>10</x>
        <y>20</y>
        <width>1240</width>
-       <height>540</height>
+       <height>560</height>
       </rect>
      </property>
      <property name="font">
@@ -46,7 +46,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>570</y>
+       <y>590</y>
        <width>1240</width>
        <height>20</height>
       </rect>

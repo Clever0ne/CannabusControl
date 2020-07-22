@@ -292,7 +292,7 @@ void CannabusControl::processFramesReceived()
 
         QString count = QString::number(m_numberFramesReceived);
         QString time = tr("%1.%2")
-                .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
+                .arg(frame.timeStamp().seconds(), 4, 10, QLatin1Char(' '))
                 .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char(' '));
         QString slaveAddress = QString::number(cannabus::getAddressFromId(frameId));
         QString dataSize = "[" + QString::number(frame.payload().size()) + "]";
