@@ -43,6 +43,6 @@ private:
     QLabel *m_written = nullptr;
     ConnectDialog *m_connectDialog = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
-    QTimer *m_logWindowUpdateTimer = nullptr;
     QTimer *m_busStatusTimer = nullptr;
+    QTimer *m_logWindowUpdateTimer = nullptr;
 };

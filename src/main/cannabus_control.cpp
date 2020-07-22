@@ -13,7 +13,8 @@
 CannabusControl::CannabusControl(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::CannabusControl),
-    m_busStatusTimer(new QTimer(this))
+    m_busStatusTimer(new QTimer(this)),
+    m_logWindowUpdateTimer(new QTimer(this))
 {
     m_ui->setupUi(this);
 
