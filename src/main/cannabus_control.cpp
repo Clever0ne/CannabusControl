@@ -172,7 +172,7 @@ void CannabusControl::disconnectDevice()
 
     m_canDevice->disconnectDevice();
 
-    busStatus();
+    m_ui->busStatus->setText(tr("No CAN bus status available."));
 
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
@@ -206,7 +206,6 @@ void CannabusControl::processFramesReceived()
         }        
 
         const uint32_t frameId = frame.frameId();
-
 
         uint32_t msgType = (uint32_t)cannabus::getMsgTypeFromId(frameId);
         QString msgTypeInfo;
@@ -293,13 +292,22 @@ void CannabusControl::processFramesReceived()
         QString count = QString::number(m_numberFramesReceived);
         QString time = tr("%1.%2")
                 .arg(frame.timeStamp().seconds(), 4, 10, QLatin1Char(' '))
-                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char(' '));
+                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
         QString slaveAddress = QString::number(cannabus::getAddressFromId(frameId));
         QString dataSize = "[" + QString::number(frame.payload().size()) + "]";
         QString data(frame.payload().toHex(' ').toUpper());
-        QString info = tr("[%1] %2")
-                .arg(fCodeInfo)
-                .arg(msgTypeInfo);
+        QString info;
+
+        if (dataSize != "[0]")
+        {
+            info = tr("[%1] %2")
+                    .arg(fCodeInfo)
+                    .arg(msgTypeInfo);
+        }
+        else
+        {
+            info = tr("Error: incorrect request!");
+        }
 
         QStringList frameInfo = {
             count,
