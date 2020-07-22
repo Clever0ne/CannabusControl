@@ -14,7 +14,7 @@ namespace Ui { class CannabusControl; }
 
 QT_END_NAMESPACE
 
-class ConnectDialog;
+class SettingsDialog;
 
 class CannabusControl : public QMainWindow
 {
@@ -41,7 +41,7 @@ private:
     Ui::CannabusControl *m_ui = nullptr;
     QLabel *m_status = nullptr;
     QLabel *m_written = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
+    SettingsDialog *m_settingsDialog = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
     QTimer *m_logWindowUpdateTimer = nullptr;

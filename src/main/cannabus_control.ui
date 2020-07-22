@@ -75,6 +75,8 @@
     <addaction name="separator"/>
     <addaction name="actionClearLog"/>
     <addaction name="separator"/>
+    <addaction name="actionSettings"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <addaction name="menuCalls"/>
@@ -94,6 +96,8 @@
    <addaction name="actionDisconnect"/>
    <addaction name="separator"/>
    <addaction name="actionClearLog"/>
+   <addaction name="separator"/>
+   <addaction name="actionSettings"/>
   </widget>
   <action name="actionConnect">
    <property name="icon">
@@ -135,6 +139,15 @@
    </property>
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="../images/cannabus_control.qrc">
+     <normaloff>:/settings.png</normaloff>:/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

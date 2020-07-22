@@ -18,21 +18,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     src/main/bitrate_box.cpp \
     src/main/cannabus_control.cpp \
-    src/main/connect_dialog.cpp \
     src/main/log_window.cpp \
     src/main/main.cpp \
+    src/main/settings_dialog.cpp
 
 HEADERS += \
     src/cannabus_library/cannabus_common.h \
     src/main/bitrate.h \
     src/main/bitrate_box.h \
     src/main/cannabus_control.h \
-    src/main/connect_dialog.h \
-    src/main/log_window.h
+    src/main/log_window.h \
+    src/main/settings_dialog.h
 
 FORMS += \
     src/main/cannabus_control.ui \
-    src/main/connect_dialog.ui
+    src/main/settings_dialog.ui
 
 TRANSLATIONS += \
     src/main/CannabusControl_ru_RU.ts

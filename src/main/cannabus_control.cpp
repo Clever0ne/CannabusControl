@@ -1,6 +1,6 @@
 #include "cannabus_control.h"
 #include "ui_cannabus_control.h"
-#include "connect_dialog.h"
+#include "settings_dialog.h"
 #include "bitrate.h"
 #include "../cannabus_library/cannabus_common.h"
 
@@ -18,7 +18,7 @@ CannabusControl::CannabusControl(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    m_connectDialog = new ConnectDialog;
+    m_settingsDialog = new SettingsDialog;
 
     m_status = new QLabel;
     m_ui->statusBar->addPermanentWidget(m_status);
@@ -31,7 +31,7 @@ CannabusControl::CannabusControl(QWidget *parent) :
 
 CannabusControl::~CannabusControl()
 {
-    delete m_connectDialog;
+    delete m_settingsDialog;
     delete m_ui;
 }
 
@@ -39,19 +39,18 @@ void CannabusControl::initActionsConnections()
 {
     m_ui->actionDisconnect->setEnabled(false);
 
-    connect(m_ui->actionConnect, &QAction::triggered, [this]() {
+    connect(m_ui->actionSettings, &QAction::triggered, [this]() {
         m_canDevice.release()->deleteLater();
-        m_connectDialog->show();
+        m_settingsDialog->show();
     });
+    connect(m_ui->actionConnect, &QAction::triggered,
+            this, &CannabusControl::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered,
             this, &CannabusControl::disconnectDevice);
     connect(m_ui->actionClearLog, &QAction::triggered,
             m_ui->receivedMessagesLogWindow, &LogWindow::clearLog);
     connect(m_ui->actionQuit, &QAction::triggered,
             this, &QWidget::close);
-
-    connect(m_connectDialog, &QDialog::accepted,
-            this, &CannabusControl::connectDevice);
 
     connect(m_busStatusTimer, &QTimer::timeout,
             this, &CannabusControl::busStatus);
@@ -81,7 +80,7 @@ void CannabusControl::processError(QCanBusDevice::CanBusError error) const
 
 void CannabusControl::connectDevice()
 {
-    const ConnectDialog::Settings settings = m_connectDialog->settings();
+    const SettingsDialog::Settings settings = m_settingsDialog->settings();
 
     QString errorString;
     m_canDevice.reset(QCanBus::instance()->createDevice(
@@ -99,17 +98,12 @@ void CannabusControl::connectDevice()
 
     m_numberFramesReceived = 0;
 
-    m_canDevice->setConfigurationParameter(QCanBusDevice::BitRateKey, (QVariant)BITRATE_125000_BPS);
-
     connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
             this, &CannabusControl::processError);
 
-    if (settings.isCustomConfigurationEnabled != false)
+    for (const SettingsDialog::ConfigurationItem &item : qAsConst(settings.configurations))
     {
-        for (const ConnectDialog::ConfigurationItem &item : qAsConst(settings.configurations))
-        {
-            m_canDevice->setConfigurationParameter(item.first, item.second);
-        }
+        m_canDevice->setConfigurationParameter(item.first, item.second);
     }
 
     if (m_canDevice->connectDevice() == false)
@@ -178,6 +172,8 @@ void CannabusControl::disconnectDevice()
 
     m_canDevice->disconnectDevice();
 
+    busStatus();
+
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
 
@@ -186,7 +182,7 @@ void CannabusControl::disconnectDevice()
 
 void CannabusControl::closeEvent(QCloseEvent *event)
 {
-    m_connectDialog->close();
+    m_settingsDialog->close();
     event->accept();
 }
 
@@ -296,8 +292,8 @@ void CannabusControl::processFramesReceived()
 
         QString count = QString::number(m_numberFramesReceived);
         QString time = tr("%1.%2")
-                .arg(frame.timeStamp().seconds())
-                .arg(frame.timeStamp().microSeconds());
+                .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
+                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char(' '));
         QString slaveAddress = QString::number(cannabus::getAddressFromId(frameId));
         QString dataSize = "[" + QString::number(frame.payload().size()) + "]";
         QString data(frame.payload().toHex(' ').toUpper());
