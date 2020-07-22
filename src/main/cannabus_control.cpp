@@ -39,10 +39,8 @@ void CannabusControl::initActionsConnections()
 {
     m_ui->actionDisconnect->setEnabled(false);
 
-    connect(m_ui->actionSettings, &QAction::triggered, [this]() {
-        m_canDevice.release()->deleteLater();
-        m_settingsDialog->show();
-    });
+    connect(m_ui->actionSettings, &QAction::triggered,
+        m_settingsDialog, &QDialog::show);
     connect(m_ui->actionConnect, &QAction::triggered,
             this, &CannabusControl::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered,
@@ -51,6 +49,11 @@ void CannabusControl::initActionsConnections()
             m_ui->receivedMessagesLogWindow, &LogWindow::clearLog);
     connect(m_ui->actionQuit, &QAction::triggered,
             this, &QWidget::close);
+
+    connect(m_settingsDialog, &QDialog::accept, [this] {
+        disconnectDevice();
+        m_ui->receivedMessagesLogWindow->clearLog();
+    });
 
     connect(m_busStatusTimer, &QTimer::timeout,
             this, &CannabusControl::busStatus);
