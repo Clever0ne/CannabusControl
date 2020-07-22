@@ -45,10 +45,8 @@ void CannabusControl::initActionsConnections()
     });
     connect(m_ui->actionDisconnect, &QAction::triggered,
             this, &CannabusControl::disconnectDevice);
-    connect(m_ui->actionClearLog, &QAction::triggered, [this]() {
-        m_ui->receivedMessagesLogWindow->clear();
-        m_ui->receivedMessagesLogWindow->makeHeader();
-    });
+    connect(m_ui->actionClearLog, &QAction::triggered,
+            m_ui->receivedMessagesLogWindow, &LogWindow::clearLog);
     connect(m_ui->actionQuit, &QAction::triggered,
             this, &QWidget::close);
 
@@ -103,8 +101,6 @@ void CannabusControl::connectDevice()
 
     connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
             this, &CannabusControl::processError);
-    /*connect(m_canDevice.get(), &QCanBusDevice::framesReceived,
-            this, &CannabusControl::processFramesReceived);*/
 
     if (settings.isCustomConfigurationEnabled != false)
     {
@@ -175,6 +171,8 @@ void CannabusControl::disconnectDevice()
 
     m_busStatusTimer->stop();
     m_logWindowUpdateTimer->stop();
+
+    processFramesReceived();
 
     m_canDevice->disconnectDevice();
 
@@ -324,6 +322,8 @@ void CannabusControl::processFramesReceived()
             QTableWidgetItem *item = new QTableWidgetItem(frameInfo.takeFirst());
             m_ui->receivedMessagesLogWindow->setItem(row, column, item);
         }
+
+        m_ui->receivedMessagesLogWindow->scrollToBottom();
     }
 }
 

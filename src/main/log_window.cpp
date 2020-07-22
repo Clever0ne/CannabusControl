@@ -31,3 +31,10 @@ void LogWindow::makeHeader()
    setColumnWidth(logWindowHeader.indexOf("DLC"), 60);
    setColumnWidth(logWindowHeader.indexOf("Data"), 180);
 }
+
+void LogWindow::clearLog()
+{
+    clear();
+    setRowCount(1);
+    makeHeader();
+}
