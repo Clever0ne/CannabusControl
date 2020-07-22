@@ -35,6 +35,6 @@ void LogWindow::makeHeader()
 void LogWindow::clearLog()
 {
     clear();
-    setRowCount(1);
+    setRowCount(0);
     makeHeader();
 }

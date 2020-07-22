@@ -9,6 +9,8 @@ public:
     ~LogWindow();
 
 public slots:
-    void makeHeader();
     void clearLog();
+
+private:
+    void makeHeader();
 };

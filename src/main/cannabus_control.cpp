@@ -99,6 +99,8 @@ void CannabusControl::connectDevice()
 
     m_numberFramesReceived = 0;
 
+    m_canDevice->setConfigurationParameter(QCanBusDevice::BitRateKey, (QVariant)BITRATE_125000_BPS);
+
     connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
             this, &CannabusControl::processError);
 
@@ -298,7 +300,7 @@ void CannabusControl::processFramesReceived()
                 .arg(frame.timeStamp().microSeconds());
         QString slaveAddress = QString::number(cannabus::getAddressFromId(frameId));
         QString dataSize = "[" + QString::number(frame.payload().size()) + "]";
-        QString data(frame.payload().toHex(' '));
+        QString data(frame.payload().toHex(' ').toUpper());
         QString info = tr("[%1] %2")
                 .arg(fCodeInfo)
                 .arg(msgTypeInfo);
