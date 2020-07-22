@@ -50,7 +50,7 @@ void CannabusControl::initActionsConnections()
     connect(m_ui->actionQuit, &QAction::triggered,
             this, &QWidget::close);
 
-    connect(m_settingsDialog, &QDialog::accept, [this] {
+    connect(m_settingsDialog, &QDialog::accepted, [this] {
         disconnectDevice();
         m_ui->receivedMessagesLogWindow->clearLog();
     });
