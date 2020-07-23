@@ -35,7 +35,7 @@ FORMS += \
     src/main/settings_dialog.ui
 
 TRANSLATIONS += \
-    src/main/CannabusControl_ru_RU.ts
+    src/main/NarcoCANtrol_ru_RU.ts
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
