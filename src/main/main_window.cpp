@@ -317,7 +317,9 @@ void MainWindow::processFramesReceived()
         QString time = tr("%1.%2")
                 .arg(frame.timeStamp().seconds(), 4, 10, QLatin1Char(' '))
                 .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
-        QString slaveAddress = QString::number(cannabus::getAddressFromId(frameId));
+        QString slaveAddress = tr("%1 (0x%2)")
+                .arg(cannabus::getAddressFromId(frameId), 2, 10, QLatin1Char(' '))
+                .arg(cannabus::getAddressFromId(frameId), 2, 16, QLatin1Char('0'));
         QString dataSize = "[" + QString::number(frame.payload().size()) + "]";
         QString data(frame.payload().toHex(' ').toUpper());
         QString info;
@@ -336,9 +338,9 @@ void MainWindow::processFramesReceived()
         QStringList frameInfo = {
             count,
             time,
-            QString::number((uint32_t)fCode, 2).rightJustified(2, '0'),
+            "0b" + QString::number((uint32_t)fCode, 2).rightJustified(2, '0'),
             slaveAddress,
-            QString::number((uint32_t)msgType, 2).rightJustified(3, '0'),
+            "0b" + QString::number((uint32_t)msgType, 2).rightJustified(3, '0'),
             dataSize,
             data,
             info
