@@ -231,6 +231,8 @@ void MainWindow::processFramesReceived()
         // Обработка обычных кадров
         const uint32_t frameId = frame.frameId();
 
+        uint32_t slaveAddress = cannabus::getAddressFromId(frameId);
+
         cannabus::IdMsgTypes msgType = cannabus::getMsgTypeFromId(frameId);
         QString msgTypeInfo;
 
@@ -241,12 +243,12 @@ void MainWindow::processFramesReceived()
         {
             case cannabus::IdMsgTypes::HIGH_PRIO_MASTER:
             {
-                msgTypeInfo = tr("Master's high-priority");
+                msgTypeInfo = tr("Master's high-prio");
                 break;
             }
             case cannabus::IdMsgTypes::HIGH_PRIO_SLAVE:
             {
-                msgTypeInfo = tr("Slave's high-priority");
+                msgTypeInfo = tr("Slave's high-prio");
                 break;
             }
             case cannabus::IdMsgTypes::MASTER:
@@ -269,42 +271,42 @@ void MainWindow::processFramesReceived()
         {
             case cannabus::IdFCode::WRITE_REGS_RANGE:
             {
-                fCodeInfo = tr("Writing register's range");
+                fCodeInfo = tr("Writing regs range");
                 break;
             }
             case cannabus::IdFCode::WRITE_REGS_SERIES:
             {
-                fCodeInfo = tr("Writing register's series");
+                fCodeInfo = tr("Writing regs series");
                 break;
             }
             case cannabus::IdFCode::READ_REGS_RANGE:
             {
-                fCodeInfo = tr("Reading register's range");
+                fCodeInfo = tr("Reading regs range");
                 break;
             }
             case cannabus::IdFCode::READ_REGS_SERIES:
             {
-                fCodeInfo = tr("Reading register's series");
+                fCodeInfo = tr("Reading regs series");
                 break;
             }
             case cannabus::IdFCode::DEVICE_SPECIFIC1:
             {
-                fCodeInfo = tr("Device-specific function (1)");
+                fCodeInfo = tr("Device-specific (1)");
                 break;
             }
             case cannabus::IdFCode::DEVICE_SPECIFIC2:
             {
-                fCodeInfo = tr("Device-specific function (2)");
+                fCodeInfo = tr("Device-specific (2)");
                 break;
             }
             case cannabus::IdFCode::DEVICE_SPECIFIC3:
             {
-                fCodeInfo = tr("Device-specific function (3)");
+                fCodeInfo = tr("Device-specific (3)");
                 break;
             }
             case cannabus::IdFCode::DEVICE_SPECIFIC4:
             {
-                fCodeInfo = tr("Device-specific function (4)");
+                fCodeInfo = tr("Device-specific (4)");
                 break;
             }
             default:
@@ -317,9 +319,6 @@ void MainWindow::processFramesReceived()
         QString time = tr("%1.%2")
                 .arg(frame.timeStamp().seconds(), 4, 10, QLatin1Char(' '))
                 .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
-        QString slaveAddress = tr("%1 (0x%2)")
-                .arg(cannabus::getAddressFromId(frameId), 2, 10, QLatin1Char(' '))
-                .arg(cannabus::getAddressFromId(frameId), 2, 16, QLatin1Char('0'));
         QString dataSize = "[" + QString::number(frame.payload().size()) + "]";
         QString data(frame.payload().toHex(' ').toUpper());
         QString info;
@@ -327,21 +326,22 @@ void MainWindow::processFramesReceived()
         if (dataSize != "[0]")
         {
             info = tr("[%1] %2")
-                    .arg(fCodeInfo)
-                    .arg(msgTypeInfo);
+                    .arg(msgTypeInfo)
+                    .arg(fCodeInfo);
         }
         else
         {
-            info = tr("Error: incorrect request!");
+            info = tr("[Slave's response] Incorrect request");
         }
 
         QStringList frameInfo = {
-            count,
+            count.rightJustified(5, ' '),
             time,
-            "0b" + QString::number((uint32_t)fCode, 2).rightJustified(2, '0'),
-            slaveAddress,
-            "0b" + QString::number((uint32_t)msgType, 2).rightJustified(3, '0'),
-            dataSize,
+            "  0b" + QString::number((uint32_t)msgType, 2).rightJustified(2, '0'),
+            QString::number(slaveAddress, 10).rightJustified(2, ' ') +
+            + " (0x" + QString::number(slaveAddress, 16).rightJustified(2, '0').toUpper() + ")",
+            " 0b" + QString::number((uint32_t)fCode, 2).rightJustified(3, '0'),
+            dataSize.rightJustified(4, ' '),
             data,
             info
         };

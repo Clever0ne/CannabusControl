@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
+    <width>980</width>
     <height>720</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1280</width>
+    <width>980</width>
     <height>720</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1280</width>
+    <width>980</width>
     <height>720</height>
    </size>
   </property>
@@ -36,9 +36,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>110</y>
-      <width>1260</width>
-      <height>520</height>
+      <y>10</y>
+      <width>960</width>
+      <height>620</height>
      </rect>
     </property>
     <property name="title">
@@ -49,8 +49,8 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>1240</width>
-       <height>480</height>
+       <width>940</width>
+       <height>580</height>
       </rect>
      </property>
      <property name="font">
@@ -59,13 +59,28 @@
        <pointsize>8</pointsize>
       </font>
      </property>
+     <property name="lineWidth">
+      <number>1</number>
+     </property>
+     <property name="midLineWidth">
+      <number>1</number>
+     </property>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>25</number>
+     </attribute>
+     <attribute name="verticalHeaderMinimumSectionSize">
+      <number>20</number>
+     </attribute>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>30</number>
+     </attribute>
     </widget>
     <widget class="QLabel" name="busStatus">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>500</y>
-       <width>1240</width>
+       <y>600</y>
+       <width>940</width>
        <height>20</height>
       </rect>
      </property>
@@ -74,26 +89,13 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>1260</width>
-      <height>100</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Message Filter Settings</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1280</width>
+     <width>980</width>
      <height>26</height>
     </rect>
    </property>
