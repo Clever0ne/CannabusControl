@@ -100,6 +100,9 @@ void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
 void LogWindow::setMsgType(const cannabus::IdMsgTypes msgType)
 {
     m_msgType = tr("  0b%1").arg((uint32_t)msgType, 2, 2, QLatin1Char('0'));
+
+    QTableWidgetItem *item = new QTableWidgetItem(m_msgType);
+    setItem(m_currentRow, MSG_TYPE, item);
 }
 
 void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
