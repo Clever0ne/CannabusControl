@@ -44,7 +44,7 @@
     <property name="title">
      <string>Log Window</string>
     </property>
-    <widget class="LogWindow" name="receivedMessagesLogWindow">
+    <widget class="LogWindow" name="logWindow">
      <property name="geometry">
       <rect>
        <x>10</x>

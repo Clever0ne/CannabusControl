@@ -46,7 +46,7 @@ void MainWindow::initActionsConnections()
     connect(m_ui->actionDisconnect, &QAction::triggered,
             this, &MainWindow::disconnectDevice);
     connect(m_ui->actionClearLog, &QAction::triggered,
-            m_ui->receivedMessagesLogWindow, &LogWindow::clearLog);
+            m_ui->logWindow, &LogWindow::clearLog);
     connect(m_ui->actionQuit, &QAction::triggered,
             this, &QWidget::close);
 
@@ -99,7 +99,7 @@ void MainWindow::connectDevice()
         return;
     }
 
-    m_ui->receivedMessagesLogWindow->clearLog();
+    m_ui->logWindow->clearLog();
     m_numberFramesReceived = 0;
 
     connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
@@ -206,156 +206,30 @@ void MainWindow::processFramesReceived()
         // Обработка кадра ошибки
         if (frame.frameType() == QCanBusFrame::ErrorFrame)
         {
-            uint32_t row = m_ui->receivedMessagesLogWindow->rowCount();
-            m_ui->receivedMessagesLogWindow->insertRow(row);
+            uint32_t row = m_ui->logWindow->rowCount();
+            m_ui->logWindow->insertRow(row);
 
             QString count = QString::number(m_numberFramesReceived);
             QTableWidgetItem *countItem = new QTableWidgetItem(count);
-            m_ui->receivedMessagesLogWindow->setItem(row, 0, countItem);
+            m_ui->logWindow->setItem(row, 0, countItem);
 
             QString time = tr("%1.%2")
                     .arg(frame.timeStamp().seconds(), 4, 10, QLatin1Char(' '))
                     .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
             QTableWidgetItem *timeItem = new QTableWidgetItem(time);
-            m_ui->receivedMessagesLogWindow->setItem(row, 1, timeItem);
+            m_ui->logWindow->setItem(row, 1, timeItem);
 
             QString info = m_canDevice->interpretErrorFrame(frame);
             QTableWidgetItem *infoItem = new QTableWidgetItem(info);
-            m_ui->receivedMessagesLogWindow->setItem(row, 7, infoItem);
+            m_ui->logWindow->setItem(row, 7, infoItem);
 
-            m_ui->receivedMessagesLogWindow->scrollToBottom();
+            m_ui->logWindow->scrollToBottom();
 
             continue;
         }        
 
         // Обработка обычных кадров
-        const uint32_t frameId = frame.frameId();
-
-        uint32_t slaveAddress = cannabus::getAddressFromId(frameId);
-
-        cannabus::IdMsgTypes msgType = cannabus::getMsgTypeFromId(frameId);
-        QString msgTypeInfo;
-
-        cannabus::IdFCode fCode = cannabus::getFCodeFromId(frameId);
-        QString fCodeInfo;
-
-        switch (msgType)
-        {
-            case cannabus::IdMsgTypes::HIGH_PRIO_MASTER:
-            {
-                msgTypeInfo = tr("Master's high-prio");
-                break;
-            }
-            case cannabus::IdMsgTypes::HIGH_PRIO_SLAVE:
-            {
-                msgTypeInfo = tr("Slave's high-prio");
-                break;
-            }
-            case cannabus::IdMsgTypes::MASTER:
-            {
-                msgTypeInfo = tr("Master's request");
-                break;
-            }
-            case cannabus::IdMsgTypes::SLAVE:
-            {
-                msgTypeInfo = tr("Slave's response");
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
-
-        switch (fCode)
-        {
-            case cannabus::IdFCode::WRITE_REGS_RANGE:
-            {
-                fCodeInfo = tr("Writing regs range");
-                break;
-            }
-            case cannabus::IdFCode::WRITE_REGS_SERIES:
-            {
-                fCodeInfo = tr("Writing regs series");
-                break;
-            }
-            case cannabus::IdFCode::READ_REGS_RANGE:
-            {
-                fCodeInfo = tr("Reading regs range");
-                break;
-            }
-            case cannabus::IdFCode::READ_REGS_SERIES:
-            {
-                fCodeInfo = tr("Reading regs series");
-                break;
-            }
-            case cannabus::IdFCode::DEVICE_SPECIFIC1:
-            {
-                fCodeInfo = tr("Device-specific (1)");
-                break;
-            }
-            case cannabus::IdFCode::DEVICE_SPECIFIC2:
-            {
-                fCodeInfo = tr("Device-specific (2)");
-                break;
-            }
-            case cannabus::IdFCode::DEVICE_SPECIFIC3:
-            {
-                fCodeInfo = tr("Device-specific (3)");
-                break;
-            }
-            case cannabus::IdFCode::DEVICE_SPECIFIC4:
-            {
-                fCodeInfo = tr("Device-specific (4)");
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
-
-        QString count = QString::number(m_numberFramesReceived);
-        QString time = tr("%1.%2")
-                .arg(frame.timeStamp().seconds(), 4, 10, QLatin1Char(' '))
-                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
-        QString dataSize = "[" + QString::number(frame.payload().size()) + "]";
-        QString data(frame.payload().toHex(' ').toUpper());
-        QString info;
-
-        if (dataSize != "[0]")
-        {
-            info = tr("[%1] %2")
-                    .arg(msgTypeInfo)
-                    .arg(fCodeInfo);
-        }
-        else
-        {
-            info = tr("[Slave's response] Incorrect request");
-        }
-
-        QStringList frameInfo = {
-            count.rightJustified(5, ' '),
-            time,
-            "  0b" + QString::number((uint32_t)msgType, 2).rightJustified(2, '0'),
-            QString::number(slaveAddress, 10).rightJustified(2, ' ') +
-            + " (0x" + QString::number(slaveAddress, 16).rightJustified(2, '0').toUpper() + ")",
-            " 0b" + QString::number((uint32_t)fCode, 2).rightJustified(3, '0'),
-            dataSize.rightJustified(4, ' '),
-            data,
-            info
-        };
-
-        uint32_t row = m_ui->receivedMessagesLogWindow->rowCount();
-        m_ui->receivedMessagesLogWindow->insertRow(row);
-
-        for (uint8_t column = 0; column < m_ui->receivedMessagesLogWindow->columnCount(); column++)
-        {
-            QTableWidgetItem *item = new QTableWidgetItem(frameInfo.takeFirst());
-            m_ui->receivedMessagesLogWindow->setItem(row, column, item);
-        }
-
-        m_ui->receivedMessagesLogWindow->scrollToBottom();
+        m_ui->logWindow->addReceivedMessage(frame);
     }
 }
 
