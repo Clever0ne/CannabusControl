@@ -37,7 +37,6 @@ private slots:
 private:
     void initActionsConnections();
 
-    uint64_t m_numberFramesReceived = 0;
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;
     QLabel *m_written = nullptr;

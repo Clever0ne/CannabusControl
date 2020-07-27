@@ -100,7 +100,6 @@ void MainWindow::connectDevice()
     }
 
     m_ui->logWindow->clearLog();
-    m_numberFramesReceived = 0;
 
     connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
             this, &MainWindow::processError);
@@ -201,35 +200,14 @@ void MainWindow::processFramesReceived()
     {
         const QCanBusFrame frame = m_canDevice->readFrame();
 
-        m_numberFramesReceived++;
-
-        // Обработка кадра ошибки
-        if (frame.frameType() == QCanBusFrame::ErrorFrame)
+        if (frame.frameType() == QCanBusFrame::FrameType::ErrorFrame)
         {
-            uint32_t row = m_ui->logWindow->rowCount();
-            m_ui->logWindow->insertRow(row);
-
-            QString count = QString::number(m_numberFramesReceived);
-            QTableWidgetItem *countItem = new QTableWidgetItem(count);
-            m_ui->logWindow->setItem(row, 0, countItem);
-
-            QString time = tr("%1.%2")
-                    .arg(frame.timeStamp().seconds(), 4, 10, QLatin1Char(' '))
-                    .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
-            QTableWidgetItem *timeItem = new QTableWidgetItem(time);
-            m_ui->logWindow->setItem(row, 1, timeItem);
-
-            QString info = m_canDevice->interpretErrorFrame(frame);
-            QTableWidgetItem *infoItem = new QTableWidgetItem(info);
-            m_ui->logWindow->setItem(row, 7, infoItem);
-
-            m_ui->logWindow->scrollToBottom();
-
-            continue;
-        }        
+            const QString errorInfo = m_canDevice->interpretErrorFrame(frame);
+            m_ui->logWindow->processErrorFrame(frame, errorInfo);
+        }
 
         // Обработка обычных кадров
-        m_ui->logWindow->addReceivedMessage(frame);
+        m_ui->logWindow->processDataFrame(frame);
     }
 }
 
