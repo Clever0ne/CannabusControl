@@ -107,9 +107,8 @@ void LogWindow::setMsgType(const cannabus::IdMsgTypes msgType)
 
 void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
 {
-    m_slaveAddress = tr("%2 (0x%1)")
-            .arg(slaveAddress, 2, 16, QLatin1Char('0')).toUpper()
-            .arg(slaveAddress, 2, 10, QLatin1Char(' '));
+    m_slaveAddress = tr("%1 (0x").arg(slaveAddress, 2, 10, QLatin1Char(' ')) +
+            tr("%1)").arg(slaveAddress, 2, 16, QLatin1Char('0')).toUpper();
 
     QTableWidgetItem *item = new QTableWidgetItem(m_slaveAddress);
     setItem(m_currentRow, SLAVE_ADDRESS, item);
