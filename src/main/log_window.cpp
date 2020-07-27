@@ -93,7 +93,7 @@ void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
             .arg(seconds, 4, 10, QLatin1Char(' '))
             .arg(microseconds / 100, 4, 10, QLatin1Char('0'));
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_count);
+    QTableWidgetItem *item = new QTableWidgetItem(m_time);
     setItem(m_currentRow, TIME, item);
 }
 
@@ -108,7 +108,7 @@ void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
             .arg(slaveAddress, 2, 16, QLatin1Char('0')).toUpper()
             .arg(slaveAddress, 2, 10, QLatin1Char(' '));
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_count);
+    QTableWidgetItem *item = new QTableWidgetItem(m_slaveAddress);
     setItem(m_currentRow, SLAVE_ADDRESS, item);
 }
 
@@ -116,7 +116,7 @@ void LogWindow::setFCode(const cannabus::IdFCode fCode)
 {
     m_fCode = tr(" 0b%1").arg((uint32_t)fCode, 3, 2, QLatin1Char('0'));
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_count);
+    QTableWidgetItem *item = new QTableWidgetItem(m_fCode);
     setItem(m_currentRow, F_CODE, item);
 }
 
@@ -124,7 +124,7 @@ void LogWindow::setDataSize(const uint32_t dataSize)
 {
     m_dataSize = tr(" [%1]").arg(dataSize);
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_count);
+    QTableWidgetItem *item = new QTableWidgetItem(m_dataSize);
     setItem(m_currentRow, DATA_SIZE, item);
 }
 
@@ -132,7 +132,7 @@ void LogWindow::setData(const QByteArray data)
 {
     m_data = data.toHex(' ').toUpper();
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_count);
+    QTableWidgetItem *item = new QTableWidgetItem(m_data);
     setItem(m_currentRow, DATA, item);
 }
 
@@ -226,7 +226,7 @@ void LogWindow::setMsgInfo(const cannabus::IdMsgTypes msgType, const cannabus::I
         m_msgInfo = tr("[%1] %2").arg(msgTypeInfo).arg(fCodeInfo);
     }
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_count);
+    QTableWidgetItem *item = new QTableWidgetItem(m_msgInfo);
     setItem(m_currentRow, MSG_INFO, item);
 }
 
@@ -234,6 +234,6 @@ void LogWindow::setMsgInfo(const QString errorInfo)
 {
     m_msgInfo = errorInfo;
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_count);
+    QTableWidgetItem *item = new QTableWidgetItem(m_msgInfo);
     setItem(m_currentRow, MSG_INFO, item);
 }
