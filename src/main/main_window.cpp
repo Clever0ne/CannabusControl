@@ -52,6 +52,17 @@ void MainWindow::initActionsConnections()
         connectDevice();
     });
 
+    connect(m_ui->filterHighPrioMaster, &QCheckBox::stateChanged,
+            this, &MainWindow::setHighPrioMasterFiltrated);
+    connect(m_ui->filterHighPrioSlave, &QCheckBox::stateChanged,
+            this, &MainWindow::setHighPrioSlaveFiltrated);
+    connect(m_ui->filterMaster, &QCheckBox::stateChanged,
+            this, &MainWindow::setMasterFiltrated);
+    connect(m_ui->filterSlave, &QCheckBox::stateChanged,
+            this, &MainWindow::setSlaveFiltrated);
+    connect(m_ui->filterAllMsgTypes, &QCheckBox::stateChanged,
+            this, &MainWindow::setAllMsgTypesFiltrated);
+
     connect(m_ui->filterReadRegsRange, &QCheckBox::stateChanged,
             this, &MainWindow::setReadRegsRangeFiltrated);
     connect(m_ui->filterReadRegsSeries, &QCheckBox::stateChanged,
@@ -68,7 +79,7 @@ void MainWindow::initActionsConnections()
             this, &MainWindow::setDeviceSpecificFiltrated_3);
     connect(m_ui->filterDeviceSpecific_4, &QCheckBox::stateChanged,
             this, &MainWindow::setDeviceSpecificFiltrated_4);
-    connect(m_ui->filterAllMessageTypes, &QCheckBox::stateChanged,
+    connect(m_ui->filterAllFCodes, &QCheckBox::stateChanged,
             this, &MainWindow::setAllFCodesFiltrated);
 
     connect(m_busStatusTimer, &QTimer::timeout,
@@ -267,9 +278,47 @@ void MainWindow::busStatus()
     }
 }
 
+void MainWindow::setAllMsgTypesFiltrated()
+{
+    const bool isFiltrated = m_ui->filterAllMsgTypes->isChecked();
+
+    m_ui->filterHighPrioMaster->setChecked(isFiltrated);
+    m_ui->filterHighPrioSlave->setChecked(isFiltrated);
+    m_ui->filterMaster->setChecked(isFiltrated);
+    m_ui->filterSlave->setChecked(isFiltrated);
+}
+
+void MainWindow::setHighPrioMasterFiltrated()
+{
+    const bool isFiltrated = m_ui->filterHighPrioMaster->isChecked();
+
+    m_ui->logWindow->setMsgTypeFiltrated(cannabus::IdMsgTypes::HIGH_PRIO_MASTER, isFiltrated);
+}
+
+void MainWindow::setHighPrioSlaveFiltrated()
+{
+    const bool isFiltrated = m_ui->filterHighPrioSlave->isChecked();
+
+    m_ui->logWindow->setMsgTypeFiltrated(cannabus::IdMsgTypes::HIGH_PRIO_SLAVE, isFiltrated);
+}
+
+void MainWindow::setMasterFiltrated()
+{
+    const bool isFiltrated = m_ui->filterMaster->isChecked();
+
+    m_ui->logWindow->setMsgTypeFiltrated(cannabus::IdMsgTypes::MASTER, isFiltrated);
+}
+
+void MainWindow::setSlaveFiltrated()
+{
+    const bool isFiltrated = m_ui->filterSlave->isChecked();
+
+    m_ui->logWindow->setMsgTypeFiltrated(cannabus::IdMsgTypes::SLAVE, isFiltrated);
+}
+
 void MainWindow::setAllFCodesFiltrated()
 {
-    const bool isFiltrated = m_ui->filterAllMessageTypes->isChecked();
+    const bool isFiltrated = m_ui->filterAllFCodes->isChecked();
 
     m_ui->filterWriteRegsRange->setChecked(isFiltrated);
     m_ui->filterWriteRegsSeries->setChecked(isFiltrated);

@@ -28,6 +28,12 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
+    void setAllMsgTypesFiltrated();
+    void setHighPrioMasterFiltrated();
+    void setHighPrioSlaveFiltrated();
+    void setMasterFiltrated();
+    void setSlaveFiltrated();
+
     void setAllFCodesFiltrated();
     void setReadRegsRangeFiltrated();
     void setReadRegsSeriesFiltrated();

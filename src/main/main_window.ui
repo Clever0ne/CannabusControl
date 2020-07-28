@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1190</width>
+    <width>1180</width>
     <height>720</height>
    </rect>
   </property>
@@ -82,24 +82,24 @@
      <rect>
       <x>980</x>
       <y>10</y>
-      <width>200</width>
+      <width>190</width>
       <height>620</height>
      </rect>
     </property>
     <property name="title">
      <string>Message Filter Settings</string>
     </property>
-    <widget class="QGroupBox" name="enabledMessageTypesBox">
+    <widget class="QGroupBox" name="filterFCodesBox">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>360</y>
-       <width>180</width>
+       <width>170</width>
        <height>250</height>
       </rect>
      </property>
      <property name="title">
-      <string>Message Types</string>
+      <string>F-Codes</string>
      </property>
      <widget class="QCheckBox" name="filterReadRegsRange">
       <property name="geometry">
@@ -149,7 +149,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="filterAllMessageTypes">
+     <widget class="QCheckBox" name="filterAllFCodes">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -159,7 +159,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>All Message Types</string>
+       <string>All F-Codes</string>
       </property>
       <property name="checked">
        <bool>true</bool>
@@ -249,6 +249,102 @@
       </property>
      </widget>
     </widget>
+    <widget class="QGroupBox" name="filterMsgTypesBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>200</y>
+       <width>170</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Message Types</string>
+     </property>
+     <widget class="QCheckBox" name="filterMaster">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>95</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Master's Request</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterSlave">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>120</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Slave's Response</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterAllMsgTypes">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>140</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>All Message Types</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterHighPrioMaster">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>45</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Master's High-prio</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterHighPrioSlave">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>70</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Slave's High-prio</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -256,7 +352,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1190</width>
+     <width>1180</width>
      <height>26</height>
     </rect>
    </property>
