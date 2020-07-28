@@ -22,14 +22,24 @@ public:
     explicit LogWindow(QWidget *parent = nullptr);
     ~LogWindow();
 
+    typedef QPair<cannabus::IdFCode, bool> MsgFCodeSettings;
+
+    struct Filter {
+        QList<MsgFCodeSettings> msgFCodeSettings;
+    };
+
+    void setMsgFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated);
+
     void processDataFrame(const QCanBusFrame &frame);
     void processErrorFrame(const QCanBusFrame &frame, const QString errorInfo);
 
 public slots:
     void clearLog();
+    void setDefaultMessageFilterSettings();
 
 private:
     void makeHeader();
+    bool isDataFrameMustBeProcessed(const QCanBusFrame &frame);
     void setCount();
     void setTime(const uint64_t seconds, const uint64_t microseconds);
     void setMsgType(const cannabus::IdMsgTypes msgType);
@@ -39,6 +49,8 @@ private:
     void setData(const QByteArray data);
     void setMsgInfo(const cannabus::IdMsgTypes msgType, const cannabus::IdFCode fCode, const uint32_t dataSize);
     void setMsgInfo(const QString errorInfo);
+
+    Filter m_filter;
 
     uint64_t m_numberFramesReceived = 0;
     uint64_t m_currentRow = 0;

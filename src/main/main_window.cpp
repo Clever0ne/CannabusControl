@@ -23,9 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_status = new QLabel;
     m_ui->statusBar->addPermanentWidget(m_status);
 
-    m_written = new QLabel;
-    m_ui->statusBar->addWidget(m_written);
-
     initActionsConnections();
 }
 
@@ -40,9 +37,9 @@ void MainWindow::initActionsConnections()
     m_ui->actionDisconnect->setEnabled(false);
 
     connect(m_ui->actionSettings, &QAction::triggered,
-        m_settingsDialog, &QDialog::show);
+            m_settingsDialog, &QDialog::show);
     connect(m_ui->actionConnect, &QAction::triggered,
-    this, &MainWindow::connectDevice);
+            this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered,
             this, &MainWindow::disconnectDevice);
     connect(m_ui->actionClearLog, &QAction::triggered,
@@ -54,6 +51,19 @@ void MainWindow::initActionsConnections()
         disconnectDevice();
         connectDevice();
     });
+
+    connect(m_ui->filterReadRegsRange, &QCheckBox::stateChanged,
+            this, &MainWindow::setReadRegsRangeFiltrated);
+    connect(m_ui->filterReadRegsSeries, &QCheckBox::stateChanged,
+            this, &MainWindow::setReadRegsSeriesFiltrated);
+    connect(m_ui->filterWriteRegsRange, &QCheckBox::stateChanged,
+            this, &MainWindow::setWriteRegsRangeFiltrated);
+    connect(m_ui->filterWriteRegsSeries, &QCheckBox::stateChanged,
+            this, &MainWindow::setWriteRegsSeriesFiltrated);
+    connect(m_ui->filterDeviceSpecific, &QCheckBox::stateChanged,
+            this, &MainWindow::setDeviceSpecificFiltrated);
+    connect(m_ui->filterAllMessageTypes, &QCheckBox::stateChanged,
+            this, &MainWindow::setAllMessageTypesFiltrated);
 
     connect(m_busStatusTimer, &QTimer::timeout,
             this, &MainWindow::busStatus);
@@ -93,7 +103,7 @@ void MainWindow::connectDevice()
 
     if (m_canDevice == nullptr)
     {
-        m_status->setText(tr("Error creating device '%1': '%2'")
+        m_status->setText(tr("Error creating device '%1': %2")
                         .arg(settings.pluginName)
                         .arg(errorString));
         return;
@@ -200,6 +210,7 @@ void MainWindow::processFramesReceived()
     {
         const QCanBusFrame frame = m_canDevice->readFrame();
 
+        // Обработка кадров ошибок
         if (frame.frameType() == QCanBusFrame::FrameType::ErrorFrame)
         {
             const QString errorInfo = m_canDevice->interpretErrorFrame(frame);
@@ -250,3 +261,51 @@ void MainWindow::busStatus()
     }
 }
 
+void MainWindow::setAllMessageTypesFiltrated()
+{
+    const bool isFiltrated = m_ui->filterAllMessageTypes->isChecked();
+
+    m_ui->filterWriteRegsRange->setChecked(isFiltrated);
+    m_ui->filterWriteRegsSeries->setChecked(isFiltrated);
+    m_ui->filterReadRegsRange->setChecked(isFiltrated);
+    m_ui->filterReadRegsSeries->setChecked(isFiltrated);
+    m_ui->filterDeviceSpecific->setChecked(isFiltrated);
+}
+
+void MainWindow::setReadRegsRangeFiltrated()
+{
+    const bool isFiltrated = m_ui->filterReadRegsRange->isChecked();
+
+    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::READ_REGS_RANGE, isFiltrated);
+}
+
+void MainWindow::setReadRegsSeriesFiltrated()
+{
+    const bool isFiltrated = m_ui->filterReadRegsSeries->isChecked();
+
+    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::READ_REGS_SERIES, isFiltrated);
+}
+
+void MainWindow::setWriteRegsRangeFiltrated()
+{
+    const bool isFiltrated = m_ui->filterWriteRegsRange->isChecked();
+
+    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_RANGE, isFiltrated);
+}
+
+void MainWindow::setWriteRegsSeriesFiltrated()
+{
+    const bool isFiltrated = m_ui->filterWriteRegsSeries->isChecked();
+
+    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_SERIES, isFiltrated);
+}
+
+void MainWindow::setDeviceSpecificFiltrated()
+{
+    const bool isFiltrated = m_ui->filterDeviceSpecific->isChecked();
+
+    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC1, isFiltrated);
+    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC2, isFiltrated);
+    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC3, isFiltrated);
+    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC4, isFiltrated);
+}

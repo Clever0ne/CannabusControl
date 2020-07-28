@@ -3,11 +3,13 @@
 
 LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
 {    
-     makeHeader();
+    makeHeader();
 
-     horizontalHeader()->setStretchLastSection(true);
-     horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-     verticalHeader()->hide();
+    horizontalHeader()->setStretchLastSection(true);
+    horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    verticalHeader()->hide();
+
+    setDefaultMessageFilterSettings();
 }
 
 LogWindow::~LogWindow()
@@ -46,6 +48,11 @@ void LogWindow::clearLog()
 void LogWindow::processDataFrame(const QCanBusFrame &frame)
 {
     m_numberFramesReceived++;
+
+    if (isDataFrameMustBeProcessed(frame) == false)
+    {
+        return;
+    }
 
     m_currentRow = rowCount();
     insertRow(m_currentRow);
@@ -238,4 +245,70 @@ void LogWindow::setMsgInfo(const QString errorInfo)
 
     QTableWidgetItem *item = new QTableWidgetItem(m_msgInfo);
     setItem(m_currentRow, MSG_INFO, item);
+}
+
+void LogWindow::setDefaultMessageFilterSettings()
+{
+    m_filter.msgFCodeSettings.clear();
+
+    MsgFCodeSettings settings;
+
+    settings.first = cannabus::IdFCode::READ_REGS_RANGE;
+    settings.second = true;
+    m_filter.msgFCodeSettings.append(settings);
+
+    settings.first = cannabus::IdFCode::READ_REGS_SERIES;
+    settings.second = true;
+    m_filter.msgFCodeSettings.append(settings);
+
+    settings.first = cannabus::IdFCode::WRITE_REGS_RANGE;
+    settings.second = true;
+    m_filter.msgFCodeSettings.append(settings);
+
+    settings.first = cannabus::IdFCode::WRITE_REGS_SERIES;
+    settings.second = true;
+    m_filter.msgFCodeSettings.append(settings);
+
+    settings.first = cannabus::IdFCode::DEVICE_SPECIFIC1;
+    settings.second = true;
+    m_filter.msgFCodeSettings.append(settings);
+
+    settings.first = cannabus::IdFCode::DEVICE_SPECIFIC2;
+    settings.second = true;
+    m_filter.msgFCodeSettings.append(settings);
+
+    settings.first = cannabus::IdFCode::DEVICE_SPECIFIC3;
+    settings.second = true;
+    m_filter.msgFCodeSettings.append(settings);
+
+    settings.first = cannabus::IdFCode::DEVICE_SPECIFIC4;
+    settings.second = true;
+    m_filter.msgFCodeSettings.append(settings);
+}
+
+bool LogWindow::isDataFrameMustBeProcessed(const QCanBusFrame &frame)
+{
+    const uint32_t frameId = frame.frameId();
+    const cannabus::IdFCode fCode = cannabus::getFCodeFromId(frameId);
+
+    for (const MsgFCodeSettings &settings : qAsConst(m_filter.msgFCodeSettings))
+    {
+        if (settings.first == fCode)
+        {
+            return settings.second;
+        }
+    }
+
+    return false;
+}
+
+void LogWindow::setMsgFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated)
+{
+    for (MsgFCodeSettings &settings : m_filter.msgFCodeSettings)
+    {
+        if (settings.first == fCode)
+        {
+            settings.second = isFiltrated;
+        }
+    }
 }

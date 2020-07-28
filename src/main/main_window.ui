@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>980</width>
+    <width>1190</width>
     <height>720</height>
    </rect>
   </property>
@@ -15,18 +15,6 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>980</width>
-    <height>720</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>980</width>
-    <height>720</height>
-   </size>
   </property>
   <property name="windowTitle">
    <string>NarcoCANtrol</string>
@@ -89,13 +77,138 @@
      </property>
     </widget>
    </widget>
+   <widget class="QGroupBox" name="messageFilterSettingsBox">
+    <property name="geometry">
+     <rect>
+      <x>980</x>
+      <y>10</y>
+      <width>200</width>
+      <height>620</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Message Filter Settings</string>
+    </property>
+    <widget class="QGroupBox" name="enabledMessageTypesBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>410</y>
+       <width>180</width>
+       <height>200</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Message Types</string>
+     </property>
+     <widget class="QCheckBox" name="filterReadRegsRange">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>110</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Read Regs Range</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterReadRegsSeries">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>140</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Read Regs Series</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterDeviceSpecific">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>170</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Device-specific</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterAllMessageTypes">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>140</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>All Message Types</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterWriteRegsRange">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>50</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Write Regs Range</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="filterWriteRegsSeries">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>80</y>
+        <width>130</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Write Regs Series</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>980</width>
+     <width>1190</width>
      <height>26</height>
     </rect>
    </property>

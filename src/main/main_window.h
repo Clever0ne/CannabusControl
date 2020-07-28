@@ -28,6 +28,13 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
+    void setAllMessageTypesFiltrated();
+    void setReadRegsRangeFiltrated();
+    void setReadRegsSeriesFiltrated();
+    void setWriteRegsRangeFiltrated();
+    void setWriteRegsSeriesFiltrated();
+    void setDeviceSpecificFiltrated();
+
     void connectDevice();
     void disconnectDevice();
     void busStatus();
@@ -39,7 +46,6 @@ private:
 
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;
-    QLabel *m_written = nullptr;
     SettingsDialog *m_settingsDialog = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
