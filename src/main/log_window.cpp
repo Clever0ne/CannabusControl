@@ -278,12 +278,12 @@ bool LogWindow::isDataFrameMustBeProcessed(const QCanBusFrame &frame)
 
 void LogWindow::setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated)
 {
-    m_filter.msgTypeSettings[slaveAddress] = isFiltrated;
+    m_filter.slaveAddressSettings[slaveAddress] = isFiltrated;
 }
 
 bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
 {
-    return m_filter.msgTypeSettings[slaveAddress];
+    return m_filter.slaveAddressSettings[slaveAddress];
 }
 
 void LogWindow::setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated)
