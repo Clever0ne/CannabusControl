@@ -60,10 +60,16 @@ void MainWindow::initActionsConnections()
             this, &MainWindow::setWriteRegsRangeFiltrated);
     connect(m_ui->filterWriteRegsSeries, &QCheckBox::stateChanged,
             this, &MainWindow::setWriteRegsSeriesFiltrated);
-    connect(m_ui->filterDeviceSpecific, &QCheckBox::stateChanged,
-            this, &MainWindow::setDeviceSpecificFiltrated);
+    connect(m_ui->filterDeviceSpecific_1, &QCheckBox::stateChanged,
+            this, &MainWindow::setDeviceSpecificFiltrated_1);
+    connect(m_ui->filterDeviceSpecific_2, &QCheckBox::stateChanged,
+            this, &MainWindow::setDeviceSpecificFiltrated_2);
+    connect(m_ui->filterDeviceSpecific_3, &QCheckBox::stateChanged,
+            this, &MainWindow::setDeviceSpecificFiltrated_3);
+    connect(m_ui->filterDeviceSpecific_4, &QCheckBox::stateChanged,
+            this, &MainWindow::setDeviceSpecificFiltrated_4);
     connect(m_ui->filterAllMessageTypes, &QCheckBox::stateChanged,
-            this, &MainWindow::setAllMessageTypesFiltrated);
+            this, &MainWindow::setAllFCodesFiltrated);
 
     connect(m_busStatusTimer, &QTimer::timeout,
             this, &MainWindow::busStatus);
@@ -261,7 +267,7 @@ void MainWindow::busStatus()
     }
 }
 
-void MainWindow::setAllMessageTypesFiltrated()
+void MainWindow::setAllFCodesFiltrated()
 {
     const bool isFiltrated = m_ui->filterAllMessageTypes->isChecked();
 
@@ -269,43 +275,64 @@ void MainWindow::setAllMessageTypesFiltrated()
     m_ui->filterWriteRegsSeries->setChecked(isFiltrated);
     m_ui->filterReadRegsRange->setChecked(isFiltrated);
     m_ui->filterReadRegsSeries->setChecked(isFiltrated);
-    m_ui->filterDeviceSpecific->setChecked(isFiltrated);
+    m_ui->filterDeviceSpecific_1->setChecked(isFiltrated);
+    m_ui->filterDeviceSpecific_2->setChecked(isFiltrated);
+    m_ui->filterDeviceSpecific_3->setChecked(isFiltrated);
+    m_ui->filterDeviceSpecific_4->setChecked(isFiltrated);
 }
 
 void MainWindow::setReadRegsRangeFiltrated()
 {
     const bool isFiltrated = m_ui->filterReadRegsRange->isChecked();
 
-    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::READ_REGS_RANGE, isFiltrated);
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_RANGE, isFiltrated);
 }
 
 void MainWindow::setReadRegsSeriesFiltrated()
 {
     const bool isFiltrated = m_ui->filterReadRegsSeries->isChecked();
 
-    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::READ_REGS_SERIES, isFiltrated);
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_SERIES, isFiltrated);
 }
 
 void MainWindow::setWriteRegsRangeFiltrated()
 {
     const bool isFiltrated = m_ui->filterWriteRegsRange->isChecked();
 
-    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_RANGE, isFiltrated);
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_RANGE, isFiltrated);
 }
 
 void MainWindow::setWriteRegsSeriesFiltrated()
 {
     const bool isFiltrated = m_ui->filterWriteRegsSeries->isChecked();
 
-    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_SERIES, isFiltrated);
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_SERIES, isFiltrated);
 }
 
-void MainWindow::setDeviceSpecificFiltrated()
+void MainWindow::setDeviceSpecificFiltrated_1()
 {
-    const bool isFiltrated = m_ui->filterDeviceSpecific->isChecked();
+    const bool isFiltrated = m_ui->filterDeviceSpecific_1->isChecked();
 
-    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC1, isFiltrated);
-    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC2, isFiltrated);
-    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC3, isFiltrated);
-    m_ui->logWindow->setMsgFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC4, isFiltrated);
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC1, isFiltrated);
+}
+
+void MainWindow::setDeviceSpecificFiltrated_2()
+{
+    const bool isFiltrated = m_ui->filterDeviceSpecific_2->isChecked();
+
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC2, isFiltrated);
+}
+
+void MainWindow::setDeviceSpecificFiltrated_3()
+{
+    const bool isFiltrated = m_ui->filterDeviceSpecific_3->isChecked();
+
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC3, isFiltrated);
+}
+
+void MainWindow::setDeviceSpecificFiltrated_4()
+{
+    const bool isFiltrated = m_ui->filterDeviceSpecific_4->isChecked();
+
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC4, isFiltrated);
 }

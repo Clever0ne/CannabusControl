@@ -1,5 +1,6 @@
 #include "log_window.h"
 #include <QHeaderView>
+#include <algorithm>
 
 LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
 {    
@@ -249,66 +250,58 @@ void LogWindow::setMsgInfo(const QString errorInfo)
 
 void LogWindow::setDefaultMessageFilterSettings()
 {
-    m_filter.msgFCodeSettings.clear();
-
-    MsgFCodeSettings settings;
-
-    settings.first = cannabus::IdFCode::READ_REGS_RANGE;
-    settings.second = true;
-    m_filter.msgFCodeSettings.append(settings);
-
-    settings.first = cannabus::IdFCode::READ_REGS_SERIES;
-    settings.second = true;
-    m_filter.msgFCodeSettings.append(settings);
-
-    settings.first = cannabus::IdFCode::WRITE_REGS_RANGE;
-    settings.second = true;
-    m_filter.msgFCodeSettings.append(settings);
-
-    settings.first = cannabus::IdFCode::WRITE_REGS_SERIES;
-    settings.second = true;
-    m_filter.msgFCodeSettings.append(settings);
-
-    settings.first = cannabus::IdFCode::DEVICE_SPECIFIC1;
-    settings.second = true;
-    m_filter.msgFCodeSettings.append(settings);
-
-    settings.first = cannabus::IdFCode::DEVICE_SPECIFIC2;
-    settings.second = true;
-    m_filter.msgFCodeSettings.append(settings);
-
-    settings.first = cannabus::IdFCode::DEVICE_SPECIFIC3;
-    settings.second = true;
-    m_filter.msgFCodeSettings.append(settings);
-
-    settings.first = cannabus::IdFCode::DEVICE_SPECIFIC4;
-    settings.second = true;
-    m_filter.msgFCodeSettings.append(settings);
+    std::fill(m_filter.fCodeSettings, m_filter.fCodeSettings
+              + sizeof(m_filter.fCodeSettings) / sizeof(m_filter.fCodeSettings[0]), true);
+    std::fill(m_filter.msgTypeSettings, m_filter.msgTypeSettings
+              + sizeof(m_filter.msgTypeSettings) / sizeof(m_filter.msgTypeSettings[0]), true);
+    std::fill(m_filter.slaveAddressSettings, m_filter.slaveAddressSettings
+              + sizeof(m_filter.slaveAddressSettings) / sizeof(m_filter.slaveAddressSettings[0]), true);
 }
 
 bool LogWindow::isDataFrameMustBeProcessed(const QCanBusFrame &frame)
 {
+    bool isFiltrated = true;
+
     const uint32_t frameId = frame.frameId();
+
+    const uint32_t slaveAddress = cannabus::getAddressFromId(frameId);
+    isFiltrated &= isSlaveAddressFiltrated(slaveAddress);
+
+    const cannabus::IdMsgTypes msgType = cannabus::getMsgTypeFromId(frameId);
+    isFiltrated &= isMsgTypeFiltrated(msgType);
+
     const cannabus::IdFCode fCode = cannabus::getFCodeFromId(frameId);
+    isFiltrated &= isFCodeFiltrated(fCode);
 
-    for (const MsgFCodeSettings &settings : qAsConst(m_filter.msgFCodeSettings))
-    {
-        if (settings.first == fCode)
-        {
-            return settings.second;
-        }
-    }
-
-    return false;
+    return isFiltrated;
 }
 
-void LogWindow::setMsgFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated)
+void LogWindow::setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated)
 {
-    for (MsgFCodeSettings &settings : m_filter.msgFCodeSettings)
-    {
-        if (settings.first == fCode)
-        {
-            settings.second = isFiltrated;
-        }
-    }
+    m_filter.msgTypeSettings[slaveAddress] = isFiltrated;
+}
+
+bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
+{
+    return m_filter.msgTypeSettings[slaveAddress];
+}
+
+void LogWindow::setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated)
+{
+    m_filter.msgTypeSettings[(uint32_t)msgType] = isFiltrated;
+}
+
+bool LogWindow::isMsgTypeFiltrated(const cannabus::IdMsgTypes msgType)
+{
+    return m_filter.msgTypeSettings[(uint32_t)msgType];
+}
+
+void LogWindow::setFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated)
+{
+    m_filter.fCodeSettings[(uint32_t)fCode] = isFiltrated;
+}
+
+bool LogWindow::isFCodeFiltrated(const cannabus::IdFCode fCode)
+{
+    return m_filter.fCodeSettings[(uint32_t)fCode];
 }

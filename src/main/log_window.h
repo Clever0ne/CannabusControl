@@ -22,13 +22,20 @@ public:
     explicit LogWindow(QWidget *parent = nullptr);
     ~LogWindow();
 
-    typedef QPair<cannabus::IdFCode, bool> MsgFCodeSettings;
-
     struct Filter {
-        QList<MsgFCodeSettings> msgFCodeSettings;
+        bool msgTypeSettings[(uint32_t)cannabus::IdMsgTypes::SLAVE + 1];
+        bool fCodeSettings[(uint32_t)cannabus::IdFCode::DEVICE_SPECIFIC4 + 1];
+        bool slaveAddressSettings[(uint32_t)cannabus::IdAddresses::MAX_SLAVE_ADDRESS + 1];
     };
 
-    void setMsgFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated);
+    void setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated);
+    bool isMsgTypeFiltrated(const cannabus::IdMsgTypes msgType);
+
+    void setFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated);
+    bool isFCodeFiltrated(const cannabus::IdFCode fCode);
+
+    void setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated);
+    bool isSlaveAddressFiltrated(const uint32_t slaveAddress);
 
     void processDataFrame(const QCanBusFrame &frame);
     void processErrorFrame(const QCanBusFrame &frame, const QString errorInfo);
@@ -50,8 +57,6 @@ private:
     void setMsgInfo(const cannabus::IdMsgTypes msgType, const cannabus::IdFCode fCode, const uint32_t dataSize);
     void setMsgInfo(const QString errorInfo);
 
-    Filter m_filter;
-
     uint64_t m_numberFramesReceived = 0;
     uint64_t m_currentRow = 0;
 
@@ -63,4 +68,6 @@ private:
     QString m_dataSize;
     QString m_data;
     QString m_msgInfo;
+
+    Filter m_filter;
 };
