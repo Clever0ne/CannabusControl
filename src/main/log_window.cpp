@@ -304,7 +304,7 @@ bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
 
 void LogWindow::setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated)
 {
-    m_filter.slaveAddressSettings.insert(slaveAddress, isFiltrated);
+    m_filter.slaveAddressSettings.replace(slaveAddress, isFiltrated);
 }
 
 bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
@@ -314,7 +314,7 @@ bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
 
 void LogWindow::setMsgTypeFiltrated(const IdMsgTypes msgType, const bool isFiltrated)
 {
-    m_filter.msgTypeSettings.insert((uint32_t)msgType, isFiltrated);
+    m_filter.msgTypeSettings.replace((uint32_t)msgType, isFiltrated);
 }
 
 bool LogWindow::isMsgTypeFiltrated(const IdMsgTypes msgType)
@@ -324,7 +324,7 @@ bool LogWindow::isMsgTypeFiltrated(const IdMsgTypes msgType)
 
 void LogWindow::setFCodeFiltrated(const IdFCode fCode, const bool isFiltrated)
 {
-    m_filter.fCodeSettings.insert((uint32_t)fCode, isFiltrated);
+    m_filter.fCodeSettings.replace((uint32_t)fCode, isFiltrated);
 }
 
 bool LogWindow::isFCodeFiltrated(const IdFCode fCode)
