@@ -297,9 +297,9 @@ void MainWindow::busStatus()
             status = "Unknown.";
             break;
         }
-
-        m_ui->busStatus->setText(tr("CAN bus status: %1.").arg(status));
     }
+
+    m_ui->busStatus->setText(tr("CAN bus status: %1.").arg(status));
 }
 
 void MainWindow::setAllMsgTypesFiltrated()

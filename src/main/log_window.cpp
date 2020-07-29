@@ -91,20 +91,20 @@ void LogWindow::setCount()
     m_count = tr("%1").arg(m_numberFramesReceived, 6, 10, QLatin1Char(' '));
 
     auto item = new QTableWidgetItem(m_count);
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     setItem(m_currentRow, COUNT, item);
 }
 
 void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
 {
     // Выводим время в секундах с шириной поля в 9 символов
-    // в формате '1234.1234'
+    // в формате '  12.3456'
     m_time = tr("%1.%2")
             .arg(seconds, 4, 10, QLatin1Char(' '))
             .arg(microseconds / 100, 4, 10, QLatin1Char('0'));
 
     auto item = new QTableWidgetItem(m_time);
-    item->setTextAlignment(Qt::AlignRight);
+    item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     setItem(m_currentRow, TIME, item);
 }
 
@@ -162,7 +162,7 @@ void LogWindow::setData(const QByteArray data)
     m_data = data.toHex(' ').toUpper();
 
     auto item = new QTableWidgetItem(m_data);
-    item->setTextAlignment(Qt::AlignLeft);
+    item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     setItem(m_currentRow, DATA, item);
 }
 
@@ -261,7 +261,7 @@ void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const 
     }
 
     auto item = new QTableWidgetItem(m_msgInfo);
-    item->setTextAlignment(Qt::AlignLeft);
+    item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     setItem(m_currentRow, MSG_INFO, item);
 }
 
@@ -273,7 +273,7 @@ void LogWindow::setMsgInfo(const QString errorInfo)
     m_msgInfo = errorInfo;
 
     auto item = new QTableWidgetItem(m_msgInfo);
-    item->setTextAlignment(Qt::AlignLeft);
+    item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     setItem(m_currentRow, MSG_INFO, item);
 }
 
