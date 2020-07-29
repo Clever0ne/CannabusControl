@@ -20,12 +20,16 @@ class LogWindow : public QTableWidget
 {
 public:
     explicit LogWindow(QWidget *parent = nullptr);
-    ~LogWindow();
+    ~LogWindow() = default;
+
+    static constexpr uint32_t id_msg_types_size = 4;
+    static constexpr uint32_t id_f_code_size = 8;
+    static constexpr uint32_t id_addresses_size = 61;
 
     struct Filter {
-        bool msgTypeSettings[(uint32_t)cannabus::IdMsgTypes::SLAVE + 1];
-        bool fCodeSettings[(uint32_t)cannabus::IdFCode::DEVICE_SPECIFIC4 + 1];
-        bool slaveAddressSettings[(uint32_t)cannabus::IdAddresses::MAX_SLAVE_ADDRESS + 1];
+        QVector<bool> msgTypeSettings[id_msg_types_size];
+        QVector<bool> fCodeSettings[id_f_code_size];
+        QVector<bool> slaveAddressSettings[id_addresses_size];
     };
 
     void setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated);
@@ -46,7 +50,7 @@ public slots:
 
 private:
     void makeHeader();
-    bool isDataFrameMustBeProcessed(const QCanBusFrame &frame);
+    bool mustDataFrameBeProcessed(const QCanBusFrame &frame);
     void setCount();
     void setTime(const uint64_t seconds, const uint64_t microseconds);
     void setMsgType(const cannabus::IdMsgTypes msgType);

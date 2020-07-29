@@ -4,6 +4,12 @@
 #include <QCanBusDevice>
 #include <stdint.h>
 
+#define SUPER_CONNECT(sender, signal, receiver, slot) \
+connect(sender, &std::remove_pointer<decltype(sender)>::type::signal, \
+        receiver, &std::remove_pointer<decltype(receiver)>::type::slot)
+
+#define CONNECT_FILTER(filter_name) SUPER_CONNECT(m_ui->filter##filter_name, stateChanged, this, set##filter_name##Filtrated);
+
 QT_BEGIN_NAMESPACE
 
 class QCanBusFrame;
@@ -24,6 +30,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    static constexpr uint32_t bus_status_timeout = 1000;
+    static constexpr uint32_t log_window_update_timeout = 100;
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -39,10 +48,10 @@ private slots:
     void setReadRegsSeriesFiltrated();
     void setWriteRegsRangeFiltrated();
     void setWriteRegsSeriesFiltrated();
-    void setDeviceSpecificFiltrated_1();
-    void setDeviceSpecificFiltrated_2();
-    void setDeviceSpecificFiltrated_3();
-    void setDeviceSpecificFiltrated_4();
+    void setDeviceSpecific_1Filtrated();
+    void setDeviceSpecific_2Filtrated();
+    void setDeviceSpecific_3Filtrated();
+    void setDeviceSpecific_4Filtrated();
 
     void connectDevice();
     void disconnectDevice();

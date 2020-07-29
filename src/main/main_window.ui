@@ -16,6 +16,18 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>1180</width>
+    <height>720</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1180</width>
+    <height>720</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>NarcoCANtrol</string>
   </property>
@@ -345,6 +357,42 @@
       </property>
      </widget>
     </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>170</width>
+       <height>70</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Slave Addresses</string>
+     </property>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Filter by Address</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -356,20 +404,6 @@
      <height>26</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuCalls">
-    <property name="title">
-     <string>Calls</string>
-    </property>
-    <addaction name="actionConnect"/>
-    <addaction name="actionDisconnect"/>
-    <addaction name="separator"/>
-    <addaction name="actionClearLog"/>
-    <addaction name="separator"/>
-    <addaction name="actionSettings"/>
-    <addaction name="separator"/>
-    <addaction name="actionQuit"/>
-   </widget>
-   <addaction name="menuCalls"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">

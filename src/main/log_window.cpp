@@ -2,6 +2,8 @@
 #include <QHeaderView>
 #include <algorithm>
 
+using namespace cannabus;
+
 LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
 {    
     makeHeader();
@@ -11,11 +13,6 @@ LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
     verticalHeader()->hide();
 
     setDefaultMessageFilterSettings();
-}
-
-LogWindow::~LogWindow()
-{
-    ;
 }
 
 void LogWindow::makeHeader()
@@ -50,7 +47,7 @@ void LogWindow::processDataFrame(const QCanBusFrame &frame)
 {
     m_numberFramesReceived++;
 
-    if (isDataFrameMustBeProcessed(frame) == false)
+    if (mustDataFrameBeProcessed(frame) == false)
     {
         return;
     }
@@ -59,9 +56,9 @@ void LogWindow::processDataFrame(const QCanBusFrame &frame)
     insertRow(m_currentRow);
 
     const uint32_t frameId = frame.frameId();
-    const uint32_t slaveAddress = cannabus::getAddressFromId(frameId);
-    const cannabus::IdMsgTypes msgType = cannabus::getMsgTypeFromId(frameId);
-    const cannabus::IdFCode fCode = cannabus::getFCodeFromId(frameId);
+    const uint32_t slaveAddress = getAddressFromId(frameId);
+    const IdMsgTypes msgType = getMsgTypeFromId(frameId);
+    const IdFCode fCode = getFCodeFromId(frameId);
 
     setCount();
     setTime(frame.timeStamp().seconds(), frame.timeStamp().microSeconds());
@@ -89,65 +86,92 @@ void LogWindow::processErrorFrame(const QCanBusFrame &frame, const QString error
 
 void LogWindow::setCount()
 {
-    m_count = tr("%1").arg(m_numberFramesReceived, 5, 10, QLatin1Char(' '));
+    // Выводим номер принятого кадра с шириной поля в 6 символов
+    // в формате '   123'
+    m_count = tr("%1").arg(m_numberFramesReceived, 6, 10, QLatin1Char(' '));
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_count);
+    auto item = new QTableWidgetItem(m_count);
+    item->setTextAlignment(Qt::AlignRight);
     setItem(m_currentRow, COUNT, item);
 }
 
 void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
 {
+    // Выводим время в секундах с шириной поля в 9 символов
+    // в формате '1234.1234'
     m_time = tr("%1.%2")
             .arg(seconds, 4, 10, QLatin1Char(' '))
             .arg(microseconds / 100, 4, 10, QLatin1Char('0'));
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_time);
+    auto item = new QTableWidgetItem(m_time);
+    item->setTextAlignment(Qt::AlignRight);
     setItem(m_currentRow, TIME, item);
 }
 
-void LogWindow::setMsgType(const cannabus::IdMsgTypes msgType)
+void LogWindow::setMsgType(const IdMsgTypes msgType)
 {
-    m_msgType = tr("  0b%1").arg((uint32_t)msgType, 2, 2, QLatin1Char('0'));
+    // Выводим тип сообщения в двоичной системе счисления с шириной поля в 4 символа
+    // в формате '0b10'
+    m_msgType = tr("0b%1").arg((uint32_t)msgType, 2, 2, QLatin1Char('0'));
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_msgType);
+    auto item = new QTableWidgetItem(m_msgType);
+    item->setTextAlignment(Qt::AlignCenter);
     setItem(m_currentRow, MSG_TYPE, item);
 }
 
 void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
 {
+    // Выводим адрес ведомого устройства в десятичной
+    // и шестнадцатеричной системах счисления с шириной поля в 9 символов
+    // в формате '10 (0x0A)'
     m_slaveAddress = tr("%1 (0x").arg(slaveAddress, 2, 10, QLatin1Char(' ')) +
             tr("%1)").arg(slaveAddress, 2, 16, QLatin1Char('0')).toUpper();
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_slaveAddress);
+    auto item = new QTableWidgetItem(m_slaveAddress);
+    item->setTextAlignment(Qt::AlignCenter);
     setItem(m_currentRow, SLAVE_ADDRESS, item);
 }
 
-void LogWindow::setFCode(const cannabus::IdFCode fCode)
+void LogWindow::setFCode(const IdFCode fCode)
 {
-    m_fCode = tr(" 0b%1").arg((uint32_t)fCode, 3, 2, QLatin1Char('0'));
+    // Выводим F-код в двоичной системе счисления с шириной поля в 5 символов
+    // в формате '0b101'
+    m_fCode = tr("0b%1").arg((uint32_t)fCode, 3, 2, QLatin1Char('0'));
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_fCode);
+    auto item = new QTableWidgetItem(m_fCode);
+    item->setTextAlignment(Qt::AlignCenter);
     setItem(m_currentRow, F_CODE, item);
 }
 
 void LogWindow::setDataSize(const uint32_t dataSize)
 {
-    m_dataSize = tr(" [%1]").arg(dataSize);
+    // Выводим размер поля данных в байтах с шириной поля в 3 символа
+    // в формате '[8]'
+    m_dataSize = tr("[%1]").arg(dataSize);
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_dataSize);
+    auto item = new QTableWidgetItem(m_dataSize);
+    item->setTextAlignment(Qt::AlignCenter);
     setItem(m_currentRow, DATA_SIZE, item);
 }
 
 void LogWindow::setData(const QByteArray data)
 {
+    // Выводим данные в шестнадцатеричном системе счисления без префиксов
+    // с шириной поля данных до 25 символов (сколько получится)
+    // в формате '11 22 33 44 55 66 77 88'
     m_data = data.toHex(' ').toUpper();
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_data);
+    auto item = new QTableWidgetItem(m_data);
+    item->setTextAlignment(Qt::AlignLeft);
     setItem(m_currentRow, DATA, item);
 }
 
-void LogWindow::setMsgInfo(const cannabus::IdMsgTypes msgType, const cannabus::IdFCode fCode, const uint32_t dataSize)
+void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const uint32_t dataSize)
 {
+    // Готовим словесное описание для типа сообщения и его F-кода,
+    // а затем выводим информацию о кадре в текстовом формате
+    // с шириной поля до 40 символов (сколько получится)
+    // в формате '[MSG_TYPE_INFO] F_CODE_INFO'
     if (dataSize == 0)
     {
         m_msgInfo = tr("[Slave's response] Incorrect request");
@@ -159,22 +183,22 @@ void LogWindow::setMsgInfo(const cannabus::IdMsgTypes msgType, const cannabus::I
 
         switch (msgType)
         {
-            case cannabus::IdMsgTypes::HIGH_PRIO_MASTER:
+            case IdMsgTypes::HIGH_PRIO_MASTER:
             {
                 msgTypeInfo = tr("Master's high-prio");
                 break;
             }
-            case cannabus::IdMsgTypes::HIGH_PRIO_SLAVE:
+            case IdMsgTypes::HIGH_PRIO_SLAVE:
             {
                 msgTypeInfo = tr("Slave's high-prio");
                 break;
             }
-            case cannabus::IdMsgTypes::MASTER:
+            case IdMsgTypes::MASTER:
             {
                 msgTypeInfo = tr("Master's request");
                 break;
             }
-            case cannabus::IdMsgTypes::SLAVE:
+            case IdMsgTypes::SLAVE:
             {
                 msgTypeInfo = tr("Slave's response");
                 break;
@@ -187,42 +211,42 @@ void LogWindow::setMsgInfo(const cannabus::IdMsgTypes msgType, const cannabus::I
 
         switch (fCode)
         {
-            case cannabus::IdFCode::WRITE_REGS_RANGE:
+            case IdFCode::WRITE_REGS_RANGE:
             {
                 fCodeInfo = tr("Writing regs range");
                 break;
             }
-            case cannabus::IdFCode::WRITE_REGS_SERIES:
+            case IdFCode::WRITE_REGS_SERIES:
             {
                 fCodeInfo = tr("Writing regs series");
                 break;
             }
-            case cannabus::IdFCode::READ_REGS_RANGE:
+            case IdFCode::READ_REGS_RANGE:
             {
                 fCodeInfo = tr("Reading regs range");
                 break;
             }
-            case cannabus::IdFCode::READ_REGS_SERIES:
+            case IdFCode::READ_REGS_SERIES:
             {
                 fCodeInfo = tr("Reading regs series");
                 break;
             }
-            case cannabus::IdFCode::DEVICE_SPECIFIC1:
+            case IdFCode::DEVICE_SPECIFIC1:
             {
                 fCodeInfo = tr("Device-specific (1)");
                 break;
             }
-            case cannabus::IdFCode::DEVICE_SPECIFIC2:
+            case IdFCode::DEVICE_SPECIFIC2:
             {
                 fCodeInfo = tr("Device-specific (2)");
                 break;
             }
-            case cannabus::IdFCode::DEVICE_SPECIFIC3:
+            case IdFCode::DEVICE_SPECIFIC3:
             {
                 fCodeInfo = tr("Device-specific (3)");
                 break;
             }
-            case cannabus::IdFCode::DEVICE_SPECIFIC4:
+            case IdFCode::DEVICE_SPECIFIC4:
             {
                 fCodeInfo = tr("Device-specific (4)");
                 break;
@@ -236,41 +260,43 @@ void LogWindow::setMsgInfo(const cannabus::IdMsgTypes msgType, const cannabus::I
         m_msgInfo = tr("[%1] %2").arg(msgTypeInfo).arg(fCodeInfo);
     }
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_msgInfo);
+    auto item = new QTableWidgetItem(m_msgInfo);
+    item->setTextAlignment(Qt::AlignLeft);
     setItem(m_currentRow, MSG_INFO, item);
 }
 
 void LogWindow::setMsgInfo(const QString errorInfo)
 {
+    // Выводим информацию о кадре ошибки в текстовом формате
+    // с шириной поля до ? символов (сколько получится)
+    // в формате 'ERROR_FRAME_INFO'
     m_msgInfo = errorInfo;
 
-    QTableWidgetItem *item = new QTableWidgetItem(m_msgInfo);
+    auto item = new QTableWidgetItem(m_msgInfo);
+    item->setTextAlignment(Qt::AlignLeft);
     setItem(m_currentRow, MSG_INFO, item);
 }
 
 void LogWindow::setDefaultMessageFilterSettings()
 {
-    std::fill(m_filter.fCodeSettings, m_filter.fCodeSettings
-              + sizeof(m_filter.fCodeSettings) / sizeof(m_filter.fCodeSettings[0]), true);
-    std::fill(m_filter.msgTypeSettings, m_filter.msgTypeSettings
-              + sizeof(m_filter.msgTypeSettings) / sizeof(m_filter.msgTypeSettings[0]), true);
-    std::fill(m_filter.slaveAddressSettings, m_filter.slaveAddressSettings
-              + sizeof(m_filter.slaveAddressSettings) / sizeof(m_filter.slaveAddressSettings[0]), true);
+    m_filter.fCodeSettings->fill(true);
+    m_filter.msgTypeSettings->fill(true);
+    m_filter.slaveAddressSettings->fill(true);
 }
 
-bool LogWindow::isDataFrameMustBeProcessed(const QCanBusFrame &frame)
+bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
 {
     bool isFiltrated = true;
 
     const uint32_t frameId = frame.frameId();
 
-    const uint32_t slaveAddress = cannabus::getAddressFromId(frameId);
+    const uint32_t slaveAddress = getAddressFromId(frameId);
     isFiltrated &= isSlaveAddressFiltrated(slaveAddress);
 
-    const cannabus::IdMsgTypes msgType = cannabus::getMsgTypeFromId(frameId);
+    const IdMsgTypes msgType = getMsgTypeFromId(frameId);
     isFiltrated &= isMsgTypeFiltrated(msgType);
 
-    const cannabus::IdFCode fCode = cannabus::getFCodeFromId(frameId);
+    const IdFCode fCode = getFCodeFromId(frameId);
     isFiltrated &= isFCodeFiltrated(fCode);
 
     return isFiltrated;
@@ -278,30 +304,30 @@ bool LogWindow::isDataFrameMustBeProcessed(const QCanBusFrame &frame)
 
 void LogWindow::setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated)
 {
-    m_filter.slaveAddressSettings[slaveAddress] = isFiltrated;
+    m_filter.slaveAddressSettings->insert(slaveAddress, isFiltrated);
 }
 
 bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
 {
-    return m_filter.slaveAddressSettings[slaveAddress];
+    return m_filter.slaveAddressSettings->value(slaveAddress);
 }
 
-void LogWindow::setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated)
+void LogWindow::setMsgTypeFiltrated(const IdMsgTypes msgType, const bool isFiltrated)
 {
-    m_filter.msgTypeSettings[(uint32_t)msgType] = isFiltrated;
+    m_filter.msgTypeSettings->insert((uint32_t)msgType, isFiltrated);
 }
 
-bool LogWindow::isMsgTypeFiltrated(const cannabus::IdMsgTypes msgType)
+bool LogWindow::isMsgTypeFiltrated(const IdMsgTypes msgType)
 {
-    return m_filter.msgTypeSettings[(uint32_t)msgType];
+    return m_filter.msgTypeSettings->value((uint32_t)msgType);
 }
 
-void LogWindow::setFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated)
+void LogWindow::setFCodeFiltrated(const IdFCode fCode, const bool isFiltrated)
 {
-    m_filter.fCodeSettings[(uint32_t)fCode] = isFiltrated;
+    m_filter.fCodeSettings->insert((uint32_t)fCode, isFiltrated);
 }
 
-bool LogWindow::isFCodeFiltrated(const cannabus::IdFCode fCode)
+bool LogWindow::isFCodeFiltrated(const IdFCode fCode)
 {
-    return m_filter.fCodeSettings[(uint32_t)fCode];
+    return m_filter.fCodeSettings->value((uint32_t)fCode);
 }

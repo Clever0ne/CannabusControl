@@ -52,35 +52,25 @@ void MainWindow::initActionsConnections()
         connectDevice();
     });
 
-    connect(m_ui->filterHighPrioMaster, &QCheckBox::stateChanged,
-            this, &MainWindow::setHighPrioMasterFiltrated);
-    connect(m_ui->filterHighPrioSlave, &QCheckBox::stateChanged,
-            this, &MainWindow::setHighPrioSlaveFiltrated);
-    connect(m_ui->filterMaster, &QCheckBox::stateChanged,
-            this, &MainWindow::setMasterFiltrated);
-    connect(m_ui->filterSlave, &QCheckBox::stateChanged,
-            this, &MainWindow::setSlaveFiltrated);
-    connect(m_ui->filterAllMsgTypes, &QCheckBox::stateChanged,
-            this, &MainWindow::setAllMsgTypesFiltrated);
+    // Устанавливаем связь между чекбоксами настроек фильтра типов сообщений и
+    // соответствующими методами-сеттерами (см. макросы)
+    CONNECT_FILTER(HighPrioMaster);
+    CONNECT_FILTER(HighPrioSlave);
+    CONNECT_FILTER(Master);
+    CONNECT_FILTER(Slave);
+    CONNECT_FILTER(AllMsgTypes);
 
-    connect(m_ui->filterReadRegsRange, &QCheckBox::stateChanged,
-            this, &MainWindow::setReadRegsRangeFiltrated);
-    connect(m_ui->filterReadRegsSeries, &QCheckBox::stateChanged,
-            this, &MainWindow::setReadRegsSeriesFiltrated);
-    connect(m_ui->filterWriteRegsRange, &QCheckBox::stateChanged,
-            this, &MainWindow::setWriteRegsRangeFiltrated);
-    connect(m_ui->filterWriteRegsSeries, &QCheckBox::stateChanged,
-            this, &MainWindow::setWriteRegsSeriesFiltrated);
-    connect(m_ui->filterDeviceSpecific_1, &QCheckBox::stateChanged,
-            this, &MainWindow::setDeviceSpecificFiltrated_1);
-    connect(m_ui->filterDeviceSpecific_2, &QCheckBox::stateChanged,
-            this, &MainWindow::setDeviceSpecificFiltrated_2);
-    connect(m_ui->filterDeviceSpecific_3, &QCheckBox::stateChanged,
-            this, &MainWindow::setDeviceSpecificFiltrated_3);
-    connect(m_ui->filterDeviceSpecific_4, &QCheckBox::stateChanged,
-            this, &MainWindow::setDeviceSpecificFiltrated_4);
-    connect(m_ui->filterAllFCodes, &QCheckBox::stateChanged,
-            this, &MainWindow::setAllFCodesFiltrated);
+    // Устанавливаем связь между чекбоксами настроек фильтра F-кодов сообщений и
+    // соответствующими методами-сеттерами (см. макросы)
+    CONNECT_FILTER(ReadRegsRange);
+    CONNECT_FILTER(ReadRegsSeries);
+    CONNECT_FILTER(WriteRegsRange);
+    CONNECT_FILTER(WriteRegsSeries);
+    CONNECT_FILTER(DeviceSpecific_1);
+    CONNECT_FILTER(DeviceSpecific_2);
+    CONNECT_FILTER(DeviceSpecific_3);
+    CONNECT_FILTER(DeviceSpecific_4);
+    CONNECT_FILTER(AllFCodes);
 
     connect(m_busStatusTimer, &QTimer::timeout,
             this, &MainWindow::busStatus);
@@ -110,14 +100,17 @@ void MainWindow::processError(QCanBusDevice::CanBusError error) const
 
 void MainWindow::connectDevice()
 {
-    const SettingsDialog::Settings settings = m_settingsDialog->settings();
+    // Получаем указатель на настройки для адаптера
+    const auto settings = m_settingsDialog->settings();
 
+    // Сбрасываем настройки адаптера и настраиваем новый
     QString errorString;
     m_canDevice.reset(QCanBus::instance()->createDevice(
                         settings.pluginName,
                         settings.deviceInterfaceName,
                         &errorString));
 
+    // Если не удалось подключиться, выводим ошибку
     if (m_canDevice == nullptr)
     {
         m_status->setText(tr("Error creating device '%1': %2")
@@ -126,87 +119,104 @@ void MainWindow::connectDevice()
         return;
     }
 
+    // Очищаем окно лога
     m_ui->logWindow->clearLog();
 
+    // Устанавливаем связь между сигналом возникновения ошибки
+    // и функцией-обработчиком ошибок
     connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
             this, &MainWindow::processError);
 
+    // Настраиваем параметры конфигурации адаптера (битрейт, обратная связь, etc.)
     for (const SettingsDialog::ConfigurationItem &item : qAsConst(settings.configurations))
     {
         m_canDevice->setConfigurationParameter(item.first, item.second);
     }
 
+    // Пробуем подключиться к шине адаптера
+    // Если не удалось, выводим ошибку и сбрасываем настройки
     if (m_canDevice->connectDevice() == false)
     {
         m_status->setText(tr("Connection error: %1").arg(m_canDevice->errorString()));
 
         m_canDevice.reset();
+
+        return;
+    }
+
+    // Делаем кнопку Connect недоступной, а Disconnect — доступной
+    m_ui->actionConnect->setEnabled(false);
+    m_ui->actionDisconnect->setEnabled(true);
+
+    // Определяем битрейт и выводим его в поле статуса подключения
+    const QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
+    if (bitRate.isValid() != false)
+    {
+        const bool isCanFdEnabled = m_canDevice->configurationParameter(QCanBusDevice::CanFdKey).toBool();
+        const QVariant dataBitRate = m_canDevice->configurationParameter(QCanBusDevice::DataBitRateKey);
+
+        if (isCanFdEnabled != false && dataBitRate.isValid() != false)
+        {
+            m_status->setText(tr("Plugin '%1': connected to %2 at %3 / %4 with CAN FD")
+                            .arg(settings.pluginName)
+                            .arg(settings.deviceInterfaceName)
+                            .arg(bitRateToString(bitRate.toUInt()))
+                            .arg(bitRateToString(dataBitRate.toUInt())));
+        }
+        else
+        {
+            m_status->setText(tr("Plugin '%1': connected to %2 at %3")
+                            .arg(settings.pluginName)
+                            .arg(settings.deviceInterfaceName)
+                            .arg(bitRateToString(bitRate.toUInt())));
+        }
     }
     else
     {
-        m_ui->actionConnect->setEnabled(false);
-        m_ui->actionDisconnect->setEnabled(true);
+        m_status->setText(tr("Plugin '%1': connected to %2")
+                        .arg(settings.pluginName)
+                        .arg(settings.deviceInterfaceName));
+    }
 
-        const QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
-        if (bitRate.isValid() != false)
-        {
-            const bool isCanFdEnabled = m_canDevice->configurationParameter(QCanBusDevice::CanFdKey).toBool();
-            const QVariant dataBitRate = m_canDevice->configurationParameter(QCanBusDevice::DataBitRateKey);
-
-            if (isCanFdEnabled != false && dataBitRate.isValid() != false)
-            {
-                m_status->setText(tr("Plugin '%1': connected to %2 at %3 / %4 with CAN FD")
-                                .arg(settings.pluginName)
-                                .arg(settings.deviceInterfaceName)
-                                .arg(bitRateToString(bitRate.toUInt()))
-                                .arg(bitRateToString(dataBitRate.toUInt())));
-            }
-            else
-            {
-                m_status->setText(tr("Plugin '%1': connected to %2 at %3")
-                                .arg(settings.pluginName)
-                                .arg(settings.deviceInterfaceName)
-                                .arg(bitRateToString(bitRate.toUInt())));
-            }
-        }
-        else
-        {
-            m_status->setText(tr("Plugin '%1': connected to %2")
-                            .arg(settings.pluginName)
-                            .arg(settings.deviceInterfaceName));
-        }
-
-        if (m_canDevice->hasBusStatus() != false)
-        {
-            m_busStatusTimer->start(1000);
-            m_logWindowUpdateTimer->start(100);
-        }
-        else
-        {
-            m_ui->busStatus->setText(tr("No CAN bus status available"));
-        }
+    // Если есть возможность определить статус шины, запускаем таймеры
+    // Иначе выводим сообщения о невозможности определить статус шины
+    if (m_canDevice->hasBusStatus() != false)
+    {
+        m_busStatusTimer->start(bus_status_timeout);
+        m_logWindowUpdateTimer->start(log_window_update_timeout);
+    }
+    else
+    {
+        m_ui->busStatus->setText(tr("No CAN bus status available"));
     }
 }
 
 void MainWindow::disconnectDevice()
 {
+    // Ничего не делаем, если отключать и так нечего
     if (m_canDevice == nullptr)
     {
         return;
     }
 
+    // Останавливаем таймеры
     m_busStatusTimer->stop();
     m_logWindowUpdateTimer->stop();
 
+    // Обрабатываем полученные, но необработанные кадры
     processFramesReceived();
 
+    // Отключаем адаптер
     m_canDevice->disconnectDevice();
 
+    // Выводим сообщение о невозможности определить статус шины
     m_ui->busStatus->setText(tr("No CAN bus status available."));
 
+    // Делаем кнопку Connect доступной, а Disconnect — недоступной
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
 
+    // Выводим в поле статуса сообщение об отключении
     m_status->setText("Disconnected");
 }
 
@@ -218,20 +228,25 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::processFramesReceived()
 {
+    // Ничего не делаем, если принимать кадры не от кого
     if (m_canDevice == nullptr)
     {
         return;
     }
 
+    // Обрабатываем кадры в цикле
     while (m_canDevice->framesAvailable() != false)
     {
-        const QCanBusFrame frame = m_canDevice->readFrame();
+        // Вынимаем кадр из очереди
+        const auto frame = m_canDevice->readFrame();
 
         // Обработка кадров ошибок
         if (frame.frameType() == QCanBusFrame::FrameType::ErrorFrame)
         {
             const QString errorInfo = m_canDevice->interpretErrorFrame(frame);
             m_ui->logWindow->processErrorFrame(frame, errorInfo);
+
+            continue;
         }
 
         // Обработка обычных кадров
@@ -241,40 +256,49 @@ void MainWindow::processFramesReceived()
 
 void MainWindow::busStatus()
 {
+    // Выводим сообщение о невозможности определить статус шины и
+    // останавливаем таймеры, если определять статус не у чего или
+    // определить его невозможно
     if (m_canDevice == nullptr || m_canDevice->hasBusStatus() == false)
     {
         m_ui->busStatus->setText(tr("No CAN bus status available."));
         m_busStatusTimer->stop();
+        m_logWindowUpdateTimer->stop();
         return;
     }
+
+    // Определяем статус шины
+    QString status;
 
     switch(m_canDevice->busStatus())
     {
         case QCanBusDevice::CanBusStatus::Good:
         {
-            m_ui->busStatus->setText(tr("CAN bus status: Good."));
+            status = "Good";
             break;
         }
         case QCanBusDevice::CanBusStatus::Warning:
         {
-            m_ui->busStatus->setText(tr("CAN bus status: Warning."));
+            status = "Warning";
             break;
         }
         case QCanBusDevice::CanBusStatus::Error:
         {
-            m_ui->busStatus->setText(tr("CAN bus status: Error."));
+            status = "Error";
             break;
         }
         case QCanBusDevice::CanBusStatus::BusOff:
         {
-            m_ui->busStatus->setText(tr("CAN bus status: Bus Off."));
+            status = "Bus Off";
             break;
         }
         default:
         {
-            m_ui->busStatus->setText(tr("CAN bus status: Unknown."));
+            status = "Unknown.";
             break;
         }
+
+        m_ui->busStatus->setText(tr("CAN bus status: %1.").arg(status));
     }
 }
 
@@ -358,28 +382,28 @@ void MainWindow::setWriteRegsSeriesFiltrated()
     m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_SERIES, isFiltrated);
 }
 
-void MainWindow::setDeviceSpecificFiltrated_1()
+void MainWindow::setDeviceSpecific_1Filtrated()
 {
     const bool isFiltrated = m_ui->filterDeviceSpecific_1->isChecked();
 
     m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC1, isFiltrated);
 }
 
-void MainWindow::setDeviceSpecificFiltrated_2()
+void MainWindow::setDeviceSpecific_2Filtrated()
 {
     const bool isFiltrated = m_ui->filterDeviceSpecific_2->isChecked();
 
     m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC2, isFiltrated);
 }
 
-void MainWindow::setDeviceSpecificFiltrated_3()
+void MainWindow::setDeviceSpecific_3Filtrated()
 {
     const bool isFiltrated = m_ui->filterDeviceSpecific_3->isChecked();
 
     m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC3, isFiltrated);
 }
 
-void MainWindow::setDeviceSpecificFiltrated_4()
+void MainWindow::setDeviceSpecific_4Filtrated()
 {
     const bool isFiltrated = m_ui->filterDeviceSpecific_4->isChecked();
 
