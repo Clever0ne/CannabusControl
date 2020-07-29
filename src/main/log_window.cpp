@@ -279,9 +279,9 @@ void LogWindow::setMsgInfo(const QString errorInfo)
 
 void LogWindow::setDefaultMessageFilterSettings()
 {
-    m_filter.fCodeSettings->fill(true);
-    m_filter.msgTypeSettings->fill(true);
-    m_filter.slaveAddressSettings->fill(true);
+    m_filter.slaveAddressSettings.fill(true, id_addresses_size);
+    m_filter.msgTypeSettings.fill(true, id_msg_types_size);
+    m_filter.fCodeSettings.fill(true, id_f_code_size);
 }
 
 bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
@@ -304,30 +304,30 @@ bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
 
 void LogWindow::setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated)
 {
-    m_filter.slaveAddressSettings->insert(slaveAddress, isFiltrated);
+    m_filter.slaveAddressSettings.insert(slaveAddress, isFiltrated);
 }
 
 bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
 {
-    return m_filter.slaveAddressSettings->value(slaveAddress);
+    return m_filter.slaveAddressSettings.value(slaveAddress);
 }
 
 void LogWindow::setMsgTypeFiltrated(const IdMsgTypes msgType, const bool isFiltrated)
 {
-    m_filter.msgTypeSettings->insert((uint32_t)msgType, isFiltrated);
+    m_filter.msgTypeSettings.insert((uint32_t)msgType, isFiltrated);
 }
 
 bool LogWindow::isMsgTypeFiltrated(const IdMsgTypes msgType)
 {
-    return m_filter.msgTypeSettings->value((uint32_t)msgType);
+    return m_filter.msgTypeSettings.value((uint32_t)msgType);
 }
 
 void LogWindow::setFCodeFiltrated(const IdFCode fCode, const bool isFiltrated)
 {
-    m_filter.fCodeSettings->insert((uint32_t)fCode, isFiltrated);
+    m_filter.fCodeSettings.insert((uint32_t)fCode, isFiltrated);
 }
 
 bool LogWindow::isFCodeFiltrated(const IdFCode fCode)
 {
-    return m_filter.fCodeSettings->value((uint32_t)fCode);
+    return m_filter.fCodeSettings.value((uint32_t)fCode);
 }

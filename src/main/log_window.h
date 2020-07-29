@@ -22,14 +22,14 @@ public:
     explicit LogWindow(QWidget *parent = nullptr);
     ~LogWindow() = default;
 
+    static constexpr uint32_t id_addresses_size = 61;
     static constexpr uint32_t id_msg_types_size = 4;
     static constexpr uint32_t id_f_code_size = 8;
-    static constexpr uint32_t id_addresses_size = 61;
 
     struct Filter {
-        QVector<bool> msgTypeSettings[id_msg_types_size];
-        QVector<bool> fCodeSettings[id_f_code_size];
-        QVector<bool> slaveAddressSettings[id_addresses_size];
+        QVector<bool> slaveAddressSettings;
+        QVector<bool> msgTypeSettings;
+        QVector<bool> fCodeSettings;
     };
 
     void setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated);
