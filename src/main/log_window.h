@@ -5,15 +5,15 @@
 #include <stdint.h>
 #include "../cannabus_library/cannabus_common.h"
 
-enum Column {
-    COUNT,
-    TIME,
-    MSG_TYPE,
-    SLAVE_ADDRESS,
-    F_CODE,
-    DATA_SIZE,
-    DATA,
-    MSG_INFO
+enum class Column {
+    count,
+    time,
+    msg_type,
+    slave_address,
+    f_code,
+    data_size,
+    data,
+    msg_info
 };
 
 class LogWindow : public QTableWidget
@@ -32,14 +32,18 @@ public:
         QVector<bool> fCodeSettings;
     };
 
+    void setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated);
+    bool isSlaveAddressFiltrated(const uint32_t slaveAddress);
+
     void setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated);
     bool isMsgTypeFiltrated(const cannabus::IdMsgTypes msgType);
 
     void setFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated);
     bool isFCodeFiltrated(const cannabus::IdFCode fCode);
 
-    void setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated);
-    bool isSlaveAddressFiltrated(const uint32_t slaveAddress);
+    void fillSlaveAddressSettings(const bool isFiltrated);
+    void fillMsgTypesSettings(const bool isFiltrated);
+    void fillFCodeSettings(const bool isFiltrated);
 
     void processDataFrame(const QCanBusFrame &frame);
     void processErrorFrame(const QCanBusFrame &frame, const QString errorInfo);

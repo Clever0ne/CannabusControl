@@ -53,6 +53,8 @@ private slots:
     void setDeviceSpecific_3Filtrated();
     void setDeviceSpecific_4Filtrated();
 
+    void setSlaveAddressesFiltrated();
+
     void connectDevice();
     void disconnectDevice();
     void busStatus();

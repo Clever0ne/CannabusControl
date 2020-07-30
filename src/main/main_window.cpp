@@ -52,6 +52,9 @@ void MainWindow::initActionsConnections()
         connectDevice();
     });
 
+    connect(m_ui->filterSlaveAddresses, &QLineEdit::editingFinished,
+            this, &MainWindow::setSlaveAddressesFiltrated);
+
     // Устанавливаем связь между чекбоксами настроек фильтра типов сообщений и
     // соответствующими методами-сеттерами (см. макросы)
     CONNECT_FILTER(HighPrioMaster);
@@ -300,6 +303,109 @@ void MainWindow::busStatus()
     }
 
     m_ui->busStatus->setText(tr("CAN bus status: %1.").arg(status));
+}
+
+void MainWindow::setSlaveAddressesFiltrated()
+{
+    // Принимаем фильтруемые адреса в виде строки и убираем пробелы
+    QString ranges = m_ui->filterSlaveAddresses->text();
+    ranges.remove(QChar(' '));
+
+    // Разбиваем строку на список подстрок с разделителями в виде запятых
+    QStringList range = ranges.split(',', Qt::SkipEmptyParts);
+    QVector<uint32_t> slaveAddresses;
+
+    ranges.clear();
+
+    // Разбираем получившиеся подстроки
+    for (QString currentRange : range)
+    {
+        currentRange = range.takeFirst();
+
+        // Проверяем, не является ли подстрока диапазоном
+        if (currentRange.contains(QChar('-')) != false)
+        {
+            // Разбиваем диапазон на левую и правую границу
+            QStringList leftAndRight = currentRange.split('-', Qt::SkipEmptyParts);
+
+            // Конвертируем строки в беззнаковые целые числа с учетом соглашений языка Си:
+            // Строка начинается с '0x' — шестнадцатеричное число
+            // Строка начинается с '0' — восьмеричное число
+            // Всё остально — десятичное число
+            bool isConverted = true;
+            uint32_t left = leftAndRight.takeFirst().toUInt(&isConverted, 0);
+            uint32_t right = leftAndRight.takeLast().toUInt(&isConverted, 0);
+
+            // Если не получилось конвертировать — диапазон в помойку
+            if (isConverted == false)
+            {
+                continue;
+            }
+
+            // Если левая граница больше правой, возможно, пользователь всё напутал
+            // Любезно поменяем границы местами без его согласия
+            if (left > right)
+            {
+                std::swap(left, right);
+            }
+
+            currentRange = tr("%1-%2").arg(left).arg(right);
+
+            // Если левая и правая границы равны, это вовсе не диапазон, а адрес
+            if (left == right)
+            {
+                currentRange = tr("%1").arg(left);
+            }
+
+            // Добавляем все адреса из диапазона в вектор с фильтруемыми адресами
+            for (uint32_t slaveAddress = left; slaveAddress <= right; slaveAddress++)
+            {
+                slaveAddresses.append(slaveAddress);
+            }
+        }
+        else
+        {
+            // Конвертируем строку в беззнаковое целое число с учетом соглашений языка Си:
+            // Строка начинается с '0x' — шестнадцатеричное число
+            // Строка начинается с '0' — восьмеричное число
+            bool isConverted = true;
+            uint32_t slaveAddress = currentRange.toUInt(&isConverted, 0);
+
+            // Если не получилось конвертировать — диапазон в помойку
+            if (isConverted == false)
+            {
+                continue;
+            }
+
+            // Добавляем адрес в вектор с фильтруемыми адресами
+            slaveAddresses.append(slaveAddress);
+        }
+
+        // Форматируем фильтруемые адреса в соответствии с поправками
+        if (ranges.isEmpty() == false)
+        {
+            ranges += ", ";
+        }
+        ranges += currentRange;
+    }
+
+    // Обновляем текстовое поле с учётом поправок
+    m_ui->filterSlaveAddresses->setText(ranges);
+
+    // Если поле пустое, сбрасываем настройки фильтрации адресов к состоянию по-умолчанию
+    if (ranges.isEmpty() != false)
+    {
+        m_ui->logWindow->fillSlaveAddressSettings(true);
+        return;
+    }
+
+    // Иначе заполняем адресами из вектора с фильтруемыми адресами
+    m_ui->logWindow->fillSlaveAddressSettings(false);
+
+    for (uint32_t slaveAddress : slaveAddresses)
+    {
+        m_ui->logWindow->setSlaveAddressFiltrated(slaveAddress, true);
+    }
 }
 
 void MainWindow::setAllMsgTypesFiltrated()

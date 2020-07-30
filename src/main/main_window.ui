@@ -22,378 +22,437 @@
     <height>720</height>
    </size>
   </property>
-  <property name="maximumSize">
-   <size>
-    <width>1180</width>
-    <height>720</height>
-   </size>
-  </property>
   <property name="windowTitle">
    <string>NarcoCANtrol</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QGroupBox" name="receivedMessagesBox">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>960</width>
-      <height>620</height>
-     </rect>
+   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="960,190">
+    <property name="spacing">
+     <number>10</number>
     </property>
-    <property name="title">
-     <string>Log Window</string>
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
     </property>
-    <widget class="LogWindow" name="logWindow">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>940</width>
-       <height>580</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Courier New</family>
-       <pointsize>8</pointsize>
-      </font>
-     </property>
-     <property name="lineWidth">
-      <number>1</number>
-     </property>
-     <property name="midLineWidth">
-      <number>1</number>
-     </property>
-     <attribute name="horizontalHeaderMinimumSectionSize">
-      <number>25</number>
-     </attribute>
-     <attribute name="verticalHeaderMinimumSectionSize">
-      <number>20</number>
-     </attribute>
-     <attribute name="verticalHeaderDefaultSectionSize">
-      <number>30</number>
-     </attribute>
-    </widget>
-    <widget class="QLabel" name="busStatus">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>600</y>
-       <width>940</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="messageFilterSettingsBox">
-    <property name="geometry">
-     <rect>
-      <x>980</x>
-      <y>10</y>
-      <width>190</width>
-      <height>620</height>
-     </rect>
+    <property name="leftMargin">
+     <number>10</number>
     </property>
-    <property name="title">
-     <string>Message Filter Settings</string>
+    <property name="topMargin">
+     <number>10</number>
     </property>
-    <widget class="QGroupBox" name="filterFCodesBox">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>360</y>
-       <width>170</width>
-       <height>250</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>F-Codes</string>
-     </property>
-     <widget class="QCheckBox" name="filterReadRegsRange">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>95</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
+    <property name="rightMargin">
+     <number>10</number>
+    </property>
+    <property name="bottomMargin">
+     <number>6</number>
+    </property>
+    <item>
+     <widget class="QGroupBox" name="receivedMessagesBox">
+      <property name="title">
+       <string>Log Window</string>
       </property>
-      <property name="text">
-       <string>Read Regs Range</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="560,20">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
+       <property name="topMargin">
+        <number>3</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="LogWindow" name="logWindow">
+         <property name="font">
+          <font>
+           <family>Courier New</family>
+           <pointsize>8</pointsize>
+          </font>
+         </property>
+         <property name="lineWidth">
+          <number>1</number>
+         </property>
+         <property name="midLineWidth">
+          <number>1</number>
+         </property>
+         <attribute name="horizontalHeaderMinimumSectionSize">
+          <number>25</number>
+         </attribute>
+         <attribute name="verticalHeaderMinimumSectionSize">
+          <number>20</number>
+         </attribute>
+         <attribute name="verticalHeaderDefaultSectionSize">
+          <number>30</number>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="busStatus">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
-     <widget class="QCheckBox" name="filterReadRegsSeries">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>120</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="messageFilterSettingsBox">
+      <property name="minimumSize">
+       <size>
+        <width>190</width>
+        <height>0</height>
+       </size>
       </property>
-      <property name="text">
-       <string>Read Regs Series</string>
+      <property name="maximumSize">
+       <size>
+        <width>190</width>
+        <height>16777215</height>
+       </size>
       </property>
-      <property name="checked">
-       <bool>true</bool>
+      <property name="title">
+       <string>Message Filter Settings</string>
       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="70,80,150,250">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
+       <property name="topMargin">
+        <number>3</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QGroupBox" name="filterSlaveAddressesBox">
+         <property name="maximumSize">
+          <size>
+           <width>170</width>
+           <height>70</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Slave Addresses</string>
+         </property>
+         <widget class="QLineEdit" name="filterSlaveAddresses">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>40</y>
+            <width>150</width>
+            <height>20</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="filterByAddressLabel">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>150</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Filter by Address</string>
+          </property>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="filterMsgTypesBox">
+         <property name="maximumSize">
+          <size>
+           <width>170</width>
+           <height>150</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Message Types</string>
+         </property>
+         <widget class="QCheckBox" name="filterMaster">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>95</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Master's Request</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterSlave">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>120</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Slave's Response</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterAllMsgTypes">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>140</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>All Message Types</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterHighPrioMaster">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>45</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Master's High-prio</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterHighPrioSlave">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>70</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Slave's High-prio</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="filterFCodesBox">
+         <property name="maximumSize">
+          <size>
+           <width>170</width>
+           <height>251</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>F-Codes</string>
+         </property>
+         <widget class="QCheckBox" name="filterReadRegsRange">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>95</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Read Regs Range</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterReadRegsSeries">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>120</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Read Regs Series</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterDeviceSpecific_1">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>145</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Device-specific (1)</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterAllFCodes">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>20</y>
+            <width>140</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>All F-Codes</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterWriteRegsRange">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>45</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Write Regs Range</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterWriteRegsSeries">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>70</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Write Regs Series</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterDeviceSpecific_2">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>170</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Device-specific (2)</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterDeviceSpecific_3">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>195</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Device-specific (3)</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="filterDeviceSpecific_4">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>220</y>
+            <width>130</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Device-specific (4)</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
-     <widget class="QCheckBox" name="filterDeviceSpecific_1">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>145</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Device-specific (1)</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterAllFCodes">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>140</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>All F-Codes</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterWriteRegsRange">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>45</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Write Regs Range</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterWriteRegsSeries">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>70</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Write Regs Series</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterDeviceSpecific_2">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>170</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Device-specific (2)</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterDeviceSpecific_3">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>195</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Device-specific (3)</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterDeviceSpecific_4">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>220</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Device-specific (4)</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="filterMsgTypesBox">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>200</y>
-       <width>170</width>
-       <height>150</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Message Types</string>
-     </property>
-     <widget class="QCheckBox" name="filterMaster">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>95</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Master's Request</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterSlave">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>120</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Slave's Response</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterAllMsgTypes">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>140</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>All Message Types</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterHighPrioMaster">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>45</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Master's High-prio</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="filterHighPrioSlave">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>70</y>
-        <width>130</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Slave's High-prio</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>170</width>
-       <height>70</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Slave Addresses</string>
-     </property>
-     <widget class="QLineEdit" name="lineEdit">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>150</width>
-        <height>20</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>150</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Filter by Address</string>
-      </property>
-     </widget>
-    </widget>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

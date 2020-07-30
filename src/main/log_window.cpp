@@ -23,13 +23,13 @@ void LogWindow::makeHeader()
    setHorizontalHeaderLabels(logWindowHeader);
 
    resizeColumnsToContents();
-   setColumnWidth(COUNT, 50);
-   setColumnWidth(TIME, 80);
-   setColumnWidth(MSG_TYPE, 75);
-   setColumnWidth(SLAVE_ADDRESS, 80);
-   setColumnWidth(F_CODE, 65);
-   setColumnWidth(DATA_SIZE, 40);
-   setColumnWidth(DATA, 195);
+   setColumnWidth((uint32_t)Column::count, 50);
+   setColumnWidth((uint32_t)Column::time, 80);
+   setColumnWidth((uint32_t)Column::msg_type, 75);
+   setColumnWidth((uint32_t)Column::slave_address, 80);
+   setColumnWidth((uint32_t)Column::f_code, 65);
+   setColumnWidth((uint32_t)Column::data_size, 40);
+   setColumnWidth((uint32_t)Column::data, 195);
 
    horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
 }
@@ -92,7 +92,7 @@ void LogWindow::setCount()
 
     auto item = new QTableWidgetItem(m_count);
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setItem(m_currentRow, COUNT, item);
+    setItem(m_currentRow, (uint32_t)Column::count, item);
 }
 
 void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
@@ -105,7 +105,7 @@ void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
 
     auto item = new QTableWidgetItem(m_time);
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setItem(m_currentRow, TIME, item);
+    setItem(m_currentRow, (uint32_t)Column::time, item);
 }
 
 void LogWindow::setMsgType(const IdMsgTypes msgType)
@@ -116,7 +116,7 @@ void LogWindow::setMsgType(const IdMsgTypes msgType)
 
     auto item = new QTableWidgetItem(m_msgType);
     item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, MSG_TYPE, item);
+    setItem(m_currentRow, (uint32_t)Column::msg_type, item);
 }
 
 void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
@@ -129,7 +129,7 @@ void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
 
     auto item = new QTableWidgetItem(m_slaveAddress);
     item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, SLAVE_ADDRESS, item);
+    setItem(m_currentRow, (uint32_t)Column::slave_address, item);
 }
 
 void LogWindow::setFCode(const IdFCode fCode)
@@ -140,7 +140,7 @@ void LogWindow::setFCode(const IdFCode fCode)
 
     auto item = new QTableWidgetItem(m_fCode);
     item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, F_CODE, item);
+    setItem(m_currentRow, (uint32_t)Column::f_code, item);
 }
 
 void LogWindow::setDataSize(const uint32_t dataSize)
@@ -151,7 +151,7 @@ void LogWindow::setDataSize(const uint32_t dataSize)
 
     auto item = new QTableWidgetItem(m_dataSize);
     item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, DATA_SIZE, item);
+    setItem(m_currentRow, (uint32_t)Column::data_size, item);
 }
 
 void LogWindow::setData(const QByteArray data)
@@ -163,7 +163,7 @@ void LogWindow::setData(const QByteArray data)
 
     auto item = new QTableWidgetItem(m_data);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, DATA, item);
+    setItem(m_currentRow, (uint32_t)Column::data, item);
 }
 
 void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const uint32_t dataSize)
@@ -262,7 +262,7 @@ void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const 
 
     auto item = new QTableWidgetItem(m_msgInfo);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, MSG_INFO, item);
+    setItem(m_currentRow, (uint32_t)Column::msg_info, item);
 }
 
 void LogWindow::setMsgInfo(const QString errorInfo)
@@ -274,14 +274,14 @@ void LogWindow::setMsgInfo(const QString errorInfo)
 
     auto item = new QTableWidgetItem(m_msgInfo);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, MSG_INFO, item);
+    setItem(m_currentRow, (uint32_t)Column::msg_info, item);
 }
 
 void LogWindow::setDefaultMessageFilterSettings()
 {
-    m_filter.slaveAddressSettings.fill(true, id_addresses_size);
-    m_filter.msgTypeSettings.fill(true, id_msg_types_size);
-    m_filter.fCodeSettings.fill(true, id_f_code_size);
+    fillSlaveAddressSettings(true);
+    fillMsgTypesSettings(true);
+    fillFCodeSettings(true);
 }
 
 bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
@@ -330,4 +330,19 @@ void LogWindow::setFCodeFiltrated(const IdFCode fCode, const bool isFiltrated)
 bool LogWindow::isFCodeFiltrated(const IdFCode fCode)
 {
     return m_filter.fCodeSettings.value((uint32_t)fCode);
+}
+
+void LogWindow::fillSlaveAddressSettings(const bool isFiltrated)
+{
+    m_filter.slaveAddressSettings.fill(isFiltrated, id_addresses_size);
+}
+
+void LogWindow::fillMsgTypesSettings(const bool isFiltrated)
+{
+    m_filter.msgTypeSettings.fill(isFiltrated, id_msg_types_size);
+}
+
+void LogWindow::fillFCodeSettings(const bool isFiltrated)
+{
+    m_filter.fCodeSettings.fill(isFiltrated, id_f_code_size);
 }
