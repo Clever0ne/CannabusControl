@@ -304,31 +304,55 @@ bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
 
 void LogWindow::setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated)
 {
+    if ((IdAddresses)slaveAddress < IdAddresses::BROADCAST || (IdAddresses)slaveAddress > IdAddresses::DIRECT_ACCESS)
+    {
+        return;
+    }
     m_filter.slaveAddressSettings.replace(slaveAddress, isFiltrated);
 }
 
 bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
 {
+    if ((IdAddresses)slaveAddress < IdAddresses::BROADCAST || (IdAddresses)slaveAddress > IdAddresses::DIRECT_ACCESS)
+    {
+        return false;
+    }
     return m_filter.slaveAddressSettings.value(slaveAddress);
 }
 
 void LogWindow::setMsgTypeFiltrated(const IdMsgTypes msgType, const bool isFiltrated)
 {
+    if (msgType < IdMsgTypes::HIGH_PRIO_MASTER || msgType > IdMsgTypes::SLAVE)
+    {
+        return;
+    }
     m_filter.msgTypeSettings.replace((uint32_t)msgType, isFiltrated);
 }
 
 bool LogWindow::isMsgTypeFiltrated(const IdMsgTypes msgType)
 {
+    if (msgType < IdMsgTypes::HIGH_PRIO_MASTER || msgType > IdMsgTypes::SLAVE)
+    {
+        return false;
+    }
     return m_filter.msgTypeSettings.value((uint32_t)msgType);
 }
 
 void LogWindow::setFCodeFiltrated(const IdFCode fCode, const bool isFiltrated)
 {
+    if (fCode < IdFCode::WRITE_REGS_RANGE || fCode > IdFCode::DEVICE_SPECIFIC4)
+    {
+        return;
+    }
     m_filter.fCodeSettings.replace((uint32_t)fCode, isFiltrated);
 }
 
 bool LogWindow::isFCodeFiltrated(const IdFCode fCode)
 {
+    if (fCode < IdFCode::WRITE_REGS_RANGE || fCode > IdFCode::DEVICE_SPECIFIC4)
+    {
+        return false;
+    }
     return m_filter.fCodeSettings.value((uint32_t)fCode);
 }
 

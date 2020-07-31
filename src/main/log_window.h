@@ -22,7 +22,7 @@ public:
     explicit LogWindow(QWidget *parent = nullptr);
     ~LogWindow() = default;
 
-    static constexpr uint32_t id_addresses_size = 61;
+    static constexpr uint32_t id_addresses_size = 62;
     static constexpr uint32_t id_msg_types_size = 4;
     static constexpr uint32_t id_f_code_size = 8;
 

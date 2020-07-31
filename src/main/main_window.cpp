@@ -326,7 +326,7 @@ void MainWindow::setSlaveAddressesFiltrated()
         if (currentRange.contains(QChar('-')) != false)
         {
             // Разбиваем диапазон на левую и правую границу
-            QStringList leftAndRight = currentRange.split('-', Qt::SkipEmptyParts);
+            QStringList leftAndRight = currentRange.split('-');
 
             // Конвертируем строки в беззнаковые целые числа с учетом соглашений языка Си:
             // Строка начинается с '0x' — шестнадцатеричное число
@@ -368,14 +368,17 @@ void MainWindow::setSlaveAddressesFiltrated()
             // Конвертируем строку в беззнаковое целое число с учетом соглашений языка Си:
             // Строка начинается с '0x' — шестнадцатеричное число
             // Строка начинается с '0' — восьмеричное число
+            // Всё остально — десятичное число
             bool isConverted = true;
             uint32_t slaveAddress = currentRange.toUInt(&isConverted, 0);
 
-            // Если не получилось конвертировать — диапазон в помойку
+            // Если не получилось конвертировать — адрес в помойку
             if (isConverted == false)
             {
                 continue;
             }
+
+            currentRange = tr("%1").arg(slaveAddress);
 
             // Добавляем адрес в вектор с фильтруемыми адресами
             slaveAddresses.append(slaveAddress);
