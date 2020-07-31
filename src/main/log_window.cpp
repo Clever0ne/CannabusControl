@@ -299,16 +299,16 @@ bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
 
 void LogWindow::setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated)
 {
-    if ((IdAddresses)slaveAddress < IdAddresses::BROADCAST || (IdAddresses)slaveAddress > IdAddresses::DIRECT_ACCESS)
+    if (slaveAddress > (uint32_t)IdAddresses::DIRECT_ACCESS)
     {
         return;
     }
     m_filter.slaveAddressSettings.replace(slaveAddress, isFiltrated);
 }
 
-bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
+bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress) const
 {
-    if ((IdAddresses)slaveAddress < IdAddresses::BROADCAST || (IdAddresses)slaveAddress > IdAddresses::DIRECT_ACCESS)
+    if (slaveAddress > (uint32_t)IdAddresses::DIRECT_ACCESS)
     {
         return false;
     }
@@ -317,38 +317,82 @@ bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress)
 
 void LogWindow::setMsgTypeFiltrated(const IdMsgTypes msgType, const bool isFiltrated)
 {
-    if (msgType < IdMsgTypes::HIGH_PRIO_MASTER || msgType > IdMsgTypes::SLAVE)
+    switch (msgType)
     {
-        return;
+        case IdMsgTypes::HIGH_PRIO_MASTER:
+        case IdMsgTypes::HIGH_PRIO_SLAVE:
+        case IdMsgTypes::MASTER:
+        case IdMsgTypes::SLAVE:
+        {
+            m_filter.msgTypeSettings.replace((uint32_t)msgType, isFiltrated);
+        }
+        default:
+        {
+            return;
+        }
     }
-    m_filter.msgTypeSettings.replace((uint32_t)msgType, isFiltrated);
 }
 
-bool LogWindow::isMsgTypeFiltrated(const IdMsgTypes msgType)
+bool LogWindow::isMsgTypeFiltrated(const IdMsgTypes msgType) const
 {
-    if (msgType < IdMsgTypes::HIGH_PRIO_MASTER || msgType > IdMsgTypes::SLAVE)
+    switch (msgType)
     {
-        return false;
+        case IdMsgTypes::HIGH_PRIO_MASTER:
+        case IdMsgTypes::HIGH_PRIO_SLAVE:
+        case IdMsgTypes::MASTER:
+        case IdMsgTypes::SLAVE:
+        {
+            return m_filter.msgTypeSettings.value((uint32_t)msgType);
+        }
+        default:
+        {
+            return false;
+        }
     }
-    return m_filter.msgTypeSettings.value((uint32_t)msgType);
 }
 
 void LogWindow::setFCodeFiltrated(const IdFCode fCode, const bool isFiltrated)
 {
-    if (fCode < IdFCode::WRITE_REGS_RANGE || fCode > IdFCode::DEVICE_SPECIFIC4)
+    switch (fCode)
     {
-        return;
+        case IdFCode::WRITE_REGS_RANGE:
+        case IdFCode::WRITE_REGS_SERIES:
+        case IdFCode::READ_REGS_RANGE:
+        case IdFCode::READ_REGS_SERIES:
+        case IdFCode::DEVICE_SPECIFIC1:
+        case IdFCode::DEVICE_SPECIFIC2:
+        case IdFCode::DEVICE_SPECIFIC3:
+        case IdFCode::DEVICE_SPECIFIC4:
+        {
+            m_filter.fCodeSettings.replace((uint32_t)fCode, isFiltrated);
+        }
+        default:
+        {
+            return;
+        }
     }
-    m_filter.fCodeSettings.replace((uint32_t)fCode, isFiltrated);
 }
 
-bool LogWindow::isFCodeFiltrated(const IdFCode fCode)
+bool LogWindow::isFCodeFiltrated(const IdFCode fCode) const
 {
-    if (fCode < IdFCode::WRITE_REGS_RANGE || fCode > IdFCode::DEVICE_SPECIFIC4)
+    switch (fCode)
     {
-        return false;
+        case IdFCode::WRITE_REGS_RANGE:
+        case IdFCode::WRITE_REGS_SERIES:
+        case IdFCode::READ_REGS_RANGE:
+        case IdFCode::READ_REGS_SERIES:
+        case IdFCode::DEVICE_SPECIFIC1:
+        case IdFCode::DEVICE_SPECIFIC2:
+        case IdFCode::DEVICE_SPECIFIC3:
+        case IdFCode::DEVICE_SPECIFIC4:
+        {
+            return m_filter.fCodeSettings.value((uint32_t)fCode);
+        }
+        default:
+        {
+            return false;
+        }
     }
-    return m_filter.fCodeSettings.value((uint32_t)fCode);
 }
 
 void LogWindow::fillSlaveAddressSettings(const bool isFiltrated)

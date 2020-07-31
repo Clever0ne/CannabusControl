@@ -17,7 +17,7 @@ public:
     uint32_t bitRate() const;
 
     bool isFlexibleDataRateEnabled() const;
-    void setFlexibleFataRateEnabled(const bool isEnabled);
+    void setFlexibleDataRateEnabled(const bool isEnabled);
 
 private slots:
     void checkCustomSpeedPolicy(const int32_t index);

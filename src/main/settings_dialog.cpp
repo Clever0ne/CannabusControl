@@ -37,13 +37,16 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
             this, &SettingsDialog::pluginChanged);
     connect(m_ui->interfaceListBox, &QComboBox::currentTextChanged,
             this, &SettingsDialog::interfaceChanged);
+    connect(m_ui->bitRateListBox, &QComboBox::currentTextChanged,
+            this, &SettingsDialog::bitRateChanged);
 
     m_ui->pluginListBox->addItems(QCanBus::instance()->plugins());
 
     m_ui->pluginListBox->setCurrentIndex(m_ui->pluginListBox->findText("systeccan"));
 
     m_ui->isVirtual->setEnabled(false);
-    m_ui->isFlexibleDataRateCapable->setEnabled(false);
+    m_ui->isFlexibleDataRateCapable->setEnabled(false); 
+    m_ui->dataBitRateListBox->setEnabled(false);
 
     updateSettings();
 }
@@ -96,6 +99,21 @@ void SettingsDialog::interfaceChanged(const QString &interface)
             break;
         }
     }
+
+    const bool isEnabled = m_ui->isFlexibleDataRateCapable->isChecked();
+    m_ui->dataBitRateListBox->setEnabled(isEnabled);
+    m_ui->dataBitRateListBox->setFlexibleDataRateEnabled(isEnabled);
+}
+
+void SettingsDialog::bitRateChanged()
+{
+    if (m_ui->dataBitRateListBox->isEnabled() != false)
+    {
+        return;
+    }
+
+    const uint32_t bitRate = m_ui->bitRateListBox->bitRate();
+    m_ui->dataBitRateListBox->setCurrentIndex(m_ui->dataBitRateListBox->findData(bitRate));
 }
 
 void SettingsDialog::ok()

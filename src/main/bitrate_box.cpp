@@ -33,7 +33,7 @@ bool BitRateBox::isFlexibleDataRateEnabled() const
     return m_isFlexibleDataRateEnabled;
 }
 
-void BitRateBox::setFlexibleFataRateEnabled(const bool isEnabled)
+void BitRateBox::setFlexibleDataRateEnabled(const bool isEnabled)
 {
     m_isFlexibleDataRateEnabled = isEnabled;
     m_customSpeedValidator->setTop(isEnabled == true ? (uint32_t)BitRate::KBPS_8000 : (uint32_t)BitRate::KBPS_1000);

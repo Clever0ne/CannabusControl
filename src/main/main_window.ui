@@ -43,14 +43,14 @@
      <number>10</number>
     </property>
     <property name="bottomMargin">
-     <number>6</number>
+     <number>9</number>
     </property>
     <item>
      <widget class="QGroupBox" name="receivedMessagesBox">
       <property name="title">
        <string>Log Window</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="560,20">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="570,20">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -64,7 +64,7 @@
         <number>9</number>
        </property>
        <property name="bottomMargin">
-        <number>10</number>
+        <number>0</number>
        </property>
        <item>
         <widget class="LogWindow" name="logWindow">
@@ -132,13 +132,13 @@
         <number>9</number>
        </property>
        <property name="topMargin">
-        <number>3</number>
+        <number>4</number>
        </property>
        <property name="rightMargin">
         <number>9</number>
        </property>
        <property name="bottomMargin">
-        <number>10</number>
+        <number>9</number>
        </property>
        <item>
         <widget class="QGroupBox" name="filterSlaveAddressesBox">
@@ -294,7 +294,7 @@
          <property name="maximumSize">
           <size>
            <width>170</width>
-           <height>251</height>
+           <height>250</height>
           </size>
          </property>
          <property name="title">

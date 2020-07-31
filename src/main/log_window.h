@@ -33,13 +33,13 @@ public:
     };
 
     void setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated);
-    bool isSlaveAddressFiltrated(const uint32_t slaveAddress);
+    bool isSlaveAddressFiltrated(const uint32_t slaveAddress) const;
 
     void setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated);
-    bool isMsgTypeFiltrated(const cannabus::IdMsgTypes msgType);
+    bool isMsgTypeFiltrated(const cannabus::IdMsgTypes msgType) const;
 
     void setFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated);
-    bool isFCodeFiltrated(const cannabus::IdFCode fCode);
+    bool isFCodeFiltrated(const cannabus::IdFCode fCode) const;
 
     void fillSlaveAddressSettings(const bool isFiltrated);
     void fillMsgTypesSettings(const bool isFiltrated);

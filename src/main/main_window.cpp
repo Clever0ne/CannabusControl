@@ -10,6 +10,12 @@
 #include <QDesktopServices>
 #include <QTimer>
 
+#define SUPER_CONNECT(sender, signal, receiver, slot) \
+connect(sender, &std::remove_pointer<decltype(sender)>::type::signal, \
+        receiver, &std::remove_pointer<decltype(receiver)>::type::slot)
+
+#define CONNECT_FILTER(filter_name) SUPER_CONNECT(m_ui->filter##filter_name, stateChanged, this, set##filter_name##Filtrated);
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
@@ -458,20 +464,6 @@ void MainWindow::setAllFCodesFiltrated()
     m_ui->filterDeviceSpecific_4->setChecked(isFiltrated);
 }
 
-void MainWindow::setReadRegsRangeFiltrated()
-{
-    const bool isFiltrated = m_ui->filterReadRegsRange->isChecked();
-
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_RANGE, isFiltrated);
-}
-
-void MainWindow::setReadRegsSeriesFiltrated()
-{
-    const bool isFiltrated = m_ui->filterReadRegsSeries->isChecked();
-
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_SERIES, isFiltrated);
-}
-
 void MainWindow::setWriteRegsRangeFiltrated()
 {
     const bool isFiltrated = m_ui->filterWriteRegsRange->isChecked();
@@ -484,6 +476,20 @@ void MainWindow::setWriteRegsSeriesFiltrated()
     const bool isFiltrated = m_ui->filterWriteRegsSeries->isChecked();
 
     m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_SERIES, isFiltrated);
+}
+
+void MainWindow::setReadRegsRangeFiltrated()
+{
+    const bool isFiltrated = m_ui->filterReadRegsRange->isChecked();
+
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_RANGE, isFiltrated);
+}
+
+void MainWindow::setReadRegsSeriesFiltrated()
+{
+    const bool isFiltrated = m_ui->filterReadRegsSeries->isChecked();
+
+    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_SERIES, isFiltrated);
 }
 
 void MainWindow::setDeviceSpecific_1Filtrated()
@@ -525,3 +531,6 @@ void MainWindow::setDefaultFilterSettings()
     m_ui->filterAllFCodes->setChecked(false);
     m_ui->filterAllFCodes->setChecked(true);
 }
+
+#undef CONNECT_FILTER
+#undef SUPER_CONNECT

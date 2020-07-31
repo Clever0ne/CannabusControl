@@ -4,12 +4,6 @@
 #include <QCanBusDevice>
 #include <stdint.h>
 
-#define SUPER_CONNECT(sender, signal, receiver, slot) \
-connect(sender, &std::remove_pointer<decltype(sender)>::type::signal, \
-        receiver, &std::remove_pointer<decltype(receiver)>::type::slot)
-
-#define CONNECT_FILTER(filter_name) SUPER_CONNECT(m_ui->filter##filter_name, stateChanged, this, set##filter_name##Filtrated);
-
 QT_BEGIN_NAMESPACE
 
 class QCanBusFrame;
