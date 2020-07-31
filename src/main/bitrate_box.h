@@ -23,7 +23,7 @@ private slots:
     void checkCustomSpeedPolicy(const int32_t index);
 
 private:
-    void fillBitRates();
+    void fillBitRates(uint32_t index);
 
     bool m_isFlexibleDataRateEnabled = false;
     QIntValidator *m_customSpeedValidator = nullptr;

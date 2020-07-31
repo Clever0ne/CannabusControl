@@ -33,6 +33,7 @@ private slots:
     void pluginChanged(const QString &plugin);
     void interfaceChanged(const QString &interface);
     void bitRateChanged();
+    void canFdStatusChanged();
     void ok();
     void cancel();
 

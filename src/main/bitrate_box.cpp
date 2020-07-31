@@ -8,7 +8,7 @@ BitRateBox::BitRateBox(QWidget *parent) :
     QComboBox(parent),
     m_customSpeedValidator(new QIntValidator(0, (uint32_t)BitRate::KBPS_1000, this))
 {
-    fillBitRates();
+    fillBitRates(4);
 
     connect(this, QOverload<int32_t>::of(&QComboBox::currentIndexChanged),
             this, &BitRateBox::checkCustomSpeedPolicy);
@@ -21,11 +21,7 @@ BitRateBox::~BitRateBox()
 
 uint32_t BitRateBox::bitRate() const
 {
-    if (currentIndex() == (count() - 1))
-    {
-        return currentText().toUInt();
-    }
-    return itemData(currentIndex()).toInt();
+    return currentText().toUInt();
 }
 
 bool BitRateBox::isFlexibleDataRateEnabled() const
@@ -38,7 +34,7 @@ void BitRateBox::setFlexibleDataRateEnabled(const bool isEnabled)
     m_isFlexibleDataRateEnabled = isEnabled;
     m_customSpeedValidator->setTop(isEnabled == true ? (uint32_t)BitRate::KBPS_8000 : (uint32_t)BitRate::KBPS_1000);
 
-    fillBitRates();
+    fillBitRates(currentIndex());
 }
 
 void BitRateBox::checkCustomSpeedPolicy(const int32_t index)
@@ -52,7 +48,7 @@ void BitRateBox::checkCustomSpeedPolicy(const int32_t index)
     }
 }
 
-void BitRateBox::fillBitRates()
+void BitRateBox::fillBitRates(uint32_t index)
 {
     static const QList<uint32_t> rates = {
         (uint32_t)BitRate::KBPS_10,
@@ -88,6 +84,5 @@ void BitRateBox::fillBitRates()
     }
     addItem(tr("Custom"));
 
-    // По-умолчанию битрейт равен 125 кбит/с
-    setCurrentIndex(findData((uint32_t)BitRate::KBPS_125));
+    setCurrentIndex(index);
 }

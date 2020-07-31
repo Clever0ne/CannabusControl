@@ -39,6 +39,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
             this, &SettingsDialog::interfaceChanged);
     connect(m_ui->bitRateListBox, &QComboBox::currentTextChanged,
             this, &SettingsDialog::bitRateChanged);
+    connect(m_ui->canFdListBox, &QComboBox::currentTextChanged,
+            this, &SettingsDialog::canFdStatusChanged);
 
     m_ui->pluginListBox->addItems(QCanBus::instance()->plugins());
 
@@ -46,6 +48,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     m_ui->isVirtual->setEnabled(false);
     m_ui->isFlexibleDataRateCapable->setEnabled(false); 
+    m_ui->canFdListBox->setEnabled(false);
     m_ui->dataBitRateListBox->setEnabled(false);
 
     updateSettings();
@@ -101,19 +104,36 @@ void SettingsDialog::interfaceChanged(const QString &interface)
     }
 
     const bool isEnabled = m_ui->isFlexibleDataRateCapable->isChecked();
-    m_ui->dataBitRateListBox->setEnabled(isEnabled);
-    m_ui->dataBitRateListBox->setFlexibleDataRateEnabled(isEnabled);
+
+    if (isEnabled == false)
+    {
+        m_ui->canFdListBox->setCurrentIndex(m_ui->canFdListBox->findData("false"));
+    }
+    m_ui->canFdListBox->setEnabled(isEnabled);
 }
 
 void SettingsDialog::bitRateChanged()
 {
-    if (m_ui->dataBitRateListBox->isEnabled() != false)
+    if (m_ui->canFdListBox->currentText() != "false")
     {
         return;
     }
 
     const uint32_t bitRate = m_ui->bitRateListBox->bitRate();
     m_ui->dataBitRateListBox->setCurrentIndex(m_ui->dataBitRateListBox->findData(bitRate));
+}
+
+void SettingsDialog::canFdStatusChanged()
+{
+    bool isEnabled = true;
+    if (m_ui->canFdListBox->currentText() == "false")
+    {
+        isEnabled = false;
+        bitRateChanged();
+    }
+
+    m_ui->dataBitRateListBox->setEnabled(isEnabled);
+    m_ui->dataBitRateListBox->setFlexibleDataRateEnabled(isEnabled);
 }
 
 void SettingsDialog::ok()
