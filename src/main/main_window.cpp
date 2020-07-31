@@ -517,6 +517,7 @@ void MainWindow::setDeviceSpecific_4Filtrated()
 void MainWindow::setDefaultFilterSettings()
 {
     m_ui->filterSlaveAddresses->setText("");
+    m_ui->filterSlaveAddresses->editingFinished();
 
     m_ui->filterAllMsgTypes->setChecked(false);
     m_ui->filterAllMsgTypes->setChecked(true);
