@@ -50,7 +50,6 @@ public:
 
 public slots:
     void clearLog();
-    void setDefaultMessageFilterSettings();
 
 private:
     void makeHeader();

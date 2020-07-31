@@ -36,24 +36,20 @@ void MainWindow::initActionsConnections()
 {
     m_ui->actionDisconnect->setEnabled(false);
 
-    connect(m_ui->actionSettings, &QAction::triggered,
-            m_settingsDialog, &QDialog::show);
-    connect(m_ui->actionConnect, &QAction::triggered,
-            this, &MainWindow::connectDevice);
-    connect(m_ui->actionDisconnect, &QAction::triggered,
-            this, &MainWindow::disconnectDevice);
-    connect(m_ui->actionClearLog, &QAction::triggered,
-            m_ui->logWindow, &LogWindow::clearLog);
-    connect(m_ui->actionQuit, &QAction::triggered,
-            this, &QWidget::close);
+
+    SUPER_CONNECT(m_ui->actionConnect, triggered, this, connectDevice);
+    SUPER_CONNECT(m_ui->actionDisconnect, triggered, this, disconnectDevice);
+    SUPER_CONNECT(m_ui->actionClearLog, triggered, m_ui->logWindow, clearLog);
+    SUPER_CONNECT(m_ui->actionQuit, triggered, this, close);
+    SUPER_CONNECT(m_ui->actionSettings, triggered, m_settingsDialog, show);
+    SUPER_CONNECT(m_ui->actionResetFilterSettings, triggered, this, setDefaultFilterSettings);
 
     connect(m_settingsDialog, &QDialog::accepted, [this] {
         disconnectDevice();
         connectDevice();
     });
 
-    connect(m_ui->filterSlaveAddresses, &QLineEdit::editingFinished,
-            this, &MainWindow::setSlaveAddressesFiltrated);
+    SUPER_CONNECT(m_ui->filterSlaveAddresses, editingFinished, this, setSlaveAddressesFiltrated);
 
     // Устанавливаем связь между чекбоксами настроек фильтра типов сообщений и
     // соответствующими методами-сеттерами (см. макросы)
@@ -75,10 +71,9 @@ void MainWindow::initActionsConnections()
     CONNECT_FILTER(DeviceSpecific_4);
     CONNECT_FILTER(AllFCodes);
 
-    connect(m_busStatusTimer, &QTimer::timeout,
-            this, &MainWindow::busStatus);
-    connect(m_logWindowUpdateTimer, &QTimer::timeout,
-            this, &MainWindow::processFramesReceived);
+    // Устанавливаем связь между таймерами и соответствующими событиями
+    SUPER_CONNECT(m_busStatusTimer, timeout, this, busStatus);
+    SUPER_CONNECT(m_logWindowUpdateTimer, timeout, this, processFramesReceived);
 }
 
 void MainWindow::processError(QCanBusDevice::CanBusError error) const
@@ -517,4 +512,15 @@ void MainWindow::setDeviceSpecific_4Filtrated()
     const bool isFiltrated = m_ui->filterDeviceSpecific_4->isChecked();
 
     m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC4, isFiltrated);
+}
+
+void MainWindow::setDefaultFilterSettings()
+{
+    m_ui->filterSlaveAddresses->setText("");
+
+    m_ui->filterAllMsgTypes->setChecked(false);
+    m_ui->filterAllMsgTypes->setChecked(true);
+
+    m_ui->filterAllFCodes->setChecked(false);
+    m_ui->filterAllFCodes->setChecked(true);
 }

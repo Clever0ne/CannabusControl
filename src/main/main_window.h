@@ -55,6 +55,8 @@ private slots:
 
     void setSlaveAddressesFiltrated();
 
+    void setDefaultFilterSettings();
+
     void connectDevice();
     void disconnectDevice();
     void busStatus();

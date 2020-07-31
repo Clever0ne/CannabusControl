@@ -12,7 +12,9 @@ LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
     horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     verticalHeader()->hide();
 
-    setDefaultMessageFilterSettings();
+    fillSlaveAddressSettings(true);
+    fillMsgTypesSettings(true);
+    fillFCodeSettings(true);
 }
 
 void LogWindow::makeHeader()
@@ -275,13 +277,6 @@ void LogWindow::setMsgInfo(const QString errorInfo)
     auto item = new QTableWidgetItem(m_msgInfo);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     setItem(m_currentRow, (uint32_t)Column::msg_info, item);
-}
-
-void LogWindow::setDefaultMessageFilterSettings()
-{
-    fillSlaveAddressSettings(true);
-    fillMsgTypesSettings(true);
-    fillFCodeSettings(true);
 }
 
 bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)

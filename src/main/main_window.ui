@@ -481,6 +481,8 @@
    <addaction name="actionClearLog"/>
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
+   <addaction name="separator"/>
+   <addaction name="actionResetFilterSettings"/>
   </widget>
   <action name="actionConnect">
    <property name="icon">
@@ -531,6 +533,18 @@
    </property>
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionResetFilterSettings">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/reset_filter_settings.png</normaloff>:/reset_filter_settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reset Filter Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset Message Filter Settings to default</string>
    </property>
   </action>
  </widget>

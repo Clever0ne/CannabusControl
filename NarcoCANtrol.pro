@@ -44,3 +44,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     src/images/images.qrc
+
+win32: {
+    RC_FILE = $$PWD/src/res/NarcoCANtrol.rc
+}
