@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1180</width>
-    <height>720</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -124,7 +124,7 @@
       <property name="title">
        <string>Message Filter Settings</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="70,80,150,250">
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="70,0,150,250">
        <property name="spacing">
         <number>10</number>
        </property>
@@ -142,6 +142,12 @@
        </property>
        <item>
         <widget class="QGroupBox" name="filterSlaveAddressesBox">
+         <property name="minimumSize">
+          <size>
+           <width>170</width>
+           <height>70</height>
+          </size>
+         </property>
          <property name="maximumSize">
           <size>
            <width>170</width>
@@ -177,28 +183,157 @@
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="contentFiltersBox">
+         <property name="title">
+          <string>Registers and Data</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
+           <number>9</number>
+          </property>
+          <item>
+           <widget class="QFrame" name="frame">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <widget class="QLineEdit" name="filterRegs">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>20</y>
+               <width>70</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>70</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>70</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="placeholderText">
+              <string>00-FF</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="filterData">
+             <property name="geometry">
+              <rect>
+               <x>80</x>
+               <y>20</y>
+               <width>70</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>70</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>70</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="placeholderText">
+              <string>00-FF</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="contentFiltersLabel">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>150</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>150</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Add new Content Filter</string>
+             </property>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="FiltersList" name="contentFiltersList">
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>74</number>
+            </attribute>
+            <attribute name="verticalHeaderMinimumSectionSize">
+             <number>20</number>
+            </attribute>
+            <attribute name="verticalHeaderDefaultSectionSize">
+             <number>20</number>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="filterMsgTypesBox">
+         <property name="minimumSize">
+          <size>
+           <width>170</width>
+           <height>130</height>
+          </size>
+         </property>
          <property name="maximumSize">
           <size>
            <width>170</width>
-           <height>150</height>
+           <height>130</height>
           </size>
          </property>
          <property name="title">
@@ -208,7 +343,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>95</y>
+            <y>80</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -224,7 +359,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>120</y>
+            <y>100</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -259,7 +394,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>45</y>
+            <y>40</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -275,7 +410,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>70</y>
+            <y>60</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -291,10 +426,16 @@
        </item>
        <item>
         <widget class="QGroupBox" name="filterFCodesBox">
+         <property name="minimumSize">
+          <size>
+           <width>170</width>
+           <height>210</height>
+          </size>
+         </property>
          <property name="maximumSize">
           <size>
            <width>170</width>
-           <height>250</height>
+           <height>210</height>
           </size>
          </property>
          <property name="title">
@@ -304,7 +445,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>95</y>
+            <y>80</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -320,7 +461,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>120</y>
+            <y>100</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -336,7 +477,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>145</y>
+            <y>120</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -371,7 +512,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>45</y>
+            <y>40</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -387,7 +528,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>70</y>
+            <y>60</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -403,7 +544,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>170</y>
+            <y>140</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -419,7 +560,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>195</y>
+            <y>160</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -435,7 +576,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>220</y>
+            <y>180</y>
             <width>130</width>
             <height>20</height>
            </rect>
@@ -553,6 +694,11 @@
    <class>LogWindow</class>
    <extends>QTableWidget</extends>
    <header>src/main/log_window.h</header>
+  </customwidget>
+  <customwidget>
+   <class>FiltersList</class>
+   <extends>QTableWidget</extends>
+   <header>src/main/filters_list.h</header>
   </customwidget>
  </customwidgets>
  <resources>

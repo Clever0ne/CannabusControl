@@ -1,4 +1,5 @@
 #include "log_window.h"
+
 #include <QHeaderView>
 #include <algorithm>
 
@@ -21,24 +22,25 @@ void LogWindow::makeHeader()
 {
     QStringList logWindowHeader = {"No.", "Time", "Msg Type", "Address", "F-Code", "DLC", "Data", "Info"};
 
-   setColumnCount(logWindowHeader.count());
-   setHorizontalHeaderLabels(logWindowHeader);
+    setColumnCount(logWindowHeader.count());
+    setHorizontalHeaderLabels(logWindowHeader);
 
-   resizeColumnsToContents();
-   setColumnWidth((uint32_t)Column::count, 50);
-   setColumnWidth((uint32_t)Column::time, 80);
-   setColumnWidth((uint32_t)Column::msg_type, 75);
-   setColumnWidth((uint32_t)Column::slave_address, 80);
-   setColumnWidth((uint32_t)Column::f_code, 65);
-   setColumnWidth((uint32_t)Column::data_size, 40);
-   setColumnWidth((uint32_t)Column::data, 195);
+    resizeColumnsToContents();
+    setColumnWidth((uint32_t)Column::count, 50);
+    setColumnWidth((uint32_t)Column::time, 80);
+    setColumnWidth((uint32_t)Column::msg_type, 75);
+    setColumnWidth((uint32_t)Column::slave_address, 80);
+    setColumnWidth((uint32_t)Column::f_code, 65);
+    setColumnWidth((uint32_t)Column::data_size, 40);
+    setColumnWidth((uint32_t)Column::data, 195);
 
-   horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
+    horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
 }
 
 void LogWindow::clearLog()
 {    
     m_numberFramesReceived = 0;
+    m_currentRow = 0;
 
     clear();
     setRowCount(0);
@@ -294,6 +296,9 @@ bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
     const IdFCode fCode = getFCodeFromId(frameId);
     isFiltrated &= isFCodeFiltrated(fCode);
 
+    const QByteArray dataArray = frame.payload();
+    isFiltrated &= isContentFiltrated(msgType, fCode, dataArray);
+
     return isFiltrated;
 }
 
@@ -393,6 +398,190 @@ bool LogWindow::isFCodeFiltrated(const IdFCode fCode) const
             return false;
         }
     }
+}
+
+void LogWindow::setContentFiltrated(const QVector<uint32_t> regs, const QVector<uint32_t> data)
+{
+    m_filter.contentSettings.append(qMakePair(regs, data));
+}
+
+bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode, QByteArray dataArray) const
+{
+    if (m_filter.contentSettings.isEmpty() != false)
+    {
+        return true;
+    }
+
+    switch (fCode)
+    {
+        case IdFCode::WRITE_REGS_RANGE:
+        {
+            switch (msgType)
+            {
+                case IdMsgTypes::HIGH_PRIO_MASTER:
+                case IdMsgTypes::MASTER:
+                {
+                    uint32_t left = dataArray[0];
+                    uint32_t right = dataArray[1];
+
+                    for (uint32_t reg = left; reg <= right; reg++)
+                    {
+                        uint32_t index = 2 + reg - left;
+                        uint32_t data = dataArray[index];
+                        if (isPairRegDataFiltrated(reg, data) != false)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                case IdMsgTypes::HIGH_PRIO_SLAVE:
+                case IdMsgTypes::SLAVE:
+                {
+                    // В ответе ведомого не содержится информация о данных,
+                    // т.к. ответ в формате 'Адрес начальный Адрес конечный'
+                    return false;
+                }
+                default:
+                {
+                    return false;
+                }
+            }
+        }
+        case IdFCode::WRITE_REGS_SERIES:
+        {
+            switch (msgType)
+            {
+                case IdMsgTypes::HIGH_PRIO_MASTER:
+                case IdMsgTypes::MASTER:
+                {
+                    for (int32_t index = 0; index < dataArray.size(); index++)
+                    {
+                        uint32_t reg = dataArray[index];
+                        uint32_t data = dataArray[++index];
+                        if (isPairRegDataFiltrated(reg, data) != false)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                case IdMsgTypes::HIGH_PRIO_SLAVE:
+                case IdMsgTypes::SLAVE:
+                {
+                    // В ответе ведомого не содержится информация о данных,
+                    // т.к. ответ в формате 'Адрес 1 ... Адрес N'
+                    return false;
+                }
+                default:
+                {
+                    return false;
+                }
+            }
+        }
+        case IdFCode::READ_REGS_RANGE:
+        {
+            switch (msgType)
+            {
+                case IdMsgTypes::HIGH_PRIO_MASTER:
+                case IdMsgTypes::MASTER:
+                {
+                    // В запросе ведущего не содержится информация о данных,
+                    // т.к. запрос в формате 'Адрес начальный Адрес конечный'
+                    return false;
+                }
+                case IdMsgTypes::HIGH_PRIO_SLAVE:
+                case IdMsgTypes::SLAVE:
+                {
+                    uint32_t left = dataArray[0];
+                    uint32_t right = dataArray[1];
+
+                    for (uint32_t reg = left; reg <= right; reg++)
+                    {
+                        uint32_t index = 2 + reg - left;
+                        uint32_t data = dataArray[index];
+                        if(isPairRegDataFiltrated(reg, data) != false)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                default:
+                {
+                    return false;
+                }
+            }
+        }
+        case IdFCode::READ_REGS_SERIES:
+        {
+            switch (msgType)
+            {
+                case IdMsgTypes::HIGH_PRIO_MASTER:
+                case IdMsgTypes::MASTER:
+                {
+                    // В запросе ведущего не содержится информация о данных,
+                    // т.к. ответ в формате 'Адрес 1 ... Адрес N'
+                    return false;
+                }
+                case IdMsgTypes::HIGH_PRIO_SLAVE:
+                case IdMsgTypes::SLAVE:
+                {
+                    for (int32_t index = 0; index < dataArray.size(); index++)
+                    {
+                        uint32_t reg = dataArray[index];
+                        uint32_t data = dataArray[++index];
+                        if (isPairRegDataFiltrated(reg, data) != false)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+                default:
+                {
+                    return false;
+                }
+            }
+        }
+        case IdFCode::DEVICE_SPECIFIC1:
+        case IdFCode::DEVICE_SPECIFIC2:
+        case IdFCode::DEVICE_SPECIFIC3:
+        case IdFCode::DEVICE_SPECIFIC4:
+        {
+            // В запросе ведущего или в ответе ведомого не содержится информация о парах адрес-данные,
+            // т.к. device-specific сообщения могут иметь произвольное содержание
+            return true;
+        }
+        default:
+        {
+            return false;
+        }
+    }
+}
+
+bool LogWindow::isPairRegDataFiltrated(const uint32_t reg, const uint32_t data) const
+{
+    for (const Content content_filter : qAsConst(m_filter.contentSettings))
+    {
+        if ((content_filter.first.contains(reg) || content_filter.first.isEmpty()) == false)
+        {
+            continue;
+        }
+
+        if ((content_filter.second.contains(data) || content_filter.second.isEmpty()) == false)
+        {
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 void LogWindow::fillSlaveAddressSettings(const bool isFiltrated)

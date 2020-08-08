@@ -42,7 +42,6 @@ void MainWindow::initActionsConnections()
 {
     m_ui->actionDisconnect->setEnabled(false);
 
-
     SUPER_CONNECT(m_ui->actionConnect, triggered, this, connectDevice);
     SUPER_CONNECT(m_ui->actionDisconnect, triggered, this, disconnectDevice);
     SUPER_CONNECT(m_ui->actionClearLog, triggered, m_ui->logWindow, clearLog);
@@ -54,6 +53,9 @@ void MainWindow::initActionsConnections()
         disconnectDevice();
         connectDevice();
     });
+
+    SUPER_CONNECT(m_ui->filterRegs, editingFinished, this, setContentFiltrated);
+    SUPER_CONNECT(m_ui->filterData, editingFinished, this, setContentFiltrated);
 
     SUPER_CONNECT(m_ui->filterSlaveAddresses, editingFinished, this, setSlaveAddressesFiltrated);
 
@@ -312,86 +314,8 @@ void MainWindow::setSlaveAddressesFiltrated()
     QString ranges = m_ui->filterSlaveAddresses->text();
     ranges.remove(QChar(' '));
 
-    // Разбиваем строку на список подстрок с разделителями в виде запятых
-    QStringList range = ranges.split(',', Qt::SkipEmptyParts);
-    QVector<uint32_t> slaveAddresses;
-
-    ranges.clear();
-
-    // Разбираем получившиеся подстроки
-    for (QString currentRange : range)
-    {
-        currentRange = range.takeFirst();
-
-        // Проверяем, не является ли подстрока диапазоном
-        if (currentRange.contains(QChar('-')) != false)
-        {
-            // Разбиваем диапазон на левую и правую границу
-            QStringList leftAndRight = currentRange.split('-');
-
-            // Конвертируем строки в беззнаковые целые числа с учетом соглашений языка Си:
-            // Строка начинается с '0x' — шестнадцатеричное число
-            // Строка начинается с '0' — восьмеричное число
-            // Всё остально — десятичное число
-            bool isConverted = true;
-            uint32_t left = leftAndRight.takeFirst().toUInt(&isConverted, 0);
-            uint32_t right = leftAndRight.takeLast().toUInt(&isConverted, 0);
-
-            // Если не получилось конвертировать — диапазон в помойку
-            if (isConverted == false)
-            {
-                continue;
-            }
-
-            // Если левая граница больше правой, возможно, пользователь всё напутал
-            // Любезно поменяем границы местами без его согласия
-            if (left > right)
-            {
-                std::swap(left, right);
-            }
-
-            currentRange = tr("%1-%2").arg(left).arg(right);
-
-            // Если левая и правая границы равны, это вовсе не диапазон, а адрес
-            if (left == right)
-            {
-                currentRange = tr("%1").arg(left);
-            }
-
-            // Добавляем все адреса из диапазона в вектор с фильтруемыми адресами
-            for (uint32_t slaveAddress = left; slaveAddress <= right; slaveAddress++)
-            {
-                slaveAddresses.append(slaveAddress);
-            }
-        }
-        else
-        {
-            // Конвертируем строку в беззнаковое целое число с учетом соглашений языка Си:
-            // Строка начинается с '0x' — шестнадцатеричное число
-            // Строка начинается с '0' — восьмеричное число
-            // Всё остально — десятичное число
-            bool isConverted = true;
-            uint32_t slaveAddress = currentRange.toUInt(&isConverted, 0);
-
-            // Если не получилось конвертировать — адрес в помойку
-            if (isConverted == false)
-            {
-                continue;
-            }
-
-            currentRange = tr("%1").arg(slaveAddress);
-
-            // Добавляем адрес в вектор с фильтруемыми адресами
-            slaveAddresses.append(slaveAddress);
-        }
-
-        // Форматируем фильтруемые адреса в соответствии с поправками
-        if (ranges.isEmpty() == false)
-        {
-            ranges += ", ";
-        }
-        ranges += currentRange;
-    }
+    QVector<uint32_t> slaveAddresses = rangesStringToVector(ranges);
+    ranges = rangesVectorToString(slaveAddresses);
 
     // Обновляем текстовое поле с учётом поправок
     m_ui->filterSlaveAddresses->setText(ranges);
@@ -410,6 +334,153 @@ void MainWindow::setSlaveAddressesFiltrated()
     {
         m_ui->logWindow->setSlaveAddressFiltrated(slaveAddress, true);
     }
+}
+
+void MainWindow::setContentFiltrated()
+{
+    QString regsRange = m_ui->filterRegs->text();
+    QString dataRange = m_ui->filterData->text();
+
+    if ((regsRange.isEmpty() && dataRange.isEmpty()) != false)
+    {
+        return;
+    }
+
+    regsRange.remove("0x");
+    QVector<uint32_t> regs = rangesStringToVector(regsRange, 16);
+    if (regsRange.isEmpty() == false && regs.isEmpty() != false)
+    {
+        return;
+    }
+
+    dataRange.remove("0x");
+    QVector<uint32_t> data = rangesStringToVector(dataRange, 16);
+    if (dataRange.isEmpty() == false && data.isEmpty() != false)
+    {
+        return;
+    }
+
+    m_ui->logWindow->setContentFiltrated(regs, data);
+
+    m_ui->contentFiltersList->addNewContentFilter(regs, data);
+
+    m_ui->filterRegs->clear();
+    m_ui->filterData->clear();
+}
+
+QVector<uint32_t> MainWindow::rangesStringToVector(const QString ranges, const int32_t base)
+{
+    // Разбиваем строку на список подстрок с разделителями в виде запятых
+    QStringList range = ranges.split(',', Qt::SkipEmptyParts);
+    QVector<uint32_t> data;
+
+    // Разбираем получившиеся подстроки
+    for (QString currentRange : range)
+    {
+        currentRange = range.takeFirst();
+
+        // Проверяем, не является ли подстрока диапазоном
+        if (currentRange.contains(QChar('-')) != false)
+        {
+            // Разбиваем диапазон на левую и правую границу
+            QStringList leftAndRight = currentRange.split('-');
+
+            // При base = 0 конвертируем строки в беззнаковые целые числа с учетом соглашений языка Си:
+            // Строка начинается с '0x' — шестнадцатеричное число
+            // Строка начинается с '0' — восьмеричное число
+            // Всё остально — десятичное число
+            bool isConverted = true;
+            uint32_t left = leftAndRight.takeFirst().toUInt(&isConverted, base);
+            uint32_t right = leftAndRight.takeLast().toUInt(&isConverted, base);
+
+            // Если не получилось конвертировать — диапазон в помойку
+            if (isConverted == false)
+            {
+                continue;
+            }
+
+            // Если левая граница больше правой, возможно, пользователь всё напутал
+            // Любезно поменяем границы местами без его согласия
+            if (left > right)
+            {
+                std::swap(left, right);
+            }
+
+            // Добавляем все адреса из диапазона в вектор с фильтруемыми адресами
+            for (uint32_t currentData = left; currentData <= right; currentData++)
+            {
+                data.append(currentData);
+            }
+        }
+        else
+        {
+            // При base = 0 конвертируем строку в беззнаковое целое число с учетом соглашений языка Си:
+            // Строка начинается с '0x' — шестнадцатеричное число
+            // Строка начинается с '0' — восьмеричное число
+            // Всё остально — десятичное число
+            bool isConverted = true;
+            uint32_t currentData = currentRange.toUInt(&isConverted, base);
+
+            // Если не получилось конвертировать — адрес в помойку
+            if (isConverted == false)
+            {
+                continue;
+            }
+
+            // Добавляем адрес в вектор с фильтруемыми адресами
+            data.append(currentData);
+        }
+    }
+
+    std::sort(data.begin(), data.end());
+
+    return data;
+}
+
+QString MainWindow::rangesVectorToString(const QVector<uint32_t> ranges)
+{
+    QString data;
+    uint32_t left = ranges.first();
+    uint32_t right = ranges.first();
+
+    for (uint32_t currentData : ranges)
+    {
+        if (currentData == right)
+        {
+            if (currentData != ranges.last())
+            {
+                continue;
+            }
+        }
+
+        if (currentData == right + 1)
+        {
+            right = currentData;
+            if (currentData != ranges.last())
+            {
+                continue;
+            }
+        }
+
+        if (data.isEmpty() == false)
+        {
+            data += ", ";
+        }
+
+        if (left == right)
+        {
+            data += tr("%1").arg(left);
+        }
+        else
+        {
+            data += tr("%1-%2").arg(left).arg(right);
+        }
+
+        left = currentData;
+        right = currentData;
+    }
+
+    return data;
 }
 
 void MainWindow::setAllMsgTypesFiltrated()
@@ -530,6 +601,8 @@ void MainWindow::setDefaultFilterSettings()
 
     m_ui->filterAllFCodes->setChecked(false);
     m_ui->filterAllFCodes->setChecked(true);
+
+    m_ui->contentFiltersList->clearList();
 }
 
 #undef CONNECT_FILTER

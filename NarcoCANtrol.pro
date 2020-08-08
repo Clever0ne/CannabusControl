@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/main/bitrate_box.cpp \
+    src/main/filters_list.cpp \
     src/main/log_window.cpp \
     src/main/main.cpp \
     src/main/main_window.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     src/cannabus_library/cannabus_common.h \
     src/main/bitrate.h \
     src/main/bitrate_box.h \
+    src/main/filters_list.h \
     src/main/log_window.h \
     src/main/main_window.h \
     src/main/settings_dialog.h

@@ -49,6 +49,8 @@ private slots:
 
     void setSlaveAddressesFiltrated();
 
+    void setContentFiltrated();
+
     void setDefaultFilterSettings();
 
     void connectDevice();
@@ -59,6 +61,8 @@ private slots:
 
 private:
     void initActionsConnections();
+    QVector<uint32_t> rangesStringToVector(const QString ranges, const int32_t base = 0);
+    QString rangesVectorToString(const QVector<uint32_t> ranges);
 
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;
