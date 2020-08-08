@@ -47,6 +47,17 @@ void LogWindow::clearLog()
     makeHeader();
 }
 
+void LogWindow::removeContentFilter(int32_t index)
+{
+    if (index == -1)
+    {
+        m_filter.contentSettings.clear();
+        return;
+    }
+
+    m_filter.contentSettings.remove(index);
+}
+
 void LogWindow::processDataFrame(const QCanBusFrame &frame)
 {
     m_numberFramesReceived++;

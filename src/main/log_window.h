@@ -58,6 +58,7 @@ public:
 
 public slots:
     void clearLog();
+    void removeContentFilter(int32_t index);
 
 private:
     void makeHeader();

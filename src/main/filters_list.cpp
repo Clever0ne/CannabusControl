@@ -27,6 +27,7 @@ void FiltersList::clearList()
 {
     m_currentRow = 0;
 
+    emit removeFilterAtIndex(-1);
     clear();
     setRowCount(0);
     makeHeader();
@@ -62,7 +63,6 @@ QString FiltersList::rangesToString(const QVector<uint32_t> ranges, const int32_
     {
         return "00-FF";
     }
-
 
     QString data;
     uint32_t left = ranges.first();

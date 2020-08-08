@@ -57,6 +57,8 @@ void MainWindow::initActionsConnections()
     SUPER_CONNECT(m_ui->filterRegs, editingFinished, this, setContentFiltrated);
     SUPER_CONNECT(m_ui->filterData, editingFinished, this, setContentFiltrated);
 
+    SUPER_CONNECT(m_ui->contentFiltersList, removeFilterAtIndex, m_ui->logWindow, removeContentFilter);
+
     SUPER_CONNECT(m_ui->filterSlaveAddresses, editingFinished, this, setSlaveAddressesFiltrated);
 
     // Устанавливаем связь между чекбоксами настроек фильтра типов сообщений и
@@ -440,6 +442,12 @@ QVector<uint32_t> MainWindow::rangesStringToVector(const QString ranges, const i
 QString MainWindow::rangesVectorToString(const QVector<uint32_t> ranges)
 {
     QString data;
+
+    if (ranges.isEmpty() != false)
+    {
+        return data;
+    }
+
     uint32_t left = ranges.first();
     uint32_t right = ranges.first();
 
