@@ -26,7 +26,7 @@ void LogWindow::makeHeader()
     setHorizontalHeaderLabels(logWindowHeader);
 
     resizeColumnsToContents();
-    setColumnWidth((uint32_t)Column::count, 50);
+    setColumnWidth((uint32_t)Column::count, 55);
     setColumnWidth((uint32_t)Column::time, 80);
     setColumnWidth((uint32_t)Column::msg_type, 75);
     setColumnWidth((uint32_t)Column::slave_address, 80);

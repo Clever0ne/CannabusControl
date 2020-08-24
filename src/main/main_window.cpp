@@ -16,11 +16,13 @@ connect(sender, &std::remove_pointer<decltype(sender)>::type::signal, \
 
 #define CONNECT_FILTER(filter_name) SUPER_CONNECT(m_ui->filter##filter_name, stateChanged, this, set##filter_name##Filtrated);
 
+using namespace cannabus;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
     m_busStatusTimer(new QTimer(this)),
-    m_logWindowUpdateTimer(new QTimer(this))
+    m_logWindowUpdateTimer(new QTimer(this)), m_sendMessageTimer(new QTimer(this))
 {
     m_ui->setupUi(this);
 
@@ -28,6 +30,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_status = new QLabel;
     m_ui->statusBar->addPermanentWidget(m_status);
+
+    m_ui->actionDisconnect->setEnabled(false);
+
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+    m_slave.resize(61);
+
+    for (Slave slave : m_slave)
+    {
+        slave.reg.fill(0x00, 0xFF);
+        slave.data.fill(0x00, 0xFF);
+    }
+
+    // ******************* Необходимо удалить после тестирования ******************
 
     initActionsConnections();
 }
@@ -40,8 +56,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::initActionsConnections()
 {
-    m_ui->actionDisconnect->setEnabled(false);
-
     SUPER_CONNECT(m_ui->actionConnect, triggered, this, connectDevice);
     SUPER_CONNECT(m_ui->actionDisconnect, triggered, this, disconnectDevice);
     SUPER_CONNECT(m_ui->actionClearLog, triggered, m_ui->logWindow, clearLog);
@@ -84,6 +98,12 @@ void MainWindow::initActionsConnections()
     // Устанавливаем связь между таймерами и соответствующими событиями
     SUPER_CONNECT(m_busStatusTimer, timeout, this, busStatus);
     SUPER_CONNECT(m_logWindowUpdateTimer, timeout, this, processFramesReceived);
+
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+    SUPER_CONNECT(m_sendMessageTimer, timeout, this, sendMessage);
+
+    // ******************* Необходимо удалить после тестирования ******************
 }
 
 void MainWindow::processError(QCanBusDevice::CanBusError error) const
@@ -106,8 +126,143 @@ void MainWindow::processError(QCanBusDevice::CanBusError error) const
     }
 }
 
+// ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+void MainWindow::sendMessage()
+{
+    static bool isResponse = false;
+
+    static IdAddresses slaveAddress;
+    static IdFCode fCode;
+    static IdMsgTypes msgType;
+
+    static uint8_t regBegin = 0;
+    static uint8_t regEnd = 0;
+
+    slaveAddress = IdAddresses((uint32_t)IdAddresses::MIN_SLAVE_ADDRESS + rand() % ((uint32_t)IdAddresses::MAX_SLAVE_ADDRESS));
+    fCode = IdFCode((uint32_t)IdFCode::WRITE_REGS_RANGE + rand() % ((uint32_t)IdFCode::READ_REGS_SERIES + 1));
+    msgType = IdMsgTypes(((uint32_t)IdMsgTypes::HIGH_PRIO_MASTER + rand() % ((uint32_t)IdMsgTypes::SLAVE + 1)) / 2 * 2);
+
+    uint32_t id = makeId(slaveAddress, fCode, msgType);
+
+    QByteArray data;
+
+    if (isResponse == false)
+    {
+        switch(fCode)
+        {
+            case IdFCode::WRITE_REGS_RANGE:
+            {
+                uint8_t rangeLenght = 2 + rand() % (4 + 1);
+
+                regBegin = rand() % 0xFF;
+                regEnd = regBegin + (rangeLenght - 1);
+
+                if (regEnd < regBegin)
+                {
+                    regEnd = 0xFF;
+                }
+
+                data.append(regBegin);
+                data.append(regEnd);
+
+                for (uint8_t byteNumber = 0; byteNumber < rangeLenght; byteNumber++)
+                {
+                    uint8_t byte = rand();
+                    data.append(byte);
+                }
+
+                break;
+            }
+            case IdFCode::WRITE_REGS_SERIES:
+            {
+                uint8_t seriesLenght = 2 + rand() % (2 + 1);
+
+                regBegin = rand() % 0xFF;
+                regEnd = regBegin + (seriesLenght - 1);
+
+                if (regEnd < regBegin)
+                {
+                    regEnd = 0xFF;
+                }
+
+                for (uint8_t regAddress = regBegin; regAddress <= regEnd; regAddress++)
+                {
+                    uint8_t byte = rand();
+                    data.append(regAddress);
+                    data.append(byte);
+                }
+
+                break;
+            }
+            case IdFCode::READ_REGS_RANGE:
+            {
+                uint8_t rangeLenght = 2 + rand() % (4 + 1);
+
+                regBegin = rand() % 0xFF;
+                regEnd = regBegin + (rangeLenght - 1);
+
+                if (regEnd < regBegin)
+                {
+                    regEnd = 0xFF;
+                }
+
+                data.append(regBegin);
+                data.append(regEnd);
+
+                break;
+            }
+            case IdFCode::READ_REGS_SERIES:
+            {
+                uint8_t seriesLenght = 2 + rand() % (2 + 1);
+
+                regBegin = rand() % 0xFF;
+                regEnd = regBegin + (seriesLenght - 1);
+
+                if (regEnd < regBegin)
+                {
+                    regEnd = 0xFF;
+                }
+
+                for (uint8_t regAddress = regBegin; regAddress <= regEnd; regAddress++)
+                {
+                    data.append(regAddress);
+                }
+
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+    }
+    else
+    {
+
+    }
+
+    auto frame = new QCanBusFrame(id, data);
+
+    m_queue.enqueue(*frame);
+}
+
+// ******************* Необходимо удалить после тестирования ******************
+
 void MainWindow::connectDevice()
 {
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+    m_ui->actionConnect->setEnabled(false);
+    m_ui->actionDisconnect->setEnabled(true);
+    m_ui->logWindow->clearLog();
+
+    m_logWindowUpdateTimer->start(log_window_update_timeout);
+    m_sendMessageTimer->start(send_message_timeout);
+    return;
+
+    // ******************* Необходимо удалить после тестирования ******************
+
     // Получаем указатель на настройки для адаптера
     const auto settings = m_settingsDialog->settings();
 
@@ -201,6 +356,19 @@ void MainWindow::connectDevice()
 
 void MainWindow::disconnectDevice()
 {
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+    m_sendMessageTimer->stop();
+    processFramesReceived();
+
+    m_ui->actionConnect->setEnabled(true);
+    m_ui->actionDisconnect->setEnabled(false);
+
+    m_status->setText("Disconnected");
+    return;
+
+    // ******************* Необходимо удалить после тестирования ******************
+
     // Ничего не делаем, если отключать и так нечего
     if (m_canDevice == nullptr)
     {
@@ -236,6 +404,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::processFramesReceived()
 {
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+    while (m_queue.isEmpty() == false)
+    {
+        auto frame = m_queue.dequeue();
+
+        m_ui->logWindow->processDataFrame(frame);
+    }
+
+    // ******************* Необходимо удалить после тестирования ******************
+
     // Ничего не делаем, если принимать кадры не от кого
     if (m_canDevice == nullptr)
     {

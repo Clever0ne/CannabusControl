@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QCanBusDevice>
 #include <stdint.h>
+#include <QQueue>
 
 QT_BEGIN_NAMESPACE
 
@@ -26,6 +27,17 @@ public:
 
     static constexpr uint32_t bus_status_timeout = 1000;
     static constexpr uint32_t log_window_update_timeout = 100;
+
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+    static constexpr uint32_t send_message_timeout = 100;
+
+    struct Slave {
+        QVector<uint8_t> reg;
+        QVector<uint8_t> data;
+    };
+
+    // ******************* Необходимо удалить после тестирования ******************
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -59,8 +71,15 @@ private slots:
     void processError(QCanBusDevice::CanBusError error) const;
     void processFramesReceived();
 
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+    void sendMessage();
+
+    // ******************* Необходимо удалить после тестирования ******************
+
 private:
     void initActionsConnections();
+
     QVector<uint32_t> rangesStringToVector(const QString ranges, const int32_t base = 0);
     QString rangesVectorToString(const QVector<uint32_t> ranges);
 
@@ -70,4 +89,12 @@ private:
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
     QTimer *m_logWindowUpdateTimer = nullptr;
+
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+    QVector<Slave> m_slave;
+    QTimer *m_sendMessageTimer = nullptr;
+    QQueue<QCanBusFrame> m_queue;
+
+    // ******************* Необходимо удалить после тестирования ******************
 };
