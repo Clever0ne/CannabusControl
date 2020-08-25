@@ -22,7 +22,17 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
     m_busStatusTimer(new QTimer(this)),
-    m_logWindowUpdateTimer(new QTimer(this)), m_sendMessageTimer(new QTimer(this))
+    m_logWindowUpdateTimer(new QTimer(this))
+
+    // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+#if (EMULATION == ON)
+
+    , m_sendMessageTimer(new QTimer(this))
+
+#endif
+
+    // ******************* Необходимо удалить после тестирования ******************
 {
     m_ui->setupUi(this);
 
@@ -33,15 +43,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_ui->actionDisconnect->setEnabled(false);
 
+    m_ui->logWindow->clearLog();
+    m_ui->contentFiltersList->clearList();
+
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+#if (EMULATION == ON)
 
     m_slave.resize(61);
 
-    for (Slave slave : m_slave)
+    for (Slave &slave : m_slave)
     {
-        slave.reg.fill(0x00, 0xFF);
-        slave.data.fill(0x00, 0xFF);
+        slave.reg.fill(0x00, 256);
+        slave.data.fill(0x00, 256);
     }
+
+#endif
 
     // ******************* Необходимо удалить после тестирования ******************
 
@@ -101,7 +118,11 @@ void MainWindow::initActionsConnections()
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-    SUPER_CONNECT(m_sendMessageTimer, timeout, this, sendMessage);
+#if (EMULATION == ON)
+
+    SUPER_CONNECT(m_sendMessageTimer, timeout, this, emulateSendMessage);
+
+#endif
 
     // ******************* Необходимо удалить после тестирования ******************
 }
@@ -126,47 +147,76 @@ void MainWindow::processError(QCanBusDevice::CanBusError error) const
     }
 }
 
-// ************* Эмуляция общения между ведущим и ведомыми узлами *************
+// ***************** Эмуляция общения между ведущим и ведомыми узлами *************
 
-void MainWindow::sendMessage()
+#if (EMULATION == ON)
+
+void MainWindow::emulateSendMessage()
 {
     static bool isResponse = false;
+
+    static std::random_device randomNumber;
+    static std::mt19937 gen(randomNumber());
+
+    static std::uniform_int_distribution<> slaveAddressRange((uint32_t)IdAddresses::MIN_SLAVE_ADDRESS,
+                                                             (uint32_t)IdAddresses::MAX_SLAVE_ADDRESS);
+
+    static std::uniform_int_distribution<> fCodeRange((uint32_t)IdFCode::WRITE_REGS_RANGE,
+                                                      (uint32_t)IdFCode::READ_REGS_SERIES);
+
+    static std::uniform_int_distribution<> msgTypeRange((uint32_t)IdMsgTypes::HIGH_PRIO_MASTER,
+                                                        (uint32_t)IdMsgTypes::SLAVE);
+
+    static std::uniform_int_distribution<> rangeLenghtRange(2, 6);
+    static std::uniform_int_distribution<> seriesLenghtRange(2, 4);
+
+    static std::uniform_int_distribution<> regRange(0x00, 0xFF);
+    static std::uniform_int_distribution<> byteRange(0x00, 0xFF);
 
     static IdAddresses slaveAddress;
     static IdFCode fCode;
     static IdMsgTypes msgType;
 
-    static uint8_t regBegin = 0;
-    static uint8_t regEnd = 0;
 
-    slaveAddress = IdAddresses((uint32_t)IdAddresses::MIN_SLAVE_ADDRESS + rand() % ((uint32_t)IdAddresses::MAX_SLAVE_ADDRESS));
-    fCode = IdFCode((uint32_t)IdFCode::WRITE_REGS_RANGE + rand() % ((uint32_t)IdFCode::READ_REGS_SERIES + 1));
-    msgType = IdMsgTypes(((uint32_t)IdMsgTypes::HIGH_PRIO_MASTER + rand() % ((uint32_t)IdMsgTypes::SLAVE + 1)) / 2 * 2);
 
-    uint32_t id = makeId(slaveAddress, fCode, msgType);
+    static uint32_t id;
 
-    QByteArray data;
+    static QByteArray data;
 
     if (isResponse == false)
     {
+        data.clear();
+
+        slaveAddress = IdAddresses(slaveAddressRange(gen));
+        fCode = IdFCode(fCodeRange(gen));
+        msgType = IdMsgTypes(msgTypeRange(gen));
+
+        while (msgType == IdMsgTypes::HIGH_PRIO_SLAVE || msgType == IdMsgTypes::SLAVE)
+        {
+            msgType = IdMsgTypes(msgTypeRange(gen));
+        }
+
+        id = makeId(slaveAddress, fCode, msgType);
+
         switch(fCode)
         {
             case IdFCode::WRITE_REGS_RANGE:
             {
-                uint8_t rangeLenght = 2 + rand() % (4 + 1);
+                uint8_t rangeLenght = rangeLenghtRange(gen);
 
-                regBegin = rand() % 0xFF;
-                regEnd = regBegin + (rangeLenght - 1);
+                uint8_t regBegin = regRange(gen);
+                uint8_t regEnd = regBegin + (rangeLenght - 1);
 
                 if (regEnd < regBegin)
                 {
-                    regEnd = 0xFF;
+                    regEnd = regBegin;
+                    regBegin = regEnd - (rangeLenght - 1);
                 }
 
                 data.append(regBegin);
                 data.append(regEnd);
 
-                for (uint8_t byteNumber = 0; byteNumber < rangeLenght; byteNumber++)
+                for (uint32_t byteNumber = 0; byteNumber < rangeLenght; byteNumber++)
                 {
                     uint8_t byte = rand();
                     data.append(byte);
@@ -176,20 +226,27 @@ void MainWindow::sendMessage()
             }
             case IdFCode::WRITE_REGS_SERIES:
             {
-                uint8_t seriesLenght = 2 + rand() % (2 + 1);
+                uint8_t seriesLenght = seriesLenghtRange(gen);
 
-                regBegin = rand() % 0xFF;
-                regEnd = regBegin + (seriesLenght - 1);
+                QVector<uint8_t> regAddress;
 
-                if (regEnd < regBegin)
+                for (uint32_t regNumber = 0; regNumber <= seriesLenght; regNumber++)
                 {
-                    regEnd = 0xFF;
+                    uint8_t reg = regRange(gen);
+
+                    while (regAddress.contains(reg) != false)
+                    {
+                        reg = regRange(gen);
+                    }
+
+                    regAddress.append(reg);;
                 }
 
-                for (uint8_t regAddress = regBegin; regAddress <= regEnd; regAddress++)
+                for (uint32_t byteNumber = 0; byteNumber < seriesLenght; byteNumber++)
                 {
-                    uint8_t byte = rand();
-                    data.append(regAddress);
+                    uint8_t byte = byteRange(gen);
+
+                    data.append(regAddress.takeFirst());
                     data.append(byte);
                 }
 
@@ -197,14 +254,15 @@ void MainWindow::sendMessage()
             }
             case IdFCode::READ_REGS_RANGE:
             {
-                uint8_t rangeLenght = 2 + rand() % (4 + 1);
+                uint8_t rangeLenght = rangeLenghtRange(gen);
 
-                regBegin = rand() % 0xFF;
-                regEnd = regBegin + (rangeLenght - 1);
+                uint8_t regBegin = regRange(gen);
+                uint8_t regEnd = regBegin + (rangeLenght - 1);
 
                 if (regEnd < regBegin)
                 {
-                    regEnd = 0xFF;
+                    regEnd = regBegin;
+                    regBegin = regEnd - (rangeLenght - 1);
                 }
 
                 data.append(regBegin);
@@ -214,19 +272,25 @@ void MainWindow::sendMessage()
             }
             case IdFCode::READ_REGS_SERIES:
             {
-                uint8_t seriesLenght = 2 + rand() % (2 + 1);
+                uint8_t seriesLenght = seriesLenghtRange(gen);
 
-                regBegin = rand() % 0xFF;
-                regEnd = regBegin + (seriesLenght - 1);
+                QVector<uint8_t> regAddress;
 
-                if (regEnd < regBegin)
+                for (uint32_t regNumber = 0; regNumber <= seriesLenght; regNumber++)
                 {
-                    regEnd = 0xFF;
+                    uint8_t reg = regRange(gen);
+
+                    while (regAddress.contains(reg) != false)
+                    {
+                        reg = regRange(gen);
+                    }
+
+                    regAddress.append(reg);;
                 }
 
-                for (uint8_t regAddress = regBegin; regAddress <= regEnd; regAddress++)
+                for (uint32_t byteNumber = 0; byteNumber < seriesLenght; byteNumber++)
                 {
-                    data.append(regAddress);
+                    data.append(regAddress.takeFirst());
                 }
 
                 break;
@@ -236,22 +300,108 @@ void MainWindow::sendMessage()
                 break;
             }
         }
+
+        isResponse = true;
     }
     else
     {
+        msgType = IdMsgTypes::SLAVE;
 
+        id = makeId(slaveAddress, fCode, msgType);
+
+        switch (fCode)
+        {
+            case IdFCode::WRITE_REGS_RANGE:
+            {
+                uint32_t left = static_cast<uint8_t>(data[0]);
+                uint32_t right = static_cast<uint8_t>(data[1]);
+
+                for (uint32_t reg = left; reg <= right; reg++)
+                {
+                    uint32_t index = 2 + reg - left;
+                    m_slave[(uint32_t)slaveAddress].data[reg] = static_cast<uint8_t>(data[index]);
+                }
+
+                data.clear();
+
+                data.append(left);
+                data.append(right);
+
+                break;
+            }
+            case IdFCode::WRITE_REGS_SERIES:
+            {
+                QByteArray regAddress;
+
+                for (int32_t index = 0; index < data.size(); index++)
+                {
+                    uint32_t reg = static_cast<uint8_t>(data[index]);
+                    m_slave[(uint32_t)slaveAddress].data[reg] = static_cast<uint8_t>(data[++index]);
+
+                    regAddress.append(reg);
+                }
+
+                data.clear();
+
+                data = regAddress;
+
+                break;
+            }
+            case IdFCode::READ_REGS_RANGE:
+            {
+                uint32_t left = static_cast<uint8_t>(data[0]);
+                uint32_t right = static_cast<uint8_t>(data[1]);
+
+                for (uint32_t reg = left; reg <= right; reg++)
+                {
+                    data.append(m_slave[(uint32_t)slaveAddress].data[reg]);
+                }
+
+                break;
+            }
+            case IdFCode::READ_REGS_SERIES:
+            {
+                QByteArray regAddress = data;
+
+                data.clear();
+
+                for (int32_t index = 0; index < regAddress.size(); index++)
+                {
+                    uint32_t reg = static_cast<uint8_t>(regAddress[index]);
+
+                    data.append(reg);
+                    data.append(m_slave[(uint32_t)slaveAddress].data[reg]);
+                }
+
+                break;
+            }
+            case IdFCode::DEVICE_SPECIFIC1:
+            case IdFCode::DEVICE_SPECIFIC2:
+            case IdFCode::DEVICE_SPECIFIC3:
+            case IdFCode::DEVICE_SPECIFIC4:
+            default:
+            {
+                break;
+            }
+        }
+
+        isResponse = false;
     }
 
-    auto frame = new QCanBusFrame(id, data);
+    auto frame = QCanBusFrame(id, data);
 
-    m_queue.enqueue(*frame);
+    m_queue.enqueue(frame);
 }
 
-// ******************* Необходимо удалить после тестирования ******************
+#endif
+
+// *********************** Необходимо удалить после тестирования ******************
 
 void MainWindow::connectDevice()
 {
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+#if (EMULATION == ON)
 
     m_ui->actionConnect->setEnabled(false);
     m_ui->actionDisconnect->setEnabled(true);
@@ -259,7 +409,10 @@ void MainWindow::connectDevice()
 
     m_logWindowUpdateTimer->start(log_window_update_timeout);
     m_sendMessageTimer->start(send_message_timeout);
+    m_status->setText("Connected");
     return;
+
+#endif
 
     // ******************* Необходимо удалить после тестирования ******************
 
@@ -358,6 +511,8 @@ void MainWindow::disconnectDevice()
 {
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
+#if (EMULATION == ON)
+
     m_sendMessageTimer->stop();
     processFramesReceived();
 
@@ -366,6 +521,8 @@ void MainWindow::disconnectDevice()
 
     m_status->setText("Disconnected");
     return;
+
+#endif
 
     // ******************* Необходимо удалить после тестирования ******************
 
@@ -406,12 +563,16 @@ void MainWindow::processFramesReceived()
 {
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
+#if (EMULATION == ON)
+
     while (m_queue.isEmpty() == false)
     {
         auto frame = m_queue.dequeue();
 
         m_ui->logWindow->processDataFrame(frame);
     }
+
+#endif
 
     // ******************* Необходимо удалить после тестирования ******************
 

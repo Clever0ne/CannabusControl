@@ -6,12 +6,12 @@
 using namespace cannabus;
 
 LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
-{    
+{
+    verticalHeader()->hide();
     makeHeader();
 
     horizontalHeader()->setStretchLastSection(true);
     horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    verticalHeader()->hide();
 
     fillSlaveAddressSettings(true);
     fillMsgTypesSettings(true);
@@ -25,14 +25,16 @@ void LogWindow::makeHeader()
     setColumnCount(logWindowHeader.count());
     setHorizontalHeaderLabels(logWindowHeader);
 
-    resizeColumnsToContents();
-    setColumnWidth((uint32_t)Column::count, 55);
-    setColumnWidth((uint32_t)Column::time, 80);
-    setColumnWidth((uint32_t)Column::msg_type, 75);
-    setColumnWidth((uint32_t)Column::slave_address, 80);
-    setColumnWidth((uint32_t)Column::f_code, 65);
-    setColumnWidth((uint32_t)Column::data_size, 40);
-    setColumnWidth((uint32_t)Column::data, 195);
+    setColumnWidth((uint32_t)LogWindowColumn::count, fontMetrics().horizontalAdvance("123456 "));
+    setColumnWidth((uint32_t)LogWindowColumn::time, fontMetrics().horizontalAdvance("1234.1234 "));
+    setColumnWidth((uint32_t)LogWindowColumn::msg_type, fontMetrics().horizontalAdvance(" Msg Type "));
+    setColumnWidth((uint32_t)LogWindowColumn::slave_address, fontMetrics().horizontalAdvance("10 (0x0A) "));
+    setColumnWidth((uint32_t)LogWindowColumn::f_code, fontMetrics().horizontalAdvance("F-Code "));
+    setColumnWidth((uint32_t)LogWindowColumn::data_size, fontMetrics().horizontalAdvance(" [8] "));
+    setColumnWidth((uint32_t)LogWindowColumn::data, fontMetrics().horizontalAdvance("11 22 33 44 55 66 77 88 "));
+
+    horizontalHeader()->setSectionsClickable(false);
+    horizontalHeader()->setFixedHeight(25);
 
     horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
 }
@@ -107,7 +109,8 @@ void LogWindow::setCount()
 
     auto item = new QTableWidgetItem(m_count);
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::count, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::count, item);
 }
 
 void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
@@ -120,7 +123,8 @@ void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
 
     auto item = new QTableWidgetItem(m_time);
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::time, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::time, item);
 }
 
 void LogWindow::setMsgType(const IdMsgTypes msgType)
@@ -131,7 +135,8 @@ void LogWindow::setMsgType(const IdMsgTypes msgType)
 
     auto item = new QTableWidgetItem(m_msgType);
     item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, (uint32_t)Column::msg_type, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::msg_type, item);
 }
 
 void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
@@ -144,7 +149,8 @@ void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
 
     auto item = new QTableWidgetItem(m_slaveAddress);
     item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, (uint32_t)Column::slave_address, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::slave_address, item);
 }
 
 void LogWindow::setFCode(const IdFCode fCode)
@@ -155,7 +161,8 @@ void LogWindow::setFCode(const IdFCode fCode)
 
     auto item = new QTableWidgetItem(m_fCode);
     item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, (uint32_t)Column::f_code, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::f_code, item);
 }
 
 void LogWindow::setDataSize(const uint32_t dataSize)
@@ -166,7 +173,8 @@ void LogWindow::setDataSize(const uint32_t dataSize)
 
     auto item = new QTableWidgetItem(m_dataSize);
     item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, (uint32_t)Column::data_size, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::data_size, item);
 }
 
 void LogWindow::setData(const QByteArray data)
@@ -178,7 +186,8 @@ void LogWindow::setData(const QByteArray data)
 
     auto item = new QTableWidgetItem(m_data);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::data, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::data, item);
 }
 
 void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const uint32_t dataSize)
@@ -277,7 +286,8 @@ void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const 
 
     auto item = new QTableWidgetItem(m_msgInfo);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::msg_info, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::msg_info, item);
 }
 
 void LogWindow::setMsgInfo(const QString errorInfo)
@@ -289,7 +299,8 @@ void LogWindow::setMsgInfo(const QString errorInfo)
 
     auto item = new QTableWidgetItem(m_msgInfo);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::msg_info, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::msg_info, item);
 }
 
 bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
@@ -416,7 +427,7 @@ void LogWindow::setContentFiltrated(const QVector<uint32_t> regs, const QVector<
     m_filter.contentSettings.append(qMakePair(regs, data));
 }
 
-bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode, QByteArray dataArray) const
+bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode, const QByteArray dataArray) const
 {
     if (m_filter.contentSettings.isEmpty() != false)
     {
@@ -432,13 +443,14 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
                 case IdMsgTypes::HIGH_PRIO_MASTER:
                 case IdMsgTypes::MASTER:
                 {
-                    uint32_t left = dataArray[0];
-                    uint32_t right = dataArray[1];
+                    uint32_t left = static_cast<uint8_t> (dataArray[0]);
+                    uint32_t right = static_cast<uint8_t> (dataArray[1]);
 
                     for (uint32_t reg = left; reg <= right; reg++)
                     {
                         uint32_t index = 2 + reg - left;
-                        uint32_t data = dataArray[index];
+                        uint32_t data = static_cast<uint8_t> (dataArray[index]);
+
                         if (isPairRegDataFiltrated(reg, data) != false)
                         {
                             return true;
@@ -469,8 +481,9 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
                 {
                     for (int32_t index = 0; index < dataArray.size(); index++)
                     {
-                        uint32_t reg = dataArray[index];
-                        uint32_t data = dataArray[++index];
+                        uint32_t reg = static_cast<uint8_t> (dataArray[index]);
+                        uint32_t data = static_cast<uint8_t> (dataArray[++index]);
+
                         if (isPairRegDataFiltrated(reg, data) != false)
                         {
                             return true;
@@ -506,13 +519,13 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
                 case IdMsgTypes::HIGH_PRIO_SLAVE:
                 case IdMsgTypes::SLAVE:
                 {
-                    uint32_t left = dataArray[0];
-                    uint32_t right = dataArray[1];
+                    uint32_t left = static_cast<uint8_t> (dataArray[0]);
+                    uint32_t right = static_cast<uint8_t> (dataArray[1]);
 
                     for (uint32_t reg = left; reg <= right; reg++)
                     {
                         uint32_t index = 2 + reg - left;
-                        uint32_t data = dataArray[index];
+                        uint32_t data = static_cast<uint8_t> (dataArray[index]);
                         if(isPairRegDataFiltrated(reg, data) != false)
                         {
                             return true;
@@ -543,8 +556,8 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
                 {
                     for (int32_t index = 0; index < dataArray.size(); index++)
                     {
-                        uint32_t reg = dataArray[index];
-                        uint32_t data = dataArray[++index];
+                        uint32_t reg = static_cast<uint8_t> (dataArray[index]);
+                        uint32_t data = static_cast<uint8_t> (dataArray[++index]);
                         if (isPairRegDataFiltrated(reg, data) != false)
                         {
                             return true;

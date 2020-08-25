@@ -3,7 +3,22 @@
 #include <QMainWindow>
 #include <QCanBusDevice>
 #include <stdint.h>
+
+#define ON        1
+#define OFF       0
+
+#define EMULATION ON
+
+// ************* Эмуляция общения между ведущим и ведомыми узлами *************
+
+#if (EMULATION == ON)
+
 #include <QQueue>
+#include <random>
+
+#endif
+
+// ******************* Необходимо удалить после тестирования ******************
 
 QT_BEGIN_NAMESPACE
 
@@ -73,7 +88,11 @@ private slots:
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-    void sendMessage();
+#if (EMULATION == ON)
+
+    void emulateSendMessage();
+
+#endif
 
     // ******************* Необходимо удалить после тестирования ******************
 
@@ -92,9 +111,13 @@ private:
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
+#if (EMULATION == ON)
+
     QVector<Slave> m_slave;
     QTimer *m_sendMessageTimer = nullptr;
     QQueue<QCanBusFrame> m_queue;
+
+#endif
 
     // ******************* Необходимо удалить после тестирования ******************
 };

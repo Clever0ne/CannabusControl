@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "../cannabus_library/cannabus_common.h"
 
-enum class Column {
+enum class LogWindowColumn {
     count,
     time,
     msg_type,

@@ -1,24 +1,30 @@
 #include "filters_list.h"
 
 #include <QHeaderView>
+#include <QPushButton>
 
 FiltersList::FiltersList(QWidget *parent) : QTableWidget(parent)
 {
+    verticalHeader()->hide();
     makeHeader();
 
     horizontalHeader()->setStretchLastSection(true);
     horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    verticalHeader()->hide();
 }
 
 void FiltersList::makeHeader()
 {
-    QStringList contentFilterListHeader = {"Regs", "Data"};
+    QStringList contentFilterListHeader = {"", "Regs", "Data"};
 
     setColumnCount(contentFilterListHeader.count());
     setHorizontalHeaderLabels(contentFilterListHeader);
 
-    resizeColumnsToContents();
+    setColumnWidth((uint32_t)FiltersListColumn::button, fontMetrics().horizontalAdvance(" - "));
+    setColumnWidth((uint32_t)FiltersListColumn::regs, fontMetrics().horizontalAdvance(" 00-FF "));
+    setColumnWidth((uint32_t)FiltersListColumn::data, fontMetrics().horizontalAdvance(" 00-FF "));
+
+    horizontalHeader()->setSectionsClickable(false);
+    horizontalHeader()->setFixedHeight(25);
 
     horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
 }
@@ -41,20 +47,32 @@ void FiltersList::addNewContentFilter(const QVector<uint32_t> regs, const QVecto
     QString regsRange = rangesToString(regs);
     QString dataRange = rangesToString(data);
 
+    addButton();
     setRegsRange(regsRange);
     setDataRange(dataRange);
 }
 
+void FiltersList::addButton()
+{
+    auto button = new QPushButton();
+    button->setStyleSheet("QPushButton { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
+    button->setText("—");
+    button->setObjectName(tr("button_%1").arg(m_currentRow));
+    setCellWidget(m_currentRow, (uint32_t)FiltersListColumn::button, button);
+}
+
 void FiltersList::setRegsRange(const QString regsRange)
 {
-    auto regsRangesItem = new QTableWidgetItem(regsRange);
-    setItem(m_currentRow, 0, regsRangesItem);
+    auto item = new QTableWidgetItem(regsRange);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)FiltersListColumn::regs, item);
 }
 
 void FiltersList::setDataRange(const QString dataRange)
 {
-    auto dataRangesItem = new QTableWidgetItem(dataRange);
-    setItem(m_currentRow, 1, dataRangesItem);
+    auto item = new QTableWidgetItem(dataRange);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)FiltersListColumn::data, item);
 }
 
 QString FiltersList::rangesToString(const QVector<uint32_t> ranges, const int32_t base)

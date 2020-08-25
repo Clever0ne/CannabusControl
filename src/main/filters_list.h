@@ -3,6 +3,12 @@
 #include <QTableWidget>
 #include <stdint.h>
 
+enum class FiltersListColumn {
+    button,
+    regs,
+    data
+};
+
 class FiltersList : public QTableWidget
 {
     Q_OBJECT
@@ -22,6 +28,7 @@ private:
 
     QString rangesToString(const QVector<uint32_t> ranges, const int32_t base = 16);
 
+    void addButton();
     void setRegsRange(const QString regsRange);
     void setDataRange(const QString dataRange);
 
