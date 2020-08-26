@@ -162,7 +162,7 @@
            <number>9</number>
           </property>
           <item>
-           <widget class="FiltersList" name="contentFiltersList">
+           <widget class="FilterList" name="contentFilterList">
             <property name="font">
              <font>
               <family>Courier New</family>
@@ -173,13 +173,13 @@
              <number>0</number>
             </attribute>
             <attribute name="horizontalHeaderDefaultSectionSize">
-             <number>0</number>
+             <number>20</number>
             </attribute>
             <attribute name="verticalHeaderMinimumSectionSize">
              <number>20</number>
             </attribute>
             <attribute name="verticalHeaderDefaultSectionSize">
-             <number>20</number>
+             <number>26</number>
             </attribute>
            </widget>
           </item>
@@ -602,9 +602,9 @@
    <header>src/main/log_window.h</header>
   </customwidget>
   <customwidget>
-   <class>FiltersList</class>
+   <class>FilterList</class>
    <extends>QTableWidget</extends>
-   <header>src/main/filters_list.h</header>
+   <header>src/main/filter_list.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -31,6 +31,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class SettingsDialog;
+class Filter;
 
 class MainWindow : public QMainWindow
 {
@@ -108,6 +109,7 @@ private:
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;
     SettingsDialog *m_settingsDialog = nullptr;
+    Filter *m_filter = nullptr;
     std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
     QTimer *m_logWindowUpdateTimer = nullptr;

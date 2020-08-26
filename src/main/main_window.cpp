@@ -2,6 +2,7 @@
 #include "ui_main_window.h"
 #include "settings_dialog.h"
 #include "bitrate.h"
+#include "filter.h"
 #include "../cannabus_library/cannabus_common.h"
 
 #include <QCanBus>
@@ -38,13 +39,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_settingsDialog = new SettingsDialog;
 
+    m_filter = new Filter;
+
     m_status = new QLabel;
     m_ui->statusBar->addPermanentWidget(m_status);
 
     m_ui->actionDisconnect->setEnabled(false);
 
     m_ui->logWindow->clearLog();
-    m_ui->contentFiltersList->clearList();
+    m_ui->contentFilterList->clearList();
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
@@ -85,8 +88,10 @@ void MainWindow::initActionsConnections()
         connectDevice();
     });
 
-    SUPER_CONNECT(m_ui->contentFiltersList, addNewFilter, this, setContentFiltrated);
-    SUPER_CONNECT(m_ui->contentFiltersList, removeFilterAtIndex, m_ui->logWindow, removeContentFilter);
+    SUPER_CONNECT(m_ui->contentFilterList, addNewFilter, this, setContentFiltrated);
+    SUPER_CONNECT(m_ui->contentFilterList, removeFilterAtIndex, m_filter, removeContentFilter);
+
+    SUPER_CONNECT(m_filter, frameInProcessing, m_ui->logWindow, numberFramesReceivedIncrement);
 
     SUPER_CONNECT(m_ui->filterSlaveAddresses, editingFinished, this, setSlaveAddressesFiltrated);
 
@@ -565,7 +570,10 @@ void MainWindow::processFramesReceived()
     {
         auto frame = m_queue.dequeue();
 
-        m_ui->logWindow->processDataFrame(frame);
+        if (m_filter->mustDataFrameBeProcessed(frame) != false)
+        {
+            m_ui->logWindow->processDataFrame(frame);
+        }
     }
 
 #endif
@@ -594,7 +602,10 @@ void MainWindow::processFramesReceived()
         }
 
         // Обработка обычных кадров
-        m_ui->logWindow->processDataFrame(frame);
+        if (m_filter->mustDataFrameBeProcessed(frame) != false)
+        {
+            m_ui->logWindow->processDataFrame(frame);
+        }
     }
 }
 
@@ -661,16 +672,16 @@ void MainWindow::setSlaveAddressesFiltrated()
     // Если поле пустое, сбрасываем настройки фильтрации адресов к состоянию по-умолчанию
     if (ranges.isEmpty() != false)
     {
-        m_ui->logWindow->fillSlaveAddressSettings(true);
+        m_filter->fillSlaveAddressSettings(true);
         return;
     }
 
     // Иначе заполняем адресами из вектора с фильтруемыми адресами
-    m_ui->logWindow->fillSlaveAddressSettings(false);
+    m_filter->fillSlaveAddressSettings(false);
 
     for (uint32_t slaveAddress : slaveAddresses)
     {
-        m_ui->logWindow->setSlaveAddressFiltrated(slaveAddress, true);
+        m_filter->setSlaveAddressFiltrated(slaveAddress, true);
     }
 }
 
@@ -697,9 +708,9 @@ void MainWindow::setContentFiltrated(QString regsRange, QString dataRange)
         return;
     }
 
-    m_ui->logWindow->setContentFiltrated(regs, data);
+    m_filter->setContentFiltrated(regs, data);
 
-    m_ui->contentFiltersList->setNewFilter(regs, data);
+    m_ui->contentFilterList->setNewFilter(regs, data);
 }
 
 QVector<uint32_t> MainWindow::rangesStringToVector(const QString ranges, const int32_t base)
@@ -837,28 +848,28 @@ void MainWindow::setHighPrioMasterFiltrated()
 {
     const bool isFiltrated = m_ui->filterHighPrioMaster->isChecked();
 
-    m_ui->logWindow->setMsgTypeFiltrated(cannabus::IdMsgTypes::HIGH_PRIO_MASTER, isFiltrated);
+    m_filter->setMsgTypeFiltrated(cannabus::IdMsgTypes::HIGH_PRIO_MASTER, isFiltrated);
 }
 
 void MainWindow::setHighPrioSlaveFiltrated()
 {
     const bool isFiltrated = m_ui->filterHighPrioSlave->isChecked();
 
-    m_ui->logWindow->setMsgTypeFiltrated(cannabus::IdMsgTypes::HIGH_PRIO_SLAVE, isFiltrated);
+    m_filter->setMsgTypeFiltrated(cannabus::IdMsgTypes::HIGH_PRIO_SLAVE, isFiltrated);
 }
 
 void MainWindow::setMasterFiltrated()
 {
     const bool isFiltrated = m_ui->filterMaster->isChecked();
 
-    m_ui->logWindow->setMsgTypeFiltrated(cannabus::IdMsgTypes::MASTER, isFiltrated);
+    m_filter->setMsgTypeFiltrated(cannabus::IdMsgTypes::MASTER, isFiltrated);
 }
 
 void MainWindow::setSlaveFiltrated()
 {
     const bool isFiltrated = m_ui->filterSlave->isChecked();
 
-    m_ui->logWindow->setMsgTypeFiltrated(cannabus::IdMsgTypes::SLAVE, isFiltrated);
+    m_filter->setMsgTypeFiltrated(cannabus::IdMsgTypes::SLAVE, isFiltrated);
 }
 
 void MainWindow::setAllFCodesFiltrated()
@@ -879,56 +890,56 @@ void MainWindow::setWriteRegsRangeFiltrated()
 {
     const bool isFiltrated = m_ui->filterWriteRegsRange->isChecked();
 
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_RANGE, isFiltrated);
+    m_filter->setFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_RANGE, isFiltrated);
 }
 
 void MainWindow::setWriteRegsSeriesFiltrated()
 {
     const bool isFiltrated = m_ui->filterWriteRegsSeries->isChecked();
 
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_SERIES, isFiltrated);
+    m_filter->setFCodeFiltrated(cannabus::IdFCode::WRITE_REGS_SERIES, isFiltrated);
 }
 
 void MainWindow::setReadRegsRangeFiltrated()
 {
     const bool isFiltrated = m_ui->filterReadRegsRange->isChecked();
 
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_RANGE, isFiltrated);
+    m_filter->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_RANGE, isFiltrated);
 }
 
 void MainWindow::setReadRegsSeriesFiltrated()
 {
     const bool isFiltrated = m_ui->filterReadRegsSeries->isChecked();
 
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_SERIES, isFiltrated);
+    m_filter->setFCodeFiltrated(cannabus::IdFCode::READ_REGS_SERIES, isFiltrated);
 }
 
 void MainWindow::setDeviceSpecific_1Filtrated()
 {
     const bool isFiltrated = m_ui->filterDeviceSpecific_1->isChecked();
 
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC1, isFiltrated);
+    m_filter->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC1, isFiltrated);
 }
 
 void MainWindow::setDeviceSpecific_2Filtrated()
 {
     const bool isFiltrated = m_ui->filterDeviceSpecific_2->isChecked();
 
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC2, isFiltrated);
+    m_filter->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC2, isFiltrated);
 }
 
 void MainWindow::setDeviceSpecific_3Filtrated()
 {
     const bool isFiltrated = m_ui->filterDeviceSpecific_3->isChecked();
 
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC3, isFiltrated);
+    m_filter->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC3, isFiltrated);
 }
 
 void MainWindow::setDeviceSpecific_4Filtrated()
 {
     const bool isFiltrated = m_ui->filterDeviceSpecific_4->isChecked();
 
-    m_ui->logWindow->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC4, isFiltrated);
+    m_filter->setFCodeFiltrated(cannabus::IdFCode::DEVICE_SPECIFIC4, isFiltrated);
 }
 
 void MainWindow::setDefaultFilterSettings()
@@ -942,7 +953,7 @@ void MainWindow::setDefaultFilterSettings()
     m_ui->filterAllFCodes->setChecked(false);
     m_ui->filterAllFCodes->setChecked(true);
 
-    m_ui->contentFiltersList->clearList();
+    m_ui->contentFilterList->clearList();
 }
 
 #undef CONNECT_FILTER

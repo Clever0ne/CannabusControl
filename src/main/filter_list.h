@@ -3,19 +3,19 @@
 #include <QTableWidget>
 #include <stdint.h>
 
-enum class FiltersListColumn {
+enum class FilterListColumn {
     button,
     regs,
     data
 };
 
-class FiltersList : public QTableWidget
+class FilterList : public QTableWidget
 {
     Q_OBJECT
 
 public:
-    explicit FiltersList(QWidget *parent = nullptr);
-    ~FiltersList() = default;
+    explicit FilterList(QWidget *parent = nullptr);
+    ~FilterList() = default;
 
     void clearList();
     void setNewFilter(const QVector<uint32_t> regs, const QVector<uint32_t> data);
