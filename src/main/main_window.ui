@@ -124,7 +124,7 @@
       <property name="title">
        <string>Message Filter Settings</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="70,0,150,250">
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,150,250">
        <property name="spacing">
         <number>10</number>
        </property>
@@ -140,6 +140,52 @@
        <property name="bottomMargin">
         <number>9</number>
        </property>
+       <item>
+        <widget class="QGroupBox" name="contentFiltersBox">
+         <property name="title">
+          <string>Registers and Data</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
+           <number>9</number>
+          </property>
+          <item>
+           <widget class="FiltersList" name="contentFiltersList">
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+              <pointsize>8</pointsize>
+             </font>
+            </property>
+            <attribute name="horizontalHeaderMinimumSectionSize">
+             <number>0</number>
+            </attribute>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>0</number>
+            </attribute>
+            <attribute name="verticalHeaderMinimumSectionSize">
+             <number>20</number>
+            </attribute>
+            <attribute name="verticalHeaderDefaultSectionSize">
+             <number>20</number>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="filterSlaveAddressesBox">
          <property name="minimumSize">
@@ -180,149 +226,6 @@
            <string>Filter by Address</string>
           </property>
          </widget>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="contentFiltersBox">
-         <property name="title">
-          <string>Registers and Data</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <property name="spacing">
-           <number>10</number>
-          </property>
-          <property name="leftMargin">
-           <number>9</number>
-          </property>
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="rightMargin">
-           <number>9</number>
-          </property>
-          <property name="bottomMargin">
-           <number>9</number>
-          </property>
-          <item>
-           <widget class="QFrame" name="frame">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>150</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <widget class="QLineEdit" name="filterRegs">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>20</y>
-               <width>70</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>70</width>
-               <height>20</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>70</width>
-               <height>20</height>
-              </size>
-             </property>
-             <property name="placeholderText">
-              <string>00-FF</string>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="filterData">
-             <property name="geometry">
-              <rect>
-               <x>80</x>
-               <y>20</y>
-               <width>70</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>70</width>
-               <height>20</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>70</width>
-               <height>20</height>
-              </size>
-             </property>
-             <property name="placeholderText">
-              <string>00-FF</string>
-             </property>
-            </widget>
-            <widget class="QLabel" name="contentFiltersLabel">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>150</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>150</width>
-               <height>20</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>20</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Add new Content Filter</string>
-             </property>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="FiltersList" name="contentFiltersList">
-            <property name="font">
-             <font>
-              <family>Courier New</family>
-              <pointsize>8</pointsize>
-             </font>
-            </property>
-            <attribute name="horizontalHeaderMinimumSectionSize">
-             <number>0</number>
-            </attribute>
-            <attribute name="horizontalHeaderDefaultSectionSize">
-             <number>0</number>
-            </attribute>
-            <attribute name="verticalHeaderMinimumSectionSize">
-             <number>20</number>
-            </attribute>
-            <attribute name="verticalHeaderDefaultSectionSize">
-             <number>20</number>
-            </attribute>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </item>
        <item>

@@ -2,6 +2,10 @@
 
 #include <QHeaderView>
 #include <QPushButton>
+#include <QLineEdit>
+
+#define ADD_FILTER    tr("+")
+#define REMOVE_FILTER tr("–")
 
 FiltersList::FiltersList(QWidget *parent) : QTableWidget(parent)
 {
@@ -10,6 +14,23 @@ FiltersList::FiltersList(QWidget *parent) : QTableWidget(parent)
 
     horizontalHeader()->setStretchLastSection(true);
     horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+}
+
+void FiltersList::addRow()
+{
+    m_currentRow = rowCount();
+    setRowCount(m_currentRow + 1);
+
+    addButton(ADD_FILTER);
+
+    auto addLineEdit = [this](FiltersListColumn column, QString text) {
+        auto lineEdit = new QLineEdit();
+        lineEdit->setPlaceholderText(text);
+        setCellWidget(m_currentRow, (uint32_t)column, lineEdit);
+    };
+
+    addLineEdit(FiltersListColumn::regs, "00-FF");
+    addLineEdit(FiltersListColumn::data, "00-FF");
 }
 
 void FiltersList::makeHeader()
@@ -27,6 +48,8 @@ void FiltersList::makeHeader()
     horizontalHeader()->setFixedHeight(25);
 
     horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
+
+    addRow();
 }
 
 void FiltersList::clearList()
@@ -39,25 +62,61 @@ void FiltersList::clearList()
     makeHeader();
 }
 
-void FiltersList::addNewContentFilter(const QVector<uint32_t> regs, const QVector<uint32_t> data)
+void FiltersList::setNewFilter(const QVector<uint32_t> regs, const QVector<uint32_t> data)
 {
-    m_currentRow = rowCount();
-    setRowCount(m_currentRow + 1);
-
     QString regsRange = rangesToString(regs);
     QString dataRange = rangesToString(data);
 
-    addButton();
+    removeRow(m_currentRow);
+    setRowCount(m_currentRow + 1);
+
+    addButton(REMOVE_FILTER);
     setRegsRange(regsRange);
     setDataRange(dataRange);
+
+    addRow();
 }
 
-void FiltersList::addButton()
+void FiltersList::addFilterButtonPressed()
+{
+    auto range = [this](FiltersListColumn column) {
+        auto lineEdit = qobject_cast<QLineEdit *>(cellWidget(currentRow(), (uint32_t)column));
+
+        Q_ASSERT(lineEdit != nullptr);
+
+        return lineEdit->text();
+    };
+
+    QString regsRange = range(FiltersListColumn::regs);
+    QString dataRange = range(FiltersListColumn::data);
+
+    emit addNewFilter(regsRange, dataRange);
+}
+
+void FiltersList::removeFilterButtonPressed()
+{
+    int32_t row = currentRow();
+    removeRow(row);
+    m_currentRow--;
+
+    emit removeFilterAtIndex(row);
+}
+
+void FiltersList::addButton(const QString buttonText)
 {
     auto button = new QPushButton();
-    button->setStyleSheet("QPushButton { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
-    button->setText("—");
-    button->setObjectName(tr("button_%1").arg(m_currentRow));
+    button->setStyleSheet("QPushButton { background-color: beige; font-family: \"Courier New\"; font-size: 10pt }");
+    button->setText(buttonText);
+
+    if (buttonText == ADD_FILTER)
+    {
+        connect(button, &QPushButton::pressed, this, &FiltersList::addFilterButtonPressed);
+    }
+    else
+    {
+        connect(button, &QPushButton::pressed, this, &FiltersList::removeFilterButtonPressed);
+    }
+
     setCellWidget(m_currentRow, (uint32_t)FiltersListColumn::button, button);
 }
 

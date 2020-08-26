@@ -46,6 +46,9 @@ public:
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
     static constexpr uint32_t send_message_timeout = 100;
+    static constexpr uint32_t regs_range_size = 256;
+    static constexpr uint32_t data_range_size = 256;
+    static constexpr uint32_t slave_adresses_range_size = 61;
 
     struct Slave {
         QVector<uint8_t> reg;
@@ -76,7 +79,7 @@ private slots:
 
     void setSlaveAddressesFiltrated();
 
-    void setContentFiltrated();
+    void setContentFiltrated(QString regsRange, QString dataRange);
 
     void setDefaultFilterSettings();
 

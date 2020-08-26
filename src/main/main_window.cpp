@@ -50,12 +50,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #if (EMULATION == ON)
 
-    m_slave.resize(61);
+    m_slave.resize(slave_adresses_range_size);
 
     for (Slave &slave : m_slave)
     {
-        slave.reg.fill(0x00, 256);
-        slave.data.fill(0x00, 256);
+        slave.reg.fill(0x00, regs_range_size);
+        slave.data.fill(0x00, data_range_size);
     }
 
 #endif
@@ -85,9 +85,7 @@ void MainWindow::initActionsConnections()
         connectDevice();
     });
 
-    SUPER_CONNECT(m_ui->filterRegs, editingFinished, this, setContentFiltrated);
-    SUPER_CONNECT(m_ui->filterData, editingFinished, this, setContentFiltrated);
-
+    SUPER_CONNECT(m_ui->contentFiltersList, addNewFilter, this, setContentFiltrated);
     SUPER_CONNECT(m_ui->contentFiltersList, removeFilterAtIndex, m_ui->logWindow, removeContentFilter);
 
     SUPER_CONNECT(m_ui->filterSlaveAddresses, editingFinished, this, setSlaveAddressesFiltrated);
@@ -176,8 +174,6 @@ void MainWindow::emulateSendMessage()
     static IdAddresses slaveAddress;
     static IdFCode fCode;
     static IdMsgTypes msgType;
-
-
 
     static uint32_t id;
 
@@ -678,11 +674,8 @@ void MainWindow::setSlaveAddressesFiltrated()
     }
 }
 
-void MainWindow::setContentFiltrated()
-{
-    QString regsRange = m_ui->filterRegs->text();
-    QString dataRange = m_ui->filterData->text();
-
+void MainWindow::setContentFiltrated(QString regsRange, QString dataRange)
+{   
     if ((regsRange.isEmpty() && dataRange.isEmpty()) != false)
     {
         return;
@@ -690,6 +683,7 @@ void MainWindow::setContentFiltrated()
 
     regsRange.remove("0x");
     QVector<uint32_t> regs = rangesStringToVector(regsRange, 16);
+
     if (regsRange.isEmpty() == false && regs.isEmpty() != false)
     {
         return;
@@ -697,6 +691,7 @@ void MainWindow::setContentFiltrated()
 
     dataRange.remove("0x");
     QVector<uint32_t> data = rangesStringToVector(dataRange, 16);
+
     if (dataRange.isEmpty() == false && data.isEmpty() != false)
     {
         return;
@@ -704,10 +699,7 @@ void MainWindow::setContentFiltrated()
 
     m_ui->logWindow->setContentFiltrated(regs, data);
 
-    m_ui->contentFiltersList->addNewContentFilter(regs, data);
-
-    m_ui->filterRegs->clear();
-    m_ui->filterData->clear();
+    m_ui->contentFiltersList->setNewFilter(regs, data);
 }
 
 QVector<uint32_t> MainWindow::rangesStringToVector(const QString ranges, const int32_t base)

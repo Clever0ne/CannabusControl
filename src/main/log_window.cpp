@@ -104,7 +104,7 @@ void LogWindow::processErrorFrame(const QCanBusFrame &frame, const QString error
 void LogWindow::setCount()
 {
     // Выводим номер принятого кадра с шириной поля в 6 символов
-    // в формате '   123'
+    // в формате '123456'
     m_count = tr("%1").arg(m_numberFramesReceived, 6, 10, QLatin1Char(' '));
 
     auto item = new QTableWidgetItem(m_count);
@@ -116,7 +116,7 @@ void LogWindow::setCount()
 void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
 {
     // Выводим время в секундах с шириной поля в 9 символов
-    // в формате '  12.3456'
+    // в формате '1234.1234'
     m_time = tr("%1.%2")
             .arg(seconds, 4, 10, QLatin1Char(' '))
             .arg(microseconds / 100, 4, 10, QLatin1Char('0'));
@@ -443,13 +443,13 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
                 case IdMsgTypes::HIGH_PRIO_MASTER:
                 case IdMsgTypes::MASTER:
                 {
-                    uint32_t left = static_cast<uint8_t> (dataArray[0]);
-                    uint32_t right = static_cast<uint8_t> (dataArray[1]);
+                    uint32_t left = static_cast<uint8_t>(dataArray[0]);
+                    uint32_t right = static_cast<uint8_t>(dataArray[1]);
 
                     for (uint32_t reg = left; reg <= right; reg++)
                     {
                         uint32_t index = 2 + reg - left;
-                        uint32_t data = static_cast<uint8_t> (dataArray[index]);
+                        uint32_t data = static_cast<uint8_t>(dataArray[index]);
 
                         if (isPairRegDataFiltrated(reg, data) != false)
                         {
@@ -481,8 +481,8 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
                 {
                     for (int32_t index = 0; index < dataArray.size(); index++)
                     {
-                        uint32_t reg = static_cast<uint8_t> (dataArray[index]);
-                        uint32_t data = static_cast<uint8_t> (dataArray[++index]);
+                        uint32_t reg = static_cast<uint8_t>(dataArray[index]);
+                        uint32_t data = static_cast<uint8_t>(dataArray[++index]);
 
                         if (isPairRegDataFiltrated(reg, data) != false)
                         {
@@ -519,13 +519,13 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
                 case IdMsgTypes::HIGH_PRIO_SLAVE:
                 case IdMsgTypes::SLAVE:
                 {
-                    uint32_t left = static_cast<uint8_t> (dataArray[0]);
-                    uint32_t right = static_cast<uint8_t> (dataArray[1]);
+                    uint32_t left = static_cast<uint8_t>(dataArray[0]);
+                    uint32_t right = static_cast<uint8_t>(dataArray[1]);
 
                     for (uint32_t reg = left; reg <= right; reg++)
                     {
                         uint32_t index = 2 + reg - left;
-                        uint32_t data = static_cast<uint8_t> (dataArray[index]);
+                        uint32_t data = static_cast<uint8_t>(dataArray[index]);
                         if(isPairRegDataFiltrated(reg, data) != false)
                         {
                             return true;
@@ -556,8 +556,8 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
                 {
                     for (int32_t index = 0; index < dataArray.size(); index++)
                     {
-                        uint32_t reg = static_cast<uint8_t> (dataArray[index]);
-                        uint32_t data = static_cast<uint8_t> (dataArray[++index]);
+                        uint32_t reg = static_cast<uint8_t>(dataArray[index]);
+                        uint32_t data = static_cast<uint8_t>(dataArray[++index]);
                         if (isPairRegDataFiltrated(reg, data) != false)
                         {
                             return true;
@@ -590,14 +590,14 @@ bool LogWindow::isContentFiltrated(const IdMsgTypes msgType, const IdFCode fCode
 
 bool LogWindow::isPairRegDataFiltrated(const uint32_t reg, const uint32_t data) const
 {
-    for (const Content content_filter : qAsConst(m_filter.contentSettings))
+    for (const Content contentFilter : qAsConst(m_filter.contentSettings))
     {
-        if ((content_filter.first.contains(reg) || content_filter.first.isEmpty()) == false)
+        if ((contentFilter.first.contains(reg) || contentFilter.first.isEmpty()) == false)
         {
             continue;
         }
 
-        if ((content_filter.second.contains(data) || content_filter.second.isEmpty()) == false)
+        if ((contentFilter.second.contains(data) || contentFilter.second.isEmpty()) == false)
         {
             continue;
         }
