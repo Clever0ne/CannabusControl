@@ -6,6 +6,7 @@
 
 #define ADD_FILTER    tr("+")
 #define REMOVE_FILTER tr("–")
+#define DEFAULT_RANGE tr("00-FF")
 
 FilterList::FilterList(QWidget *parent) : QTableWidget(parent)
 {
@@ -29,8 +30,8 @@ void FilterList::addRow()
         setCellWidget(m_currentRow, (uint32_t)column, lineEdit);
     };
 
-    addLineEdit(FilterListColumn::regs, "00-FF");
-    addLineEdit(FilterListColumn::data, "00-FF");
+    addLineEdit(FilterListColumn::regs, DEFAULT_RANGE);
+    addLineEdit(FilterListColumn::data, DEFAULT_RANGE);
 }
 
 void FilterList::makeHeader()
@@ -62,18 +63,29 @@ void FilterList::clearList()
     makeHeader();
 }
 
-void FilterList::setNewFilter(const QVector<uint32_t> regs, const QVector<uint32_t> data)
+void FilterList::setFilter(QString regsRange, QString dataRange)
 {
-    QString regsRange = rangesToString(regs);
-    QString dataRange = rangesToString(data);
-
+    // Удаляем текущую строку (с кнопкой добавления строки)
+    // и добавлем строку для текущего фильтра
     removeRow(m_currentRow);
     setRowCount(m_currentRow + 1);
 
-    addButton(REMOVE_FILTER);
-    setRegsRange(regsRange);
-    setDataRange(dataRange);
+    // Если строка пустая, записываем в неё весь диапазон 00-FF
+    auto range = [](QString range) {
+        if (range.isEmpty() != false)
+        {
+            range = DEFAULT_RANGE;
+        }
+        return range;
+    };
 
+    // Добавляем кнопку для удаления фильтра,
+    // а также диапазоны фильтруемых регистров и данных
+    addButton(REMOVE_FILTER);
+    setRegsRange(range(regsRange));
+    setDataRange(range(dataRange));
+
+    // Добавляем новую строку для добавления фильтра
     addRow();
 
     scrollToBottom();
@@ -81,6 +93,10 @@ void FilterList::setNewFilter(const QVector<uint32_t> regs, const QVector<uint32
 
 void FilterList::addFilterButtonPressed()
 {
+    // Получаем диапазоны регистров и данных из QLineEdit'ов в ячейках таблицы
+    // Да, в ячейках таблицы в строке добавления фильтра изначально QLineEdit'ы
+    // Всё ради Placeholder text, иначе пользователь может не догадаться,
+    // что же ему нужно писать в эти ячейки
     auto range = [this](FilterListColumn column) {
         auto lineEdit = qobject_cast<QLineEdit *>(cellWidget(currentRow(), (uint32_t)column));
 
@@ -92,7 +108,7 @@ void FilterList::addFilterButtonPressed()
     QString regsRange = range(FilterListColumn::regs);
     QString dataRange = range(FilterListColumn::data);
 
-    emit addNewFilter(regsRange, dataRange);
+    emit addFilter(regsRange, dataRange);
 }
 
 void FilterList::removeFilterButtonPressed()
@@ -134,57 +150,4 @@ void FilterList::setDataRange(const QString dataRange)
     auto item = new QTableWidgetItem(dataRange);
     item->setFlags(item->flags() & ~Qt::ItemIsEditable);
     setItem(m_currentRow, (uint32_t)FilterListColumn::data, item);
-}
-
-QString FilterList::rangesToString(const QVector<uint32_t> ranges, const int32_t base)
-{
-    if (ranges.isEmpty() != false)
-    {
-        return "00-FF";
-    }
-
-    QString data;
-    uint32_t left = ranges.first();
-    uint32_t right = ranges.first();
-
-    for (uint32_t currentData : ranges)
-    {
-        if (currentData == right)
-        {
-            if (currentData != ranges.last())
-            {
-                continue;
-            }
-        }
-
-        if (currentData == right + 1)
-        {
-            right = currentData;
-            if (currentData != ranges.last())
-            {
-                continue;
-            }
-        }
-
-        if (data.isEmpty() == false)
-        {
-            data += ", ";
-        }
-
-        if (left == right)
-        {
-            data += tr("%1").arg(left, 2, base, QLatin1Char('0'));
-        }
-        else
-        {
-            data += tr("%1-%2")
-                    .arg(left, 2, base, QLatin1Char('0')).toUpper()
-                    .arg(right, 2, base, QLatin1Char('0')).toUpper();
-        }
-
-        left = currentData;
-        right = currentData;
-    }
-
-    return data;
 }

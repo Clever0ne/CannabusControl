@@ -16,7 +16,7 @@ public:
     static constexpr uint32_t id_msg_types_size = 4;
     static constexpr uint32_t id_f_code_size = 8;
 
-    typedef QPair<QVector<uint32_t>, QVector<uint32_t>> Content;
+    typedef QPair<QVector<uint8_t>, QVector<uint8_t>> Content;
 
     struct Settings {
         QVector<bool> slaveAddress;
@@ -34,10 +34,10 @@ public:
     void setFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated);
     bool isFCodeFiltrated(const cannabus::IdFCode fCode) const;
 
-    void setContentFiltrated(const QVector<uint32_t> regs, const QVector<uint32_t> data);
+    void setContentFiltrated(const QVector<uint8_t> regs, const QVector<uint8_t> data);
     bool isContentFiltrated(const cannabus::IdMsgTypes msgType, const cannabus::IdFCode fCode, QByteArray dataArray) const;
 
-    bool isPairRegDataFiltrated(const uint32_t reg, const uint32_t data) const;
+    bool isPairRegDataFiltrated(const uint8_t reg, const uint8_t data) const;
 
     void fillSlaveAddressSettings(const bool isFiltrated);
     void fillMsgTypesSettings(const bool isFiltrated);
@@ -45,11 +45,18 @@ public:
 
     bool mustDataFrameBeProcessed(const QCanBusFrame &frame);
 
+    QString rangesVectorToString(const QVector<uint8_t> ranges, const int32_t base);
+    QVector<uint8_t> rangesStringToVector(const QString ranges, const int32_t base);
+
 public slots:
-    void removeContentFilter(int32_t index);
+    void setSlaveAddressFilter(QString addressesRange);
+    void setContentFilter(QString regsRange, QString dataRange);
+    void removeContentFilter(const int32_t index);
 
 signals:
-    void frameInProcessing();
+    void frameIsProcessing();
+    void slaveAddressesFilterAdded(const QString addressesRange);
+    void contentFilterAdded(const QString regsRange, const QString dataRange);
 
 private:
     Settings m_settings;

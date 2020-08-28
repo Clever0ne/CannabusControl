@@ -18,11 +18,13 @@ public:
     ~FilterList() = default;
 
     void clearList();
-    void setNewFilter(const QVector<uint32_t> regs, const QVector<uint32_t> data);
 
 signals:
-    void addNewFilter(QString regsRange, QString dataRange);
-    void removeFilterAtIndex(int32_t index);
+    void addFilter(QString regsRange, QString dataRange);
+    void removeFilterAtIndex(const int32_t index);
+
+public slots:
+    void setFilter(const QString regsRange, const QString dataRange);
 
 private slots:
     void addFilterButtonPressed();
@@ -30,8 +32,6 @@ private slots:
 
 private:
     void makeHeader();
-
-    QString rangesToString(const QVector<uint32_t> ranges, const int32_t base = 16);
 
     void addRow();
     void addButton(const QString buttonText);

@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // ******************* Необходимо удалить после тестирования ******************
 
     initActionsConnections();
+    initFiltersConnections();
 }
 
 MainWindow::~MainWindow()
@@ -83,17 +84,24 @@ void MainWindow::initActionsConnections()
     SUPER_CONNECT(m_ui->actionSettings, triggered, m_settingsDialog, show);
     SUPER_CONNECT(m_ui->actionResetFilterSettings, triggered, this, setDefaultFilterSettings);
 
-    connect(m_settingsDialog, &QDialog::accepted, [this] {
-        disconnectDevice();
-        connectDevice();
-    });
+    SUPER_CONNECT(m_settingsDialog, accepted, this, disconnectDevice);
+    SUPER_CONNECT(m_settingsDialog, accepted, this, connectDevice);
+}
 
-    SUPER_CONNECT(m_ui->contentFilterList, addNewFilter, this, setContentFiltrated);
+void MainWindow::initFiltersConnections()
+{
+    // Устанавливаем связь между фильтром и списком фильтров содержимого
+    SUPER_CONNECT(m_ui->contentFilterList, addFilter, m_filter, setContentFilter);
     SUPER_CONNECT(m_ui->contentFilterList, removeFilterAtIndex, m_filter, removeContentFilter);
+    SUPER_CONNECT(m_filter, contentFilterAdded, m_ui->contentFilterList, setFilter);
 
-    SUPER_CONNECT(m_filter, frameInProcessing, m_ui->logWindow, numberFramesReceivedIncrement);
-
+    // Устанавливаем связь между фильтров и полем ввода диапазонов адресов ведомых узлов
     SUPER_CONNECT(m_ui->filterSlaveAddresses, editingFinished, this, setSlaveAddressesFiltrated);
+    SUPER_CONNECT(this, addSlaveAdressesFilter, m_filter, setSlaveAddressFilter);
+    SUPER_CONNECT(m_filter, slaveAddressesFilterAdded, this, setFilter);
+
+    // Устанавливаем связь между фильтром и окном лога
+    SUPER_CONNECT(m_filter, frameIsProcessing, m_ui->logWindow, numberFramesReceivedIncrement);
 
     // Устанавливаем связь между чекбоксами настроек фильтра типов сообщений и
     // соответствующими методами-сеттерами (см. макросы)
@@ -659,179 +667,11 @@ void MainWindow::busStatus()
 
 void MainWindow::setSlaveAddressesFiltrated()
 {
-    // Принимаем фильтруемые адреса в виде строки и убираем пробелы
-    QString ranges = m_ui->filterSlaveAddresses->text();
-    ranges.remove(QChar(' '));
+    // Получаем диапазон фильтруемых адресов в виде строки
+    QString addressesRange = m_ui->filterSlaveAddresses->text();
 
-    QVector<uint32_t> slaveAddresses = rangesStringToVector(ranges);
-    ranges = rangesVectorToString(slaveAddresses);
-
-    // Обновляем текстовое поле с учётом поправок
-    m_ui->filterSlaveAddresses->setText(ranges);
-
-    // Если поле пустое, сбрасываем настройки фильтрации адресов к состоянию по-умолчанию
-    if (ranges.isEmpty() != false)
-    {
-        m_filter->fillSlaveAddressSettings(true);
-        return;
-    }
-
-    // Иначе заполняем адресами из вектора с фильтруемыми адресами
-    m_filter->fillSlaveAddressSettings(false);
-
-    for (uint32_t slaveAddress : slaveAddresses)
-    {
-        m_filter->setSlaveAddressFiltrated(slaveAddress, true);
-    }
-}
-
-void MainWindow::setContentFiltrated(QString regsRange, QString dataRange)
-{   
-    if ((regsRange.isEmpty() && dataRange.isEmpty()) != false)
-    {
-        return;
-    }
-
-    regsRange.remove("0x");
-    QVector<uint32_t> regs = rangesStringToVector(regsRange, 16);
-
-    if (regsRange.isEmpty() == false && regs.isEmpty() != false)
-    {
-        return;
-    }
-
-    dataRange.remove("0x");
-    QVector<uint32_t> data = rangesStringToVector(dataRange, 16);
-
-    if (dataRange.isEmpty() == false && data.isEmpty() != false)
-    {
-        return;
-    }
-
-    m_filter->setContentFiltrated(regs, data);
-
-    m_ui->contentFilterList->setNewFilter(regs, data);
-}
-
-QVector<uint32_t> MainWindow::rangesStringToVector(const QString ranges, const int32_t base)
-{
-    // Разбиваем строку на список подстрок с разделителями в виде запятых
-    QStringList range = ranges.split(',', Qt::SkipEmptyParts);
-    QVector<uint32_t> data;
-
-    // Разбираем получившиеся подстроки
-    for (QString currentRange : range)
-    {
-        currentRange = range.takeFirst();
-
-        // Проверяем, не является ли подстрока диапазоном
-        if (currentRange.contains(QChar('-')) != false)
-        {
-            // Разбиваем диапазон на левую и правую границу
-            QStringList leftAndRight = currentRange.split('-');
-
-            // При base = 0 конвертируем строки в беззнаковые целые числа с учетом соглашений языка Си:
-            // Строка начинается с '0x' — шестнадцатеричное число
-            // Строка начинается с '0' — восьмеричное число
-            // Всё остально — десятичное число
-            bool isConverted = true;
-            uint32_t left = leftAndRight.takeFirst().toUInt(&isConverted, base);
-            uint32_t right = leftAndRight.takeLast().toUInt(&isConverted, base);
-
-            // Если не получилось конвертировать — диапазон в помойку
-            if (isConverted == false)
-            {
-                continue;
-            }
-
-            // Если левая граница больше правой, возможно, пользователь всё напутал
-            // Любезно поменяем границы местами без его согласия
-            if (left > right)
-            {
-                std::swap(left, right);
-            }
-
-            // Добавляем все адреса из диапазона в вектор с фильтруемыми адресами
-            for (uint32_t currentData = left; currentData <= right; currentData++)
-            {
-                data.append(currentData);
-            }
-        }
-        else
-        {
-            // При base = 0 конвертируем строку в беззнаковое целое число с учетом соглашений языка Си:
-            // Строка начинается с '0x' — шестнадцатеричное число
-            // Строка начинается с '0' — восьмеричное число
-            // Всё остально — десятичное число
-            bool isConverted = true;
-            uint32_t currentData = currentRange.toUInt(&isConverted, base);
-
-            // Если не получилось конвертировать — адрес в помойку
-            if (isConverted == false)
-            {
-                continue;
-            }
-
-            // Добавляем адрес в вектор с фильтруемыми адресами
-            data.append(currentData);
-        }
-    }
-
-    std::sort(data.begin(), data.end());
-
-    return data;
-}
-
-QString MainWindow::rangesVectorToString(const QVector<uint32_t> ranges)
-{
-    QString data;
-
-    if (ranges.isEmpty() != false)
-    {
-        return data;
-    }
-
-    uint32_t left = ranges.first();
-    uint32_t right = ranges.first();
-
-    for (uint32_t currentData : ranges)
-    {
-        if (currentData == right)
-        {
-            if (currentData != ranges.last())
-            {
-                continue;
-            }
-        }
-
-        if (currentData == right + 1)
-        {
-            right = currentData;
-            if (currentData != ranges.last())
-            {
-                continue;
-            }
-        }
-
-        if (data.isEmpty() == false)
-        {
-            data += ", ";
-        }
-
-        if (left == right)
-        {
-            data += tr("%1").arg(left);
-        }
-        else
-        {
-            data += tr("%1-%2").arg(left).arg(right);
-        }
-
-        left = currentData;
-        right = currentData;
-    }
-
-    return data;
+    // Отправляем запрос на добавление фильтра адресов ведомых узлом
+    emit addSlaveAdressesFilter(addressesRange);
 }
 
 void MainWindow::setAllMsgTypesFiltrated()
@@ -954,6 +794,11 @@ void MainWindow::setDefaultFilterSettings()
     m_ui->filterAllFCodes->setChecked(true);
 
     m_ui->contentFilterList->clearList();
+}
+
+void MainWindow::setFilter(const QString addressesRange)
+{
+    m_ui->filterSlaveAddresses->setText(addressesRange);
 }
 
 #undef CONNECT_FILTER

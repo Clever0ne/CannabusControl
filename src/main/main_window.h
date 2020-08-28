@@ -80,7 +80,7 @@ private slots:
 
     void setSlaveAddressesFiltrated();
 
-    void setContentFiltrated(QString regsRange, QString dataRange);
+    void setFilter(const QString addressesRange);
 
     void setDefaultFilterSettings();
 
@@ -100,11 +100,12 @@ private slots:
 
     // ******************* Необходимо удалить после тестирования ******************
 
+signals:
+    void addSlaveAdressesFilter(QString addressesRange);
+
 private:
     void initActionsConnections();
-
-    QVector<uint32_t> rangesStringToVector(const QString ranges, const int32_t base = 0);
-    QString rangesVectorToString(const QVector<uint32_t> ranges);
+    void initFiltersConnections();
 
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;
