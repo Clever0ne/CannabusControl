@@ -10,6 +10,10 @@
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QTimer>
+#include <QTime>
+#include <QDate>
+#include <QTextStream>
+#include <QFileDialog>
 
 #define SUPER_CONNECT(sender, signal, receiver, slot) \
 connect(sender, &std::remove_pointer<decltype(sender)>::type::signal, \
@@ -83,6 +87,7 @@ void MainWindow::initActionsConnections()
     SUPER_CONNECT(m_ui->actionQuit, triggered, this, close);
     SUPER_CONNECT(m_ui->actionSettings, triggered, m_settingsDialog, show);
     SUPER_CONNECT(m_ui->actionResetFilterSettings, triggered, this, setDefaultFilterSettings);
+    SUPER_CONNECT(m_ui->actionSaveLog, triggered, this, saveLog);
 
     SUPER_CONNECT(m_settingsDialog, accepted, this, disconnectDevice);
     SUPER_CONNECT(m_settingsDialog, accepted, this, connectDevice);
@@ -138,6 +143,67 @@ void MainWindow::initFiltersConnections()
     // ******************* Необходимо удалить после тестирования ******************
 }
 
+void MainWindow::saveLog()
+{
+    QString currentTime = QTime::currentTime().toString().replace(":", "-");
+    QString currentDate = QDate::currentDate().toString(Qt::ISODate);
+
+    QString name = tr("message_log_%1_%2").arg(currentDate).arg(currentTime);
+
+    QString filters("CSV files (*.csv);;All files (*.*)");
+    QString defaultFilter("CSV files (*.csv)");
+    QString fileName = QFileDialog::getSaveFileName(nullptr, "Save Message Log",
+                                                    QCoreApplication::applicationDirPath() + "/" + name + ".csv",
+                                                    filters, &defaultFilter);
+
+    QFile saveFile(fileName);
+
+    if (saveFile.open(QIODevice::WriteOnly) != false)
+    {
+        QTextStream data(&saveFile);
+        QStringList stringList;
+
+        for (int32_t column = 0; column < m_ui->logWindow->horizontalHeader()->count(); column++)
+        {
+            QString text = m_ui->logWindow->horizontalHeaderItem(column)->text();
+
+            if (text.length() > 0)
+            {
+                stringList.append("\"" + text + "\"");
+            }
+            else
+            {
+                stringList.append("");
+            }
+        }
+
+        data << stringList.join(";") + "\n";
+
+        for(int32_t row = 0; row < m_ui->logWindow->verticalHeader()->count(); row++)
+        {
+            stringList.clear();
+
+            for(int32_t column = 0; column < m_ui->logWindow->horizontalHeader()->count(); column++)
+            {
+                QString text = m_ui->logWindow->item(row, column)->text();
+
+                if (text.length() > 0)
+                {
+                    stringList.append("\"" + text + "\"");
+                }
+                else
+                {
+                    stringList.append("");
+                }
+            }
+
+            data << stringList.join(";") + "\n";
+        }
+
+        saveFile.close();
+    }
+}
+
 void MainWindow::processError(QCanBusDevice::CanBusError error) const
 {
     switch(error)
@@ -179,7 +245,7 @@ void MainWindow::emulateSendMessage()
                                                         (uint32_t)IdMsgTypes::SLAVE);
 
     static std::uniform_int_distribution<> rangeLenghtRange(2, 6);
-    static std::uniform_int_distribution<> seriesLenghtRange(2, 4);
+    static std::uniform_int_distribution<> seriesLenghtRange(1, 4);
 
     static std::uniform_int_distribution<> regRange(0x00, 0xFF);
     static std::uniform_int_distribution<> byteRange(0x00, 0xFF);

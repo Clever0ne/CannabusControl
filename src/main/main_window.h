@@ -89,6 +89,7 @@ private slots:
     void busStatus();
     void processError(QCanBusDevice::CanBusError error) const;
     void processFramesReceived();
+    void saveLog();
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 

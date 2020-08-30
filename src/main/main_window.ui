@@ -530,6 +530,8 @@
    <addaction name="actionSettings"/>
    <addaction name="separator"/>
    <addaction name="actionResetFilterSettings"/>
+   <addaction name="separator"/>
+   <addaction name="actionSaveLog"/>
   </widget>
   <action name="actionConnect">
    <property name="icon">
@@ -592,6 +594,18 @@
    </property>
    <property name="toolTip">
     <string>Reset Message Filter Settings to default</string>
+   </property>
+  </action>
+  <action name="actionSaveLog">
+   <property name="icon">
+    <iconset resource="../images/images.qrc">
+     <normaloff>:/save_log.png</normaloff>:/save_log.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Message Log</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Message Log in .csv-file</string>
    </property>
   </action>
  </widget>
