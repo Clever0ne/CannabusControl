@@ -14,9 +14,11 @@
 #include <QDate>
 #include <QTextStream>
 #include <QFileDialog>
+#include <QFont>
+#include <QFontDatabase>
 
 #define SUPER_CONNECT(sender, signal, receiver, slot) \
-connect(sender, &std::remove_pointer<decltype(sender)>::type::signal, \
+connect(sender  , &std::remove_pointer<decltype(sender)>::type::signal, \
         receiver, &std::remove_pointer<decltype(receiver)>::type::slot)
 
 #define CONNECT_FILTER(filter_name) SUPER_CONNECT(m_ui->filter##filter_name, stateChanged, this, set##filter_name##Filtrated);
@@ -31,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
     , m_sendMessageTimer(new QTimer(this))
 
@@ -50,12 +52,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_ui->actionDisconnect->setEnabled(false);
 
+    QString fontName = "JetBrainsMono-Light.ttf";
+    int32_t id = QFontDatabase::addApplicationFont(tr(":/fonts/%1").arg(fontName));
+
+    QString fontFamily = QFontDatabase::applicationFontFamilies(id).at(0);
+    int32_t fontSize = 8;
+    int32_t fontWeight = QFont::Weight::Normal;
+    QFont font = QFont(fontFamily, fontSize, fontWeight);
+
+    m_ui->logWindow->setFont(font);
     m_ui->logWindow->clearLog();
+
+    m_ui->contentFilterList->setFont(font);
     m_ui->contentFilterList->clearList();
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
     m_slave.resize(slave_adresses_range_size);
 
@@ -76,18 +89,19 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete m_settingsDialog;
+    delete m_filter;
     delete m_ui;
 }
 
 void MainWindow::initActionsConnections()
-{
-    SUPER_CONNECT(m_ui->actionConnect, triggered, this, connectDevice);
-    SUPER_CONNECT(m_ui->actionDisconnect, triggered, this, disconnectDevice);
-    SUPER_CONNECT(m_ui->actionClearLog, triggered, m_ui->logWindow, clearLog);
-    SUPER_CONNECT(m_ui->actionQuit, triggered, this, close);
-    SUPER_CONNECT(m_ui->actionSettings, triggered, m_settingsDialog, show);
-    SUPER_CONNECT(m_ui->actionResetFilterSettings, triggered, this, setDefaultFilterSettings);
-    SUPER_CONNECT(m_ui->actionSaveLog, triggered, this, saveLog);
+{   
+    SUPER_CONNECT(m_ui->actionConnect            , triggered, this            , connectDevice           );
+    SUPER_CONNECT(m_ui->actionDisconnect         , triggered, this            , disconnectDevice        );
+    SUPER_CONNECT(m_ui->actionClearLog           , triggered, m_ui->logWindow , clearLog                );
+    SUPER_CONNECT(m_ui->actionQuit               , triggered, this            , close                   );
+    SUPER_CONNECT(m_ui->actionSettings           , triggered, m_settingsDialog, show                    );
+    SUPER_CONNECT(m_ui->actionResetFilterSettings, triggered, this            , setDefaultFilterSettings);
+    SUPER_CONNECT(m_ui->actionSaveLog            , triggered, this            , saveLog                 );
 
     SUPER_CONNECT(m_settingsDialog, accepted, this, disconnectDevice);
     SUPER_CONNECT(m_settingsDialog, accepted, this, connectDevice);
@@ -96,14 +110,14 @@ void MainWindow::initActionsConnections()
 void MainWindow::initFiltersConnections()
 {
     // Устанавливаем связь между фильтром и списком фильтров содержимого
-    SUPER_CONNECT(m_ui->contentFilterList, addFilter, m_filter, setContentFilter);
-    SUPER_CONNECT(m_ui->contentFilterList, removeFilterAtIndex, m_filter, removeContentFilter);
-    SUPER_CONNECT(m_filter, contentFilterAdded, m_ui->contentFilterList, setFilter);
+    SUPER_CONNECT(m_ui->contentFilterList, addFilter          , m_filter               , setContentFilter   );
+    SUPER_CONNECT(m_ui->contentFilterList, removeFilterAtIndex, m_filter               , removeContentFilter);
+    SUPER_CONNECT(m_filter               , contentFilterAdded , m_ui->contentFilterList, setFilter          );
 
     // Устанавливаем связь между фильтров и полем ввода диапазонов адресов ведомых узлов
-    SUPER_CONNECT(m_ui->filterSlaveAddresses, editingFinished, this, setSlaveAddressesFiltrated);
-    SUPER_CONNECT(this, addSlaveAdressesFilter, m_filter, setSlaveAddressFilter);
-    SUPER_CONNECT(m_filter, slaveAddressesFilterAdded, this, setFilter);
+    SUPER_CONNECT(m_ui->filterSlaveAddresses, editingFinished          , this    , setSlaveAddressesFiltrated);
+    SUPER_CONNECT(this                      , addSlaveAdressesFilter   , m_filter, setSlaveAddressFilter     );
+    SUPER_CONNECT(m_filter                  , slaveAddressesFilterAdded, this    , setFilter                 );
 
     // Устанавливаем связь между фильтром и окном лога
     SUPER_CONNECT(m_filter, frameIsProcessing, m_ui->logWindow, numberFramesReceivedIncrement);
@@ -134,7 +148,7 @@ void MainWindow::initFiltersConnections()
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
     SUPER_CONNECT(m_sendMessageTimer, timeout, this, emulateSendMessage);
 
@@ -226,7 +240,7 @@ void MainWindow::processError(QCanBusDevice::CanBusError error) const
 
 // ***************** Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
 void MainWindow::emulateSendMessage()
 {
@@ -476,7 +490,7 @@ void MainWindow::connectDevice()
 {
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
     m_ui->actionConnect->setEnabled(false);
     m_ui->actionDisconnect->setEnabled(true);
@@ -586,7 +600,7 @@ void MainWindow::disconnectDevice()
 {
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
     m_sendMessageTimer->stop();
     processFramesReceived();
@@ -638,7 +652,7 @@ void MainWindow::processFramesReceived()
 {
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
     while (m_queue.isEmpty() == false)
     {

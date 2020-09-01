@@ -536,7 +536,7 @@
   <action name="actionConnect">
    <property name="icon">
     <iconset resource="../images/images.qrc">
-     <normaloff>:/connect.png</normaloff>:/connect.png</iconset>
+     <normaloff>:/icons/disconnect.png</normaloff>:/icons/disconnect.png</iconset>
    </property>
    <property name="text">
     <string>Connect</string>
@@ -548,7 +548,7 @@
   <action name="actionDisconnect">
    <property name="icon">
     <iconset resource="../images/images.qrc">
-     <normaloff>:/disconnect.png</normaloff>:/disconnect.png</iconset>
+     <normaloff>:/icons/connect.png</normaloff>:/icons/connect.png</iconset>
    </property>
    <property name="text">
     <string>Disconnect</string>
@@ -560,7 +560,7 @@
   <action name="actionClearLog">
    <property name="icon">
     <iconset resource="../images/images.qrc">
-     <normaloff>:/clear.png</normaloff>:/clear.png</iconset>
+     <normaloff>:/icons/clear.png</normaloff>:/icons/clear.png</iconset>
    </property>
    <property name="text">
     <string>Clear Log</string>
@@ -569,7 +569,7 @@
   <action name="actionQuit">
    <property name="icon">
     <iconset resource="../images/images.qrc">
-     <normaloff>:/application-exit.png</normaloff>:/application-exit.png</iconset>
+     <normaloff>:/icons/application-exit.png</normaloff>:/icons/application-exit.png</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -578,7 +578,7 @@
   <action name="actionSettings">
    <property name="icon">
     <iconset resource="../images/images.qrc">
-     <normaloff>:/settings.png</normaloff>:/settings.png</iconset>
+     <normaloff>:/icons/settings.png</normaloff>:/icons/settings.png</iconset>
    </property>
    <property name="text">
     <string>Settings</string>
@@ -587,7 +587,7 @@
   <action name="actionResetFilterSettings">
    <property name="icon">
     <iconset resource="../images/images.qrc">
-     <normaloff>:/reset_filter_settings.png</normaloff>:/reset_filter_settings.png</iconset>
+     <normaloff>:/icons/reset_filter_settings.png</normaloff>:/icons/reset_filter_settings.png</iconset>
    </property>
    <property name="text">
     <string>Reset Filter Settings</string>
@@ -599,7 +599,7 @@
   <action name="actionSaveLog">
    <property name="icon">
     <iconset resource="../images/images.qrc">
-     <normaloff>:/save_log.png</normaloff>:/save_log.png</iconset>
+     <normaloff>:/icons/save_log.png</normaloff>:/icons/save_log.png</iconset>
    </property>
    <property name="text">
     <string>Save Message Log</string>

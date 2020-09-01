@@ -36,19 +36,26 @@ void FilterList::addRow()
 
 void FilterList::makeHeader()
 {
+    QString backgroundColor = "beige";
+    QFont currentFont = font();
+    QString fontFamily = currentFont.family();
+    int32_t fontSize = 8;
+    horizontalHeader()->setStyleSheet(tr("QHeaderView::section { background-color: %1; font-family: \"%2\"; font-size: %3pt }")
+                                      .arg(backgroundColor)
+                                      .arg(fontFamily)
+                                      .arg(fontSize));
+
     QStringList contentFilterListHeader = {"", "Regs", "Data"};
 
     setColumnCount(contentFilterListHeader.count());
     setHorizontalHeaderLabels(contentFilterListHeader);
 
-    setColumnWidth((uint32_t)FilterListColumn::button, fontMetrics().horizontalAdvance(" - "));
-    setColumnWidth((uint32_t)FilterListColumn::regs, fontMetrics().horizontalAdvance(" 00-FF "));
-    setColumnWidth((uint32_t)FilterListColumn::data, fontMetrics().horizontalAdvance(" 00-FF "));
+    setColumnWidth((uint32_t)FilterListColumn::button, fontMetrics().horizontalAdvance(" - ")    );
+    setColumnWidth((uint32_t)FilterListColumn::regs  , fontMetrics().horizontalAdvance(" 00-FF "));
+    setColumnWidth((uint32_t)FilterListColumn::data  , fontMetrics().horizontalAdvance(" 00-FF "));
 
     horizontalHeader()->setSectionsClickable(false);
-    horizontalHeader()->setFixedHeight(25);
-
-    horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
+    horizontalHeader()->setFixedHeight(1.5 * fontMetrics().height());
 
     addRow();
 }

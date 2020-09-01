@@ -2,13 +2,15 @@
 
 #include <QHeaderView>
 #include <algorithm>
+#include <QFont>
+#include <QFontDatabase>
 
 using namespace cannabus;
 
 LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
 {
-    verticalHeader()->hide();
     makeHeader();
+    verticalHeader()->hide();
 
     horizontalHeader()->setStretchLastSection(true);
     horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -16,23 +18,35 @@ LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
 
 void LogWindow::makeHeader()
 {
+    QString backgroundColor = "beige";
+    QFont currentFont = font();
+    QString fontFamily = currentFont.family();
+    int32_t fontSize = 8;
+    horizontalHeader()->setStyleSheet(tr("QHeaderView::section { background-color: %1; font-family: \"%2\"; font-size: %3pt }")
+                                      .arg(backgroundColor)
+                                      .arg(fontFamily)
+                                      .arg(fontSize));
+
     QStringList logWindowHeader = {"No.", "Time", "Msg Type", "Address", "F-Code", "DLC", "Data", "Info"};
 
     setColumnCount(logWindowHeader.count());
     setHorizontalHeaderLabels(logWindowHeader);
 
-    setColumnWidth((uint32_t)LogWindowColumn::count, fontMetrics().horizontalAdvance("123456 "));
-    setColumnWidth((uint32_t)LogWindowColumn::time, fontMetrics().horizontalAdvance("1234.1234 "));
-    setColumnWidth((uint32_t)LogWindowColumn::msg_type, fontMetrics().horizontalAdvance(" Msg Type "));
-    setColumnWidth((uint32_t)LogWindowColumn::slave_address, fontMetrics().horizontalAdvance("10 (0x0A) "));
-    setColumnWidth((uint32_t)LogWindowColumn::f_code, fontMetrics().horizontalAdvance("F-Code "));
-    setColumnWidth((uint32_t)LogWindowColumn::data_size, fontMetrics().horizontalAdvance(" [8] "));
-    setColumnWidth((uint32_t)LogWindowColumn::data, fontMetrics().horizontalAdvance("11 22 33 44 55 66 77 88 "));
+    auto resizeColumn = [this](LogWindowColumn column, QString text)
+    {
+        setColumnWidth((uint32_t)column, fontMetrics().horizontalAdvance(text));
+    };
+
+    resizeColumn(LogWindowColumn::count        , "123456 "                 );
+    resizeColumn(LogWindowColumn::time         , "1234.1234 "              );
+    resizeColumn(LogWindowColumn::msg_type     , " Msg Type "              );
+    resizeColumn(LogWindowColumn::slave_address, "10 (0x0A) "              );
+    resizeColumn(LogWindowColumn::f_code       , "F-Code "                 );
+    resizeColumn(LogWindowColumn::data_size    , " [8] "                   );
+    resizeColumn(LogWindowColumn::data         , "11 22 33 44 55 66 77 88 ");
 
     horizontalHeader()->setSectionsClickable(false);
-    horizontalHeader()->setFixedHeight(25);
-
-    horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
+    horizontalHeader()->setFixedHeight(1.5 * fontMetrics().height());
 }
 
 void LogWindow::clearLog()

@@ -4,14 +4,11 @@
 #include <QCanBusDevice>
 #include <stdint.h>
 
-#define ON        1
-#define OFF       0
-
-#define EMULATION ON
+#define EMULATION_ENABLED
 
 // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
 #include <QQueue>
 #include <random>
@@ -46,6 +43,8 @@ public:
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
+#ifdef EMULATION_ENABLED
+
     static constexpr uint32_t send_message_timeout = 100;
     static constexpr uint32_t regs_range_size = 256;
     static constexpr uint32_t data_range_size = 256;
@@ -55,6 +54,8 @@ public:
         QVector<uint8_t> reg;
         QVector<uint8_t> data;
     };
+
+#endif
 
     // ******************* Необходимо удалить после тестирования ******************
 
@@ -93,7 +94,7 @@ private slots:
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
     void emulateSendMessage();
 
@@ -118,7 +119,7 @@ private:
 
     // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 
-#if (EMULATION == ON)
+#ifdef EMULATION_ENABLED
 
     QVector<Slave> m_slave;
     QTimer *m_sendMessageTimer = nullptr;

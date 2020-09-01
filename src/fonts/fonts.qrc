@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/fonts">
+        <file>JetBrainsMono-Bold.ttf</file>
+        <file>JetBrainsMono-Light.ttf</file>
+    </qresource>
+</RCC>
