@@ -4,7 +4,7 @@
 #include <QCanBusDevice>
 #include <stdint.h>
 
-#define EMULATION_ENABLED
+//#define EMULATION_ENABLED
 
 // ************* Эмуляция общения между ведущим и ведомыми узлами *************
 

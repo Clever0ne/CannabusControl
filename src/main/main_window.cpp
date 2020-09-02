@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_ui->actionDisconnect->setEnabled(false);
 
-    QString fontName = "JetBrainsMono-Light.ttf";
+    QString fontName = "DroidSansMono.ttf";
     int32_t id = QFontDatabase::addApplicationFont(tr(":/fonts/%1").arg(fontName));
 
     QString fontFamily = QFontDatabase::applicationFontFamilies(id).at(0);
@@ -258,8 +258,8 @@ void MainWindow::emulateSendMessage()
     static std::uniform_int_distribution<> msgTypeRange((uint32_t)IdMsgTypes::HIGH_PRIO_MASTER,
                                                         (uint32_t)IdMsgTypes::SLAVE);
 
-    static std::uniform_int_distribution<> rangeLenghtRange(2, 6);
-    static std::uniform_int_distribution<> seriesLenghtRange(1, 4);
+    static std::uniform_int_distribution<> rangeLengthRange(2, max_regs_in_range);
+    static std::uniform_int_distribution<> seriesLengthRange(1, max_regs_in_series);
 
     static std::uniform_int_distribution<> regRange(0x00, 0xFF);
     static std::uniform_int_distribution<> byteRange(0x00, 0xFF);
@@ -291,7 +291,7 @@ void MainWindow::emulateSendMessage()
         {
             case IdFCode::WRITE_REGS_RANGE:
             {
-                uint8_t rangeLenght = rangeLenghtRange(gen);
+                uint8_t rangeLenght = rangeLengthRange(gen);
 
                 uint8_t regBegin = regRange(gen);
                 uint8_t regEnd = regBegin + (rangeLenght - 1);
@@ -315,7 +315,7 @@ void MainWindow::emulateSendMessage()
             }
             case IdFCode::WRITE_REGS_SERIES:
             {
-                uint8_t seriesLenght = seriesLenghtRange(gen);
+                uint8_t seriesLenght = seriesLengthRange(gen);
 
                 QVector<uint8_t> regAddress;
 
@@ -343,7 +343,7 @@ void MainWindow::emulateSendMessage()
             }
             case IdFCode::READ_REGS_RANGE:
             {
-                uint8_t rangeLenght = rangeLenghtRange(gen);
+                uint8_t rangeLenght = rangeLengthRange(gen);
 
                 uint8_t regBegin = regRange(gen);
                 uint8_t regEnd = regBegin + (rangeLenght - 1);
@@ -361,7 +361,7 @@ void MainWindow::emulateSendMessage()
             }
             case IdFCode::READ_REGS_SERIES:
             {
-                uint8_t seriesLenght = seriesLenghtRange(gen);
+                uint8_t seriesLenght = seriesLengthRange(gen);
 
                 QVector<uint8_t> regAddress;
 

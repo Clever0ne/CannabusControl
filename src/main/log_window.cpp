@@ -7,6 +7,19 @@
 
 using namespace cannabus;
 
+namespace cannabus
+{
+    uint32_t qHash(const IdMsgTypes &msgType, uint32_t seed = 0)
+    {
+        return ::qHash((uint32_t)msgType, seed);
+    }
+
+    uint32_t qHash(const IdFCode &fCode, uint32_t seed = 0)
+    {
+        return ::qHash((uint32_t)fCode, seed);
+    }
+}
+
 LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
 {
     makeHeader();
@@ -131,7 +144,7 @@ void LogWindow::setMsgType(const IdMsgTypes msgType)
     m_msgType = tr("0b%1").arg((uint32_t)msgType, 2, 2, QLatin1Char('0'));
 
     auto item = new QTableWidgetItem(m_msgType);
-    item->setTextAlignment(Qt::AlignCenter);
+    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     item->setFlags(item->flags() & ~Qt::ItemIsEditable);
     setItem(m_currentRow, (uint32_t)LogWindowColumn::msg_type, item);
 }
@@ -145,7 +158,7 @@ void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
             tr("%1)").arg(slaveAddress, 2, 16, QLatin1Char('0')).toUpper();
 
     auto item = new QTableWidgetItem(m_slaveAddress);
-    item->setTextAlignment(Qt::AlignCenter);
+    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     item->setFlags(item->flags() & ~Qt::ItemIsEditable);
     setItem(m_currentRow, (uint32_t)LogWindowColumn::slave_address, item);
 }
@@ -157,7 +170,7 @@ void LogWindow::setFCode(const IdFCode fCode)
     m_fCode = tr("0b%1").arg((uint32_t)fCode, 3, 2, QLatin1Char('0'));
 
     auto item = new QTableWidgetItem(m_fCode);
-    item->setTextAlignment(Qt::AlignCenter);
+    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     item->setFlags(item->flags() & ~Qt::ItemIsEditable);
     setItem(m_currentRow, (uint32_t)LogWindowColumn::f_code, item);
 }
@@ -169,7 +182,7 @@ void LogWindow::setDataSize(const uint32_t dataSize)
     m_dataSize = tr("[%1]").arg(dataSize);
 
     auto item = new QTableWidgetItem(m_dataSize);
-    item->setTextAlignment(Qt::AlignCenter);
+    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     item->setFlags(item->flags() & ~Qt::ItemIsEditable);
     setItem(m_currentRow, (uint32_t)LogWindowColumn::data_size, item);
 }
@@ -193,92 +206,56 @@ void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const 
     // а затем выводим информацию о кадре в текстовом формате
     // с шириной поля до 40 символов (сколько получится)
     // в формате '[MSG_TYPE_INFO] F_CODE_INFO'
+    using namespace std;
+
     if (dataSize == 0)
     {
         m_msgInfo = tr("[Slave's response] Incorrect request");
     }
     else
     {
-        QString msgTypeInfo;
-        QString fCodeInfo;
+        static const QHash<IdMsgTypes, QString> msgTypeInfo = {
+            make_pair(IdMsgTypes::HIGH_PRIO_MASTER, "Master's high-prio"),
+            make_pair(IdMsgTypes::HIGH_PRIO_SLAVE , "Slave's high-prio" ),
+            make_pair(IdMsgTypes::MASTER          , "Master's request"  ),
+            make_pair(IdMsgTypes::SLAVE           , "Slave's response"  )
+        };
 
-        switch (msgType)
+        static const QHash<IdFCode, QString> fCodeInfo = {
+            make_pair(IdFCode::WRITE_REGS_RANGE , "Writing regs range" ),
+            make_pair(IdFCode::WRITE_REGS_SERIES, "Writing regs series"),
+            make_pair(IdFCode::READ_REGS_RANGE  , "Reading regs range" ),
+            make_pair(IdFCode::READ_REGS_SERIES , "Reading regs series"),
+            make_pair(IdFCode::DEVICE_SPECIFIC1 , "Device-specific (1)"),
+            make_pair(IdFCode::DEVICE_SPECIFIC2 , "Device-specific (2)"),
+            make_pair(IdFCode::DEVICE_SPECIFIC3 , "Device-specific (3)"),
+            make_pair(IdFCode::DEVICE_SPECIFIC4 , "Device-specific (4)")
+        };
+
+        auto compare = [](const auto &first, const auto &second)
         {
-            case IdMsgTypes::HIGH_PRIO_MASTER:
-            {
-                msgTypeInfo = tr("Master's high-prio");
-                break;
-            }
-            case IdMsgTypes::HIGH_PRIO_SLAVE:
-            {
-                msgTypeInfo = tr("Slave's high-prio");
-                break;
-            }
-            case IdMsgTypes::MASTER:
-            {
-                msgTypeInfo = tr("Master's request");
-                break;
-            }
-            case IdMsgTypes::SLAVE:
-            {
-                msgTypeInfo = tr("Slave's response");
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
+            return first.size() < second.size();
+        };
 
-        switch (fCode)
+        auto getMaxLength = [compare](const auto &info)
         {
-            case IdFCode::WRITE_REGS_RANGE:
-            {
-                fCodeInfo = tr("Writing regs range");
-                break;
-            }
-            case IdFCode::WRITE_REGS_SERIES:
-            {
-                fCodeInfo = tr("Writing regs series");
-                break;
-            }
-            case IdFCode::READ_REGS_RANGE:
-            {
-                fCodeInfo = tr("Reading regs range");
-                break;
-            }
-            case IdFCode::READ_REGS_SERIES:
-            {
-                fCodeInfo = tr("Reading regs series");
-                break;
-            }
-            case IdFCode::DEVICE_SPECIFIC1:
-            {
-                fCodeInfo = tr("Device-specific (1)");
-                break;
-            }
-            case IdFCode::DEVICE_SPECIFIC2:
-            {
-                fCodeInfo = tr("Device-specific (2)");
-                break;
-            }
-            case IdFCode::DEVICE_SPECIFIC3:
-            {
-                fCodeInfo = tr("Device-specific (3)");
-                break;
-            }
-            case IdFCode::DEVICE_SPECIFIC4:
-            {
-                fCodeInfo = tr("Device-specific (4)");
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
+            return max_element(begin(info), end(info), compare).value().size();
+        };
 
-        m_msgInfo = tr("[%1] %2").arg(msgTypeInfo).arg(fCodeInfo);
+        static const int32_t msgTypeInfoMaxLength = getMaxLength(msgTypeInfo);
+        static const int32_t fCodeInfoMaxLength   = getMaxLength(fCodeInfo  );
+
+        m_msgInfo = tr("%1 %2")
+                .arg(msgTypeInfo.value(msgType), -msgTypeInfoMaxLength)
+                .arg(fCodeInfo.value(fCode)    , -fCodeInfoMaxLength  );
+
+        auto addBrackets = [](QString &info, QString msgTypeInfo)
+        {
+            info.insert(msgTypeInfo.size(), "]");
+            info.insert(0                 , "[");
+        };
+
+        addBrackets(m_msgInfo, msgTypeInfo.value(msgType));
     }
 
     auto item = new QTableWidgetItem(m_msgInfo);

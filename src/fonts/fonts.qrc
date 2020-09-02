@@ -2,5 +2,8 @@
     <qresource prefix="/fonts">
         <file>JetBrainsMono-Bold.ttf</file>
         <file>JetBrainsMono-Light.ttf</file>
+        <file>SourceCodePro-Light.otf</file>
+        <file>SourceCodePro-Bold.otf</file>
+        <file>DroidSansMono.ttf</file>
     </qresource>
 </RCC>
