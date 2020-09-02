@@ -1,3 +1,13 @@
+/****************************************************************************
+
+Класс LogWindow обеспечивает наглядное и человекочитаемое представление
+кадров данных, которые передаются по протоколу CannabusPlus и принимаются
+USB-CAN-адаптером. В логе сообщений выводится информация о номере и времени
+принятого кадра, адресе ведомого узла, типе сообщения и коде функции (F-коде),
+а также о содержимом кадра (регистрах и данных).
+
+****************************************************************************/
+
 #pragma once
 
 #include <QTableWidget>
@@ -5,7 +15,7 @@
 #include <stdint.h>
 #include "../cannabus_library/cannabus_common.h"
 
-enum class Column {
+enum class LogWindowColumn {
     count,
     time,
     msg_type,
@@ -22,38 +32,23 @@ public:
     explicit LogWindow(QWidget *parent = nullptr);
     ~LogWindow() = default;
 
-    static constexpr uint32_t id_addresses_size = 62;
-    static constexpr uint32_t id_msg_types_size = 4;
-    static constexpr uint32_t id_f_code_size = 8;
-
-    struct Filter {
-        QVector<bool> slaveAddressSettings;
-        QVector<bool> msgTypeSettings;
-        QVector<bool> fCodeSettings;
-    };
-
-    void setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated);
-    bool isSlaveAddressFiltrated(const uint32_t slaveAddress) const;
-
-    void setMsgTypeFiltrated(const cannabus::IdMsgTypes msgType, const bool isFiltrated);
-    bool isMsgTypeFiltrated(const cannabus::IdMsgTypes msgType) const;
-
-    void setFCodeFiltrated(const cannabus::IdFCode fCode, const bool isFiltrated);
-    bool isFCodeFiltrated(const cannabus::IdFCode fCode) const;
-
-    void fillSlaveAddressSettings(const bool isFiltrated);
-    void fillMsgTypesSettings(const bool isFiltrated);
-    void fillFCodeSettings(const bool isFiltrated);
-
+    // Обработка кадров данных/кадров ошибок
     void processDataFrame(const QCanBusFrame &frame);
     void processErrorFrame(const QCanBusFrame &frame, const QString errorInfo);
 
 public slots:
+    // Очистка лог и сброс счётчик принятых кадров
     void clearLog();
 
+    // Инкремент счётчик принятых кадров
+    void numberFramesReceivedIncrement();
+
 private:
+    // Создание заголовка лога сообщений
     void makeHeader();
-    bool mustDataFrameBeProcessed(const QCanBusFrame &frame);
+
+    // Сеттеры ячеек 'No', 'Time', 'Msg Type', 'Address',
+    // 'F-code', 'DLC', 'Data' и 'Info' соответственно
     void setCount();
     void setTime(const uint64_t seconds, const uint64_t microseconds);
     void setMsgType(const cannabus::IdMsgTypes msgType);
@@ -75,6 +70,4 @@ private:
     QString m_dataSize;
     QString m_data;
     QString m_msgInfo;
-
-    Filter m_filter;
 };

@@ -1,59 +1,84 @@
 #include "log_window.h"
+
 #include <QHeaderView>
 #include <algorithm>
+#include <QFont>
+#include <QFontDatabase>
 
 using namespace cannabus;
 
+namespace cannabus
+{
+    uint32_t qHash(const IdMsgTypes &msgType, uint32_t seed = 0)
+    {
+        return ::qHash((uint32_t)msgType, seed);
+    }
+
+    uint32_t qHash(const IdFCode &fCode, uint32_t seed = 0)
+    {
+        return ::qHash((uint32_t)fCode, seed);
+    }
+}
+
 LogWindow::LogWindow(QWidget *parent) : QTableWidget(parent)
-{    
+{
     makeHeader();
+    verticalHeader()->hide();
 
     horizontalHeader()->setStretchLastSection(true);
     horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    verticalHeader()->hide();
-
-    fillSlaveAddressSettings(true);
-    fillMsgTypesSettings(true);
-    fillFCodeSettings(true);
 }
 
 void LogWindow::makeHeader()
 {
+    QString backgroundColor = "beige";
+    QFont currentFont = font();
+    QString fontFamily = currentFont.family();
+    int32_t fontSize = 8;
+    horizontalHeader()->setStyleSheet(tr("QHeaderView::section { background-color: %1; font-family: \"%2\"; font-size: %3pt }")
+                                      .arg(backgroundColor)
+                                      .arg(fontFamily)
+                                      .arg(fontSize));
+
     QStringList logWindowHeader = {"No.", "Time", "Msg Type", "Address", "F-Code", "DLC", "Data", "Info"};
 
-   setColumnCount(logWindowHeader.count());
-   setHorizontalHeaderLabels(logWindowHeader);
+    setColumnCount(logWindowHeader.count());
+    setHorizontalHeaderLabels(logWindowHeader);
 
-   resizeColumnsToContents();
-   setColumnWidth((uint32_t)Column::count, 50);
-   setColumnWidth((uint32_t)Column::time, 80);
-   setColumnWidth((uint32_t)Column::msg_type, 75);
-   setColumnWidth((uint32_t)Column::slave_address, 80);
-   setColumnWidth((uint32_t)Column::f_code, 65);
-   setColumnWidth((uint32_t)Column::data_size, 40);
-   setColumnWidth((uint32_t)Column::data, 195);
+    auto resizeColumn = [this](LogWindowColumn column, QString text)
+    {
+        setColumnWidth((uint32_t)column, fontMetrics().horizontalAdvance(text));
+    };
 
-   horizontalHeader()->setStyleSheet("QHeaderView::section { background-color: beige; font-family: \"Courier New\"; font-size: 8pt }");
+    resizeColumn(LogWindowColumn::count        , "123456 "                 );
+    resizeColumn(LogWindowColumn::time         , "1234.1234 "              );
+    resizeColumn(LogWindowColumn::msg_type     , " Msg Type "              );
+    resizeColumn(LogWindowColumn::slave_address, "10 (0x0A) "              );
+    resizeColumn(LogWindowColumn::f_code       , "F-Code "                 );
+    resizeColumn(LogWindowColumn::data_size    , " [8] "                   );
+    resizeColumn(LogWindowColumn::data         , "11 22 33 44 55 66 77 88 ");
+
+    horizontalHeader()->setSectionsClickable(false);
+    horizontalHeader()->setFixedHeight(1.5 * fontMetrics().height());
 }
 
 void LogWindow::clearLog()
 {    
     m_numberFramesReceived = 0;
+    m_currentRow = 0;
 
     clear();
     setRowCount(0);
     makeHeader();
 }
 
-void LogWindow::processDataFrame(const QCanBusFrame &frame)
+void LogWindow::numberFramesReceivedIncrement()
 {
     m_numberFramesReceived++;
+}
 
-    if (mustDataFrameBeProcessed(frame) == false)
-    {
-        return;
-    }
-
+void LogWindow::processDataFrame(const QCanBusFrame &frame)
+{
     m_currentRow = rowCount();
     insertRow(m_currentRow);
 
@@ -76,7 +101,7 @@ void LogWindow::processDataFrame(const QCanBusFrame &frame)
 
 void LogWindow::processErrorFrame(const QCanBusFrame &frame, const QString errorInfo)
 {
-    m_numberFramesReceived++;
+    numberFramesReceivedIncrement();
 
     m_currentRow = rowCount();
     insertRow(m_currentRow);
@@ -89,25 +114,27 @@ void LogWindow::processErrorFrame(const QCanBusFrame &frame, const QString error
 void LogWindow::setCount()
 {
     // Выводим номер принятого кадра с шириной поля в 6 символов
-    // в формате '   123'
+    // в формате '123456'
     m_count = tr("%1").arg(m_numberFramesReceived, 6, 10, QLatin1Char(' '));
 
     auto item = new QTableWidgetItem(m_count);
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::count, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::count, item);
 }
 
 void LogWindow::setTime(const uint64_t seconds, const uint64_t microseconds)
 {
     // Выводим время в секундах с шириной поля в 9 символов
-    // в формате '  12.3456'
+    // в формате '1234.1234'
     m_time = tr("%1.%2")
             .arg(seconds, 4, 10, QLatin1Char(' '))
             .arg(microseconds / 100, 4, 10, QLatin1Char('0'));
 
     auto item = new QTableWidgetItem(m_time);
     item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::time, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::time, item);
 }
 
 void LogWindow::setMsgType(const IdMsgTypes msgType)
@@ -117,8 +144,9 @@ void LogWindow::setMsgType(const IdMsgTypes msgType)
     m_msgType = tr("0b%1").arg((uint32_t)msgType, 2, 2, QLatin1Char('0'));
 
     auto item = new QTableWidgetItem(m_msgType);
-    item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, (uint32_t)Column::msg_type, item);
+    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::msg_type, item);
 }
 
 void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
@@ -130,8 +158,9 @@ void LogWindow::setSlaveAddress(const uint32_t slaveAddress)
             tr("%1)").arg(slaveAddress, 2, 16, QLatin1Char('0')).toUpper();
 
     auto item = new QTableWidgetItem(m_slaveAddress);
-    item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, (uint32_t)Column::slave_address, item);
+    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::slave_address, item);
 }
 
 void LogWindow::setFCode(const IdFCode fCode)
@@ -141,8 +170,9 @@ void LogWindow::setFCode(const IdFCode fCode)
     m_fCode = tr("0b%1").arg((uint32_t)fCode, 3, 2, QLatin1Char('0'));
 
     auto item = new QTableWidgetItem(m_fCode);
-    item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, (uint32_t)Column::f_code, item);
+    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::f_code, item);
 }
 
 void LogWindow::setDataSize(const uint32_t dataSize)
@@ -152,8 +182,9 @@ void LogWindow::setDataSize(const uint32_t dataSize)
     m_dataSize = tr("[%1]").arg(dataSize);
 
     auto item = new QTableWidgetItem(m_dataSize);
-    item->setTextAlignment(Qt::AlignCenter);
-    setItem(m_currentRow, (uint32_t)Column::data_size, item);
+    item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::data_size, item);
 }
 
 void LogWindow::setData(const QByteArray data)
@@ -165,7 +196,8 @@ void LogWindow::setData(const QByteArray data)
 
     auto item = new QTableWidgetItem(m_data);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::data, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::data, item);
 }
 
 void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const uint32_t dataSize)
@@ -174,97 +206,62 @@ void LogWindow::setMsgInfo(const IdMsgTypes msgType, const IdFCode fCode, const 
     // а затем выводим информацию о кадре в текстовом формате
     // с шириной поля до 40 символов (сколько получится)
     // в формате '[MSG_TYPE_INFO] F_CODE_INFO'
+    using namespace std;
+
     if (dataSize == 0)
     {
         m_msgInfo = tr("[Slave's response] Incorrect request");
     }
     else
     {
-        QString msgTypeInfo;
-        QString fCodeInfo;
+        static const QHash<IdMsgTypes, QString> msgTypeInfo = {
+            make_pair(IdMsgTypes::HIGH_PRIO_MASTER, "Master's high-prio"),
+            make_pair(IdMsgTypes::HIGH_PRIO_SLAVE , "Slave's high-prio" ),
+            make_pair(IdMsgTypes::MASTER          , "Master's request"  ),
+            make_pair(IdMsgTypes::SLAVE           , "Slave's response"  )
+        };
 
-        switch (msgType)
+        static const QHash<IdFCode, QString> fCodeInfo = {
+            make_pair(IdFCode::WRITE_REGS_RANGE , "Writing regs range" ),
+            make_pair(IdFCode::WRITE_REGS_SERIES, "Writing regs series"),
+            make_pair(IdFCode::READ_REGS_RANGE  , "Reading regs range" ),
+            make_pair(IdFCode::READ_REGS_SERIES , "Reading regs series"),
+            make_pair(IdFCode::DEVICE_SPECIFIC1 , "Device-specific (1)"),
+            make_pair(IdFCode::DEVICE_SPECIFIC2 , "Device-specific (2)"),
+            make_pair(IdFCode::DEVICE_SPECIFIC3 , "Device-specific (3)"),
+            make_pair(IdFCode::DEVICE_SPECIFIC4 , "Device-specific (4)")
+        };
+
+        auto compare = [](const auto &first, const auto &second)
         {
-            case IdMsgTypes::HIGH_PRIO_MASTER:
-            {
-                msgTypeInfo = tr("Master's high-prio");
-                break;
-            }
-            case IdMsgTypes::HIGH_PRIO_SLAVE:
-            {
-                msgTypeInfo = tr("Slave's high-prio");
-                break;
-            }
-            case IdMsgTypes::MASTER:
-            {
-                msgTypeInfo = tr("Master's request");
-                break;
-            }
-            case IdMsgTypes::SLAVE:
-            {
-                msgTypeInfo = tr("Slave's response");
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
+            return first.size() < second.size();
+        };
 
-        switch (fCode)
+        auto getMaxLength = [compare](const auto &info)
         {
-            case IdFCode::WRITE_REGS_RANGE:
-            {
-                fCodeInfo = tr("Writing regs range");
-                break;
-            }
-            case IdFCode::WRITE_REGS_SERIES:
-            {
-                fCodeInfo = tr("Writing regs series");
-                break;
-            }
-            case IdFCode::READ_REGS_RANGE:
-            {
-                fCodeInfo = tr("Reading regs range");
-                break;
-            }
-            case IdFCode::READ_REGS_SERIES:
-            {
-                fCodeInfo = tr("Reading regs series");
-                break;
-            }
-            case IdFCode::DEVICE_SPECIFIC1:
-            {
-                fCodeInfo = tr("Device-specific (1)");
-                break;
-            }
-            case IdFCode::DEVICE_SPECIFIC2:
-            {
-                fCodeInfo = tr("Device-specific (2)");
-                break;
-            }
-            case IdFCode::DEVICE_SPECIFIC3:
-            {
-                fCodeInfo = tr("Device-specific (3)");
-                break;
-            }
-            case IdFCode::DEVICE_SPECIFIC4:
-            {
-                fCodeInfo = tr("Device-specific (4)");
-                break;
-            }
-            default:
-            {
-                break;
-            }
-        }
+            return max_element(begin(info), end(info), compare).value().size();
+        };
 
-        m_msgInfo = tr("[%1] %2").arg(msgTypeInfo).arg(fCodeInfo);
+        static const int32_t msgTypeInfoMaxLength = getMaxLength(msgTypeInfo);
+        static const int32_t fCodeInfoMaxLength   = getMaxLength(fCodeInfo  );
+
+        m_msgInfo = tr("%1 %2")
+                .arg(msgTypeInfo.value(msgType), -msgTypeInfoMaxLength)
+                .arg(fCodeInfo.value(fCode)    , -fCodeInfoMaxLength  );
+
+        auto addBrackets = [](QString &info, QString msgTypeInfo)
+        {
+            info.insert(msgTypeInfo.size(), "]");
+            info.insert(0                 , "[");
+        };
+
+        addBrackets(m_msgInfo, msgTypeInfo.value(msgType));
     }
 
     auto item = new QTableWidgetItem(m_msgInfo);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::msg_info, item);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::msg_info, item);
 }
 
 void LogWindow::setMsgInfo(const QString errorInfo)
@@ -276,136 +273,6 @@ void LogWindow::setMsgInfo(const QString errorInfo)
 
     auto item = new QTableWidgetItem(m_msgInfo);
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    setItem(m_currentRow, (uint32_t)Column::msg_info, item);
-}
-
-bool LogWindow::mustDataFrameBeProcessed(const QCanBusFrame &frame)
-{
-    bool isFiltrated = true;
-
-    const uint32_t frameId = frame.frameId();
-
-    const uint32_t slaveAddress = getAddressFromId(frameId);
-    isFiltrated &= isSlaveAddressFiltrated(slaveAddress);
-
-    const IdMsgTypes msgType = getMsgTypeFromId(frameId);
-    isFiltrated &= isMsgTypeFiltrated(msgType);
-
-    const IdFCode fCode = getFCodeFromId(frameId);
-    isFiltrated &= isFCodeFiltrated(fCode);
-
-    return isFiltrated;
-}
-
-void LogWindow::setSlaveAddressFiltrated(const uint32_t slaveAddress, const bool isFiltrated)
-{
-    if (slaveAddress > (uint32_t)IdAddresses::DIRECT_ACCESS)
-    {
-        return;
-    }
-    m_filter.slaveAddressSettings.replace(slaveAddress, isFiltrated);
-}
-
-bool LogWindow::isSlaveAddressFiltrated(const uint32_t slaveAddress) const
-{
-    if (slaveAddress > (uint32_t)IdAddresses::DIRECT_ACCESS)
-    {
-        return false;
-    }
-    return m_filter.slaveAddressSettings.value(slaveAddress);
-}
-
-void LogWindow::setMsgTypeFiltrated(const IdMsgTypes msgType, const bool isFiltrated)
-{
-    switch (msgType)
-    {
-        case IdMsgTypes::HIGH_PRIO_MASTER:
-        case IdMsgTypes::HIGH_PRIO_SLAVE:
-        case IdMsgTypes::MASTER:
-        case IdMsgTypes::SLAVE:
-        {
-            m_filter.msgTypeSettings.replace((uint32_t)msgType, isFiltrated);
-        }
-        default:
-        {
-            return;
-        }
-    }
-}
-
-bool LogWindow::isMsgTypeFiltrated(const IdMsgTypes msgType) const
-{
-    switch (msgType)
-    {
-        case IdMsgTypes::HIGH_PRIO_MASTER:
-        case IdMsgTypes::HIGH_PRIO_SLAVE:
-        case IdMsgTypes::MASTER:
-        case IdMsgTypes::SLAVE:
-        {
-            return m_filter.msgTypeSettings.value((uint32_t)msgType);
-        }
-        default:
-        {
-            return false;
-        }
-    }
-}
-
-void LogWindow::setFCodeFiltrated(const IdFCode fCode, const bool isFiltrated)
-{
-    switch (fCode)
-    {
-        case IdFCode::WRITE_REGS_RANGE:
-        case IdFCode::WRITE_REGS_SERIES:
-        case IdFCode::READ_REGS_RANGE:
-        case IdFCode::READ_REGS_SERIES:
-        case IdFCode::DEVICE_SPECIFIC1:
-        case IdFCode::DEVICE_SPECIFIC2:
-        case IdFCode::DEVICE_SPECIFIC3:
-        case IdFCode::DEVICE_SPECIFIC4:
-        {
-            m_filter.fCodeSettings.replace((uint32_t)fCode, isFiltrated);
-        }
-        default:
-        {
-            return;
-        }
-    }
-}
-
-bool LogWindow::isFCodeFiltrated(const IdFCode fCode) const
-{
-    switch (fCode)
-    {
-        case IdFCode::WRITE_REGS_RANGE:
-        case IdFCode::WRITE_REGS_SERIES:
-        case IdFCode::READ_REGS_RANGE:
-        case IdFCode::READ_REGS_SERIES:
-        case IdFCode::DEVICE_SPECIFIC1:
-        case IdFCode::DEVICE_SPECIFIC2:
-        case IdFCode::DEVICE_SPECIFIC3:
-        case IdFCode::DEVICE_SPECIFIC4:
-        {
-            return m_filter.fCodeSettings.value((uint32_t)fCode);
-        }
-        default:
-        {
-            return false;
-        }
-    }
-}
-
-void LogWindow::fillSlaveAddressSettings(const bool isFiltrated)
-{
-    m_filter.slaveAddressSettings.fill(isFiltrated, id_addresses_size);
-}
-
-void LogWindow::fillMsgTypesSettings(const bool isFiltrated)
-{
-    m_filter.msgTypeSettings.fill(isFiltrated, id_msg_types_size);
-}
-
-void LogWindow::fillFCodeSettings(const bool isFiltrated)
-{
-    m_filter.fCodeSettings.fill(isFiltrated, id_f_code_size);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    setItem(m_currentRow, (uint32_t)LogWindowColumn::msg_info, item);
 }
