@@ -159,11 +159,14 @@ void MainWindow::initFiltersConnections()
 
 void MainWindow::saveLog()
 {
+    // Текущие время и дата
     QString currentTime = QTime::currentTime().toString().replace(":", "-");
     QString currentDate = QDate::currentDate().toString(Qt::ISODate);
 
+    // Имя файла в формате 'message_log_YYYY-MM-DD_HH-MM-SS'
     QString name = tr("message_log_%1_%2").arg(currentDate).arg(currentTime);
 
+    // Выбор пути для сохранения файла
     QString filters("CSV files (*.csv);;All files (*.*)");
     QString defaultFilter("CSV files (*.csv)");
     QString fileName = QFileDialog::getSaveFileName(nullptr, "Save Message Log",
@@ -174,9 +177,11 @@ void MainWindow::saveLog()
 
     if (saveFile.open(QIODevice::WriteOnly) != false)
     {
+        // Создаём поток и список строк для вывода текста в файл
         QTextStream data(&saveFile);
         QStringList stringList;
 
+        // Сохраняем заголовок в список строк
         for (int32_t column = 0; column < m_ui->logWindow->horizontalHeader()->count(); column++)
         {
             QString text = m_ui->logWindow->horizontalHeaderItem(column)->text();
@@ -191,8 +196,10 @@ void MainWindow::saveLog()
             }
         }
 
+        // Преобразуем список строк в единую строку с разделителями ';' и выводим в файл
         data << stringList.join(";") + "\n";
 
+        // Сохраняем ячейки построчно в список строк
         for(int32_t row = 0; row < m_ui->logWindow->verticalHeader()->count(); row++)
         {
             stringList.clear();
@@ -211,6 +218,7 @@ void MainWindow::saveLog()
                 }
             }
 
+            // Преобразуем список строк в единую строку с разделителями ';' и выводим в файл
             data << stringList.join(";") + "\n";
         }
 
